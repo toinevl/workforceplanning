@@ -29,7 +29,9 @@ export async function applyMove(move: MovePayload): Promise<void> {
 }
 
 export async function applyBulkMoves(payload: BulkMovePayload): Promise<void> {
-  await Promise.all(payload.moves.map(m => applyMove(m)));
+  await Promise.all(
+    payload.moves.map(m => applyMove({ ...m, scenarioId: m.scenarioId ?? payload.scenarioId }))
+  );
 }
 
 export async function setTeamDriver(
