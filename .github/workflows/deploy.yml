@@ -29,17 +29,21 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Set App Service application settings
+        env:
+          APP_NAME: ${{ secrets.AZURE_APP_NAME }}
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+          CONN_STR: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
         run: |
           az webapp config appsettings set \
-            --name "${{ secrets.AZURE_APP_NAME }}" \
-            --resource-group "${{ secrets.AZURE_RESOURCE_GROUP }}" \
+            --name "$APP_NAME" \
+            --resource-group "$RESOURCE_GROUP" \
             --settings \
-              AZURE_STORAGE_CONNECTION_STRING="${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}" \
-              NODE_ENV="production" \
-              NEXT_TELEMETRY_DISABLED="1" \
-              WEBSITE_RUN_FROM_PACKAGE="1" \
-              SCM_DO_BUILD_DURING_DEPLOYMENT="true" \
-              WEBSITE_NODE_DEFAULT_VERSION="~22"
+              "AZURE_STORAGE_CONNECTION_STRING=$CONN_STR" \
+              NODE_ENV=production \
+              NEXT_TELEMETRY_DISABLED=1 \
+              WEBSITE_RUN_FROM_PACKAGE=1 \
+              SCM_DO_BUILD_DURING_DEPLOYMENT=true \
+              WEBSITE_NODE_DEFAULT_VERSION=~22
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
