@@ -10,7 +10,7 @@ resource webApp 'Microsoft.Web/sites@2023-01-01' = {
     serverFarmId: serverFarmId
     httpsOnly: true
     siteConfig: {
-      nodeVersion: '~20'
+      nodeVersion: '~22'
       appSettings: [
         {
           name: 'AZURE_STORAGE_CONNECTION_STRING'
@@ -34,7 +34,7 @@ resource webApp 'Microsoft.Web/sites@2023-01-01' = {
         }
         {
           name: 'WEBSITE_NODE_DEFAULT_VERSION'
-          value: '~20'
+          value: '~22'
         }
       ]
       webSocketsEnabled: false
