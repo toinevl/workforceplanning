@@ -34,10 +34,6 @@ jobs:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
           CONN_STR: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
         run: |
-          az webapp config set \
-            --name "$APP_NAME" \
-            --resource-group "$RESOURCE_GROUP" \
-            --linux-fx-version "NODE|22-lts"
           az webapp config appsettings set \
             --name "$APP_NAME" \
             --resource-group "$RESOURCE_GROUP" \
