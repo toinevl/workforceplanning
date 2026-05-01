@@ -75,8 +75,27 @@ Outputs include the App Service URL and Storage account name.
 Set the following GitHub Actions secrets in the repo:
 
 - `AZURE_APP_NAME` — the App Service name (e.g. `workforceplanning-prod`).
+- `AZURE_RESOURCE_GROUP` — the resource group containing the App Service (e.g. `rgWorkforcePlan`).
+- `AZURE_CLIENT_ID` — client ID of the Azure AD app registration used for OIDC login.
+- `AZURE_TENANT_ID` — Azure AD tenant ID.
+- `AZURE_SUBSCRIPTION_ID` — Azure subscription ID.
 - `AZURE_PUBLISH_PROFILE` — download from the App Service in the Azure portal (Get publish profile) and paste the full XML.
-- `AZURE_STORAGE_CONNECTION_STRING` — the production storage connection string (used at build time).
+- `AZURE_STORAGE_CONNECTION_STRING` — the production storage connection string; set as both a build-time env var and a runtime App Service application setting.
+
+To set up OIDC (federated credentials) for the `AZURE_CLIENT_ID` / `AZURE_TENANT_ID` / `AZURE_SUBSCRIPTION_ID` secrets:
+
+```bash
+# Create a service principal and configure federated credentials for GitHub Actions
+az ad app create --display-name workforceplanning-deploy
+# Add a federated credential for the main branch push trigger
+# Grant Contributor on the resource group
+az role assignment create \
+  --role Contributor \
+  --scope /subscriptions/<subscription-id>/resourceGroups/<resource-group> \
+  --assignee <app-object-id>
+```
+
+See the [Azure OIDC docs](https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure) for the full setup.
 
 On push to `main`, `.github/workflows/deploy.yml` builds and deploys.
 On pull requests, `.github/workflows/validate.yml` runs lint, type-check, and a build.
