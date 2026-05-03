@@ -2,7 +2,7 @@
 param name string
 
 param location string
-param environment string
+param environmentName string
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   name: take(replace(name, '-', ''), 24)
@@ -18,12 +18,12 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
     supportsHttpsTrafficOnly: true
   }
   tags: {
-    environment: environment
+    environment: environmentName
     application: 'workforceplanning'
   }
 }
 
-var connectionString = 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageAccount.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
+var connectionString = 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageAccount.listKeys().keys[0].value};EndpointSuffix=${az.environment().suffixes.storage}'
 
 output connectionString string = connectionString
 output name string = storageAccount.name

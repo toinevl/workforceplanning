@@ -17,7 +17,7 @@ module storage 'modules/storage.bicep' = {
   params: {
     name: '${appName}${uniqueSuffix}'
     location: location
-    environment: environment
+    environmentName: environment
   }
 }
 
