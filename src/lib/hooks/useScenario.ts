@@ -60,8 +60,12 @@ export function useDeleteScenario() {
 export function useSeed() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: () =>
-      fetch('/api/seed', { method: 'POST' }).then((r) => {
+    mutationFn: (body?: { membersPerTeam?: number; resetFirst?: boolean }) =>
+      fetch('/api/seed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body ?? {}),
+      }).then((r) => {
         if (!r.ok) throw new Error('Seed failed');
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['scenarios'] }),

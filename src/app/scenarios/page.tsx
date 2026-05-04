@@ -19,6 +19,7 @@ export default function ScenariosPage() {
 
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({ type: 'squad_removal' as ScenarioType, name: '', description: '' });
+  const [membersPerTeam, setMembersPerTeam] = useState(9);
 
   function handleCreate() {
     if (!form.name.trim()) return;
@@ -36,15 +37,35 @@ export default function ScenariosPage() {
           <p className="text-sm text-gray-500 mt-1">Create and explore workforce scenarios</p>
         </div>
         <div className="flex items-center gap-2">
-          {scenarios.length === 0 && (
-            <button
-              onClick={() => seedMutation.mutate()}
-              disabled={seedMutation.isPending}
-              className="text-sm px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition-colors"
-            >
-              {seedMutation.isPending ? 'Seeding…' : 'Seed Data'}
-            </button>
-          )}
+          <label className="text-xs text-gray-500 flex items-center gap-2">
+            Members/team
+            <input
+              type="number"
+              min={1}
+              max={10}
+              value={membersPerTeam}
+              onChange={(e) => setMembersPerTeam(Number.parseInt(e.target.value, 10) || 1)}
+              className="w-16 border border-gray-200 rounded-md px-2 py-1 text-sm text-gray-700"
+            />
+          </label>
+          <button
+            onClick={() => seedMutation.mutate({ membersPerTeam })}
+            disabled={seedMutation.isPending}
+            className="text-sm px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition-colors"
+          >
+            {seedMutation.isPending ? 'Seeding…' : 'Seed Data'}
+          </button>
+          <button
+            onClick={() => {
+              if (confirm('Reset all model data and reseed?')) {
+                seedMutation.mutate({ membersPerTeam, resetFirst: true });
+              }
+            }}
+            disabled={seedMutation.isPending}
+            className="text-sm px-3 py-1.5 border border-amber-300 text-amber-700 rounded-lg hover:bg-amber-50 disabled:opacity-40 transition-colors"
+          >
+            {seedMutation.isPending ? 'Reseeding…' : 'Reset & Reseed'}
+          </button>
           <button
             onClick={() => setShowCreate(true)}
             className="text-sm px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-700 transition-colors"
@@ -73,7 +94,7 @@ export default function ScenariosPage() {
             Seed sample data or create your first scenario to get started.
           </p>
           <button
-            onClick={() => seedMutation.mutate()}
+            onClick={() => seedMutation.mutate({ membersPerTeam })}
             disabled={seedMutation.isPending}
             className="text-sm px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-700 disabled:opacity-40 transition-colors"
           >

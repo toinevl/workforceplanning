@@ -34,6 +34,8 @@ npm run dev:seed
 Open http://localhost:3000 — you'll be redirected to `/scenarios`.
 
 Copy `.env.local.example` to `.env.local` if you need to override defaults. The default uses `UseDevelopmentStorage=true` which targets Azurite.
+You can optionally set `SEED_MEMBERS_PER_TEAM=<number>` to control how many initial members are seeded per team.
+The `/scenarios` UI also provides a members-per-team control and a reset-and-reseed action.
 
 ## Tech stack
 
