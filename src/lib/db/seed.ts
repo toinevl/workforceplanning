@@ -6,6 +6,7 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { defaultParams } from '../types/params';
 import type { ScenarioType } from '../types/domain';
+import type { SeedOptions, SeedTeamConfig } from '../types/seed';
 
 interface SeedMember {
   name: string;
@@ -19,11 +20,6 @@ interface SeedMember {
   notes?: string;
 }
 
-interface SeedOptions {
-  membersPerTeam?: number;
-  resetFirst?: boolean;
-}
-
 const TEAMS = [
   { key: 'alpha',   name: 'Team Alpha',   color: '#6366f1', sortOrder: 0 },
   { key: 'bravo',   name: 'Team Bravo',   color: '#0ea5e9', sortOrder: 1 },
@@ -31,6 +27,30 @@ const TEAMS = [
   { key: 'delta',   name: 'Team Delta',   color: '#f59e0b', sortOrder: 3 },
   { key: 'echo',    name: 'Team Echo',    color: '#f43f5e', sortOrder: 4 },
   { key: 'foxtrot', name: 'Team Foxtrot', color: '#8b5cf6', sortOrder: 5 },
+];
+
+const DEFAULT_COLORS = ['#2563eb', '#0891b2', '#059669', '#d97706', '#dc2626', '#7c3aed', '#db2777', '#475569'];
+const FIRST_NAMES = [
+  'Alex', 'Priya', 'James', 'Sara', 'Marcus', 'Fatima', 'Tom', 'Yuki', 'Carlos', 'Elena',
+  'Sam', 'Hannah', 'Kofi', 'Mei', 'David', 'Aisha', 'Luca', 'Nina', 'Omar', 'Jordan',
+  'Sophie', 'Raj', 'Ingrid', 'Amara', 'Kevin', 'Layla', 'Pieter', 'Chiara', 'Hugo', 'Taylor',
+  'Beatriz', 'Finn', 'Yara', 'Stefan', 'Adaeze', 'Marco', 'Hana', 'Remi', 'Pat', 'Zara',
+];
+const LAST_NAMES = [
+  'Chen', 'Sharma', 'Okonkwo', 'Lindqvist', 'Webb', 'Hassan', 'Bergstrom', 'Tanaka', 'Mendoza', 'Petrov',
+  'Rivera', 'Muller', 'Asante', 'Lin', 'Eriksson', 'Kamara', 'Ferretti', 'Johansson', 'Farouk', 'Lee',
+];
+const ROLES = [
+  'Engineering Manager',
+  'Senior Engineer',
+  'Backend Engineer',
+  'Frontend Engineer',
+  'Platform Engineer',
+  'Data Engineer',
+  'QA Engineer',
+  'Product Owner',
+  'Cloud Engineer',
+  'UX Designer',
 ];
 
 // 56 members total — 4 SQUAD, 8 retirement-risk, varied FTE
@@ -123,6 +143,66 @@ function buildMembers(options?: SeedOptions): SeedMember[] {
   return selected;
 }
 
+function normalizeSeedTeams(options?: SeedOptions): SeedTeamConfig[] {
+  if (!options?.teams || options.teams.length === 0) {
+    return TEAMS.map((team) => ({
+      id: `team-${team.key}`,
+      key: team.key,
+      name: team.name,
+      color: team.color,
+      members: options?.membersPerTeam ?? 9,
+      retirees: 1,
+      squad: team.key === 'echo' || team.key === 'foxtrot' ? 0 : 1,
+    }));
+  }
+
+  return options.teams
+    .map((team, index) => {
+      const members = clampWholeNumber(team.members, 1, 200);
+      const id = team.id ?? `team-${slugify(team.name)}-${index + 1}`;
+      return {
+        id,
+        key: team.key,
+        name: team.name.trim() || `Team ${index + 1}`,
+        color: /^#[0-9a-fA-F]{6}$/.test(team.color) ? team.color : DEFAULT_COLORS[index % DEFAULT_COLORS.length],
+        members,
+        retirees: clampWholeNumber(team.retirees, 0, members),
+        squad: clampWholeNumber(team.squad, 0, members),
+      };
+    })
+    .slice(0, 24);
+}
+
+function clampWholeNumber(value: number, min: number, max: number): number {
+  if (!Number.isFinite(value)) return min;
+  return Math.min(max, Math.max(min, Math.trunc(value)));
+}
+
+function buildConfiguredMembers(teams: SeedTeamConfig[]): SeedMember[] {
+  const members: SeedMember[] = [];
+  teams.forEach((team, teamIndex) => {
+    for (let memberIndex = 0; memberIndex < team.members; memberIndex++) {
+      const globalIndex = members.length;
+      const isSquad = memberIndex < team.squad;
+      const isRetiree = memberIndex < team.retirees;
+      const firstName = FIRST_NAMES[globalIndex % FIRST_NAMES.length];
+      const lastName = LAST_NAMES[(teamIndex + memberIndex) % LAST_NAMES.length];
+      members.push({
+        name: `${firstName} ${lastName}`,
+        role: isSquad ? 'SQUAD Specialist' : ROLES[(teamIndex + memberIndex) % ROLES.length],
+        fte: memberIndex % 7 === 0 ? 0.8 : 1,
+        isSquad,
+        baseTeamKey: team.key ?? team.id ?? `custom-${teamIndex}`,
+        birthYear: isRetiree ? 1960 + (memberIndex % 5) : 1982 + (memberIndex % 17),
+        startDate: isRetiree ? `199${memberIndex % 10}-04-01` : `20${10 + (memberIndex % 14)}-06-15`,
+        tags: isSquad ? ['SQUAD'] : [],
+        notes: isRetiree ? 'Retirement planning profile' : undefined,
+      });
+    }
+  });
+  return members;
+}
+
 function computeRetirementEligibleYear(member: SeedMember): number | undefined {
   const candidates: number[] = [];
   if (member.birthYear) candidates.push(member.birthYear + 65);
@@ -133,7 +213,8 @@ function computeRetirementEligibleYear(member: SeedMember): number | undefined {
 
 export async function runSeed(options?: SeedOptions): Promise<{ teams: number; members: number; scenarios: number }> {
   await ensureTablesExist();
-  const membersToSeed = buildMembers(options);
+  const configuredTeams = normalizeSeedTeams(options);
+  const membersToSeed = options?.teams ? buildConfiguredMembers(configuredTeams) : buildMembers(options);
 
   const teamClient = getTableClient(TABLE_TEAMS);
   const staffClient = getTableClient(TABLE_STAFF);
@@ -155,15 +236,17 @@ export async function runSeed(options?: SeedOptions): Promise<{ teams: number; m
 
   // Insert teams
   const teamIdMap: Record<string, string> = {};
-  for (const team of TEAMS) {
-    const id = `team-${team.key}`;
-    teamIdMap[team.key] = id;
+  for (const [index, team] of configuredTeams.entries()) {
+    const id = team.id ?? `team-${slugify(team.name)}-${index + 1}`;
+    teamIdMap[id] = id;
+    if (team.key) teamIdMap[team.key] = id;
+    teamIdMap[`custom-${index}`] = id;
     await teamClient.upsertEntity<TeamEntity>({
       partitionKey: 'team',
       rowKey: id,
       name: team.name,
       color: team.color,
-      sortOrder: team.sortOrder,
+      sortOrder: index,
     }, 'Replace');
   }
 
@@ -211,7 +294,15 @@ export async function runSeed(options?: SeedOptions): Promise<{ teams: number; m
     }, 'Replace');
   }
 
-  return { teams: TEAMS.length, members: membersToSeed.length, scenarios: scenariosToCreate.length };
+  return { teams: configuredTeams.length, members: membersToSeed.length, scenarios: scenariosToCreate.length };
+}
+
+function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 32) || 'team';
 }
 
 async function deleteByPartitionKey(client: ReturnType<typeof getTableClient>, partitionKey: string): Promise<void> {

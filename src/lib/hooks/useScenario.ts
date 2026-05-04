@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ScenarioSummary, BoardState, Scenario, ScenarioType } from '../types/domain';
+import type { SeedOptions } from '../types/seed';
 
 async function fetchJSON<T>(url: string, opts?: RequestInit): Promise<T> {
   const res = await fetch(url, opts);
@@ -60,13 +61,15 @@ export function useDeleteScenario() {
 export function useSeed() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body?: { membersPerTeam?: number; resetFirst?: boolean }) =>
+    mutationFn: (body?: SeedOptions) =>
       fetch('/api/seed', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body ?? {}),
-      }).then((r) => {
-        if (!r.ok) throw new Error('Seed failed');
+      }).then(async (r) => {
+        const json = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(json.error ?? 'Seed failed');
+        return json.data as { teams: number; members: number; scenarios: number };
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['scenarios'] }),
   });
