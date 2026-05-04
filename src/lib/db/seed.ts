@@ -19,6 +19,11 @@ interface SeedMember {
   notes?: string;
 }
 
+interface SeedOptions {
+  membersPerTeam?: number;
+  resetFirst?: boolean;
+}
+
 const TEAMS = [
   { key: 'alpha',   name: 'Team Alpha',   color: '#6366f1', sortOrder: 0 },
   { key: 'bravo',   name: 'Team Bravo',   color: '#0ea5e9', sortOrder: 1 },
@@ -99,6 +104,25 @@ const MEMBERS: SeedMember[] = [
   { name: 'Petra Horáková',   role: 'QA Engineer',         fte: 1.0, isSquad: false, baseTeamKey: 'foxtrot', birthYear: 1987, startDate: '2014-03-29' },
 ];
 
+function buildMembers(options?: SeedOptions): SeedMember[] {
+  const requested = options?.membersPerTeam;
+  if (!requested) return MEMBERS;
+
+  const byTeam = new Map<string, SeedMember[]>();
+  for (const member of MEMBERS) {
+    const arr = byTeam.get(member.baseTeamKey) ?? [];
+    arr.push(member);
+    byTeam.set(member.baseTeamKey, arr);
+  }
+
+  const selected: SeedMember[] = [];
+  for (const team of TEAMS) {
+    const teamMembers = byTeam.get(team.key) ?? [];
+    selected.push(...teamMembers.slice(0, requested));
+  }
+  return selected;
+}
+
 function computeRetirementEligibleYear(member: SeedMember): number | undefined {
   const candidates: number[] = [];
   if (member.birthYear) candidates.push(member.birthYear + 65);
@@ -107,12 +131,27 @@ function computeRetirementEligibleYear(member: SeedMember): number | undefined {
   return candidates.length > 0 ? Math.min(...candidates) : undefined;
 }
 
-export async function runSeed(): Promise<{ teams: number; members: number; scenarios: number }> {
+export async function runSeed(options?: SeedOptions): Promise<{ teams: number; members: number; scenarios: number }> {
   await ensureTablesExist();
+  const membersToSeed = buildMembers(options);
 
   const teamClient = getTableClient(TABLE_TEAMS);
   const staffClient = getTableClient(TABLE_STAFF);
   const scenarioClient = getTableClient(TABLE_SCENARIOS);
+  const memberStateClient = getTableClient('scenarioMemberStates');
+  const teamDriverClient = getTableClient('scenarioTeamDrivers');
+  const snapshotsClient = getTableClient('scenarioSnapshots');
+
+  if (options?.resetFirst) {
+    await Promise.all([
+      deleteByPartitionKey(teamClient, 'team'),
+      deleteByPartitionKey(staffClient, 'member'),
+      deleteByPartitionKey(scenarioClient, 'scenario'),
+      deleteAllEntities(memberStateClient),
+      deleteAllEntities(teamDriverClient),
+      deleteAllEntities(snapshotsClient),
+    ]);
+  }
 
   // Insert teams
   const teamIdMap: Record<string, string> = {};
@@ -129,7 +168,7 @@ export async function runSeed(): Promise<{ teams: number; members: number; scena
   }
 
   // Insert staff members
-  for (const member of MEMBERS) {
+  for (const member of membersToSeed) {
     const id = uuidv4();
     const retirementEligibleYear = computeRetirementEligibleYear(member);
     await staffClient.upsertEntity<StaffMemberEntity>({
@@ -172,5 +211,21 @@ export async function runSeed(): Promise<{ teams: number; members: number; scena
     }, 'Replace');
   }
 
-  return { teams: TEAMS.length, members: MEMBERS.length, scenarios: scenariosToCreate.length };
+  return { teams: TEAMS.length, members: membersToSeed.length, scenarios: scenariosToCreate.length };
+}
+
+async function deleteByPartitionKey(client: ReturnType<typeof getTableClient>, partitionKey: string): Promise<void> {
+  const tasks: Array<Promise<unknown>> = [];
+  for await (const entity of client.listEntities({ queryOptions: { filter: `PartitionKey eq '${partitionKey}'` } })) {
+    tasks.push(client.deleteEntity(entity.partitionKey as string, entity.rowKey as string).catch(() => undefined));
+  }
+  await Promise.all(tasks);
+}
+
+async function deleteAllEntities(client: ReturnType<typeof getTableClient>): Promise<void> {
+  const tasks: Array<Promise<unknown>> = [];
+  for await (const entity of client.listEntities()) {
+    tasks.push(client.deleteEntity(entity.partitionKey as string, entity.rowKey as string).catch(() => undefined));
+  }
+  await Promise.all(tasks);
 }
