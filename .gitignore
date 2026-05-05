@@ -51,3 +51,4 @@ __azurite_db_*.json
 
 # Scripts output
 scripts/output/
+.superpowers/
