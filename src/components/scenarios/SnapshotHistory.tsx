@@ -25,13 +25,19 @@ export function SnapshotHistory({ scenarioId, onClose }: SnapshotHistoryProps) {
   }
 
   return (
-    <aside className="w-72 shrink-0 border-l border-gray-200 bg-white flex flex-col">
-      <div className="flex items-center justify-between px-4 py-3 border-b">
+    <aside className="w-72 shrink-0 border-l border-gray-300 bg-white flex flex-col">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-300">
         <h2 className="font-semibold text-sm text-gray-900">Snapshots</h2>
-        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+        <button
+          onClick={onClose}
+          className="text-gray-600 hover:text-gray-900 text-xl leading-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
+          aria-label="Close snapshots"
+        >
+          x
+        </button>
       </div>
 
-      <div className="p-4 border-b">
+      <div className="p-4 border-b border-gray-300">
         <div className="flex gap-2">
           <input
             type="text"
@@ -39,12 +45,12 @@ export function SnapshotHistory({ scenarioId, onClose }: SnapshotHistoryProps) {
             onChange={(e) => setLabel(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSave()}
             placeholder="Snapshot label…"
-            className="flex-1 border border-gray-200 rounded px-2 py-1.5 text-sm min-w-0"
+            className="flex-1 border border-gray-400 rounded px-2 py-1.5 text-sm min-w-0 focus:border-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
           />
           <button
             onClick={handleSave}
             disabled={!label.trim() || saveSnapshot.isPending}
-            className="px-3 py-1.5 bg-gray-900 text-white text-sm rounded hover:bg-gray-700 disabled:opacity-40 transition-colors shrink-0"
+            className="px-3 py-1.5 bg-gray-900 text-white text-sm rounded hover:bg-gray-700 disabled:opacity-50 transition-colors shrink-0"
           >
             Save
           </button>
@@ -57,12 +63,12 @@ export function SnapshotHistory({ scenarioId, onClose }: SnapshotHistoryProps) {
       <div className="flex-1 overflow-y-auto">
         {isLoading && (
           <div className="flex items-center justify-center py-8">
-            <span className="text-sm text-gray-400">Loading…</span>
+            <span className="text-sm text-gray-600">Loading...</span>
           </div>
         )}
         {!isLoading && snapshots.length === 0 && (
           <div className="flex items-center justify-center py-8">
-            <span className="text-sm text-gray-400">No snapshots yet</span>
+            <span className="text-sm text-gray-600">No snapshots yet</span>
           </div>
         )}
         <ul className="divide-y divide-gray-100">
@@ -107,7 +113,7 @@ function SnapshotRow({
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="text-sm font-medium text-gray-800 truncate">{snapshot.label}</p>
-          <p className="text-xs text-gray-400 mt-0.5">{date}</p>
+          <p className="text-xs text-gray-600 mt-0.5">{date}</p>
         </div>
       </div>
       <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-500">
@@ -119,14 +125,14 @@ function SnapshotRow({
         <button
           onClick={onRestore}
           disabled={isRestoring}
-          className="text-xs px-2 py-1 border border-gray-200 rounded hover:bg-gray-50 disabled:opacity-40 transition-colors"
+          className="text-xs px-2 py-1 border border-gray-400 text-gray-800 rounded hover:bg-gray-50 disabled:opacity-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
         >
           {isRestoring ? 'Restoring…' : 'Restore'}
         </button>
         <button
           onClick={onDelete}
           disabled={isDeleting}
-          className="text-xs px-2 py-1 border border-red-200 text-red-600 rounded hover:bg-red-50 disabled:opacity-40 transition-colors"
+          className="text-xs px-2 py-1 border border-red-500 text-red-700 rounded hover:bg-red-50 disabled:opacity-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
         >
           {isDeleting ? '…' : 'Delete'}
         </button>

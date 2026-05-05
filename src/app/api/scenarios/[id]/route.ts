@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getScenario, updateScenario, deleteScenario } from '@/lib/api/scenarios';
+import { createAuditEvent } from '@/lib/api/audit';
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -11,8 +12,14 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const body = await req.json();
+  const previous = await getScenario(id);
   const updated = await updateScenario(id, body);
   if (!updated) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  await createAuditEvent({
+    scenarioId: id,
+    eventType: 'scenario_updated',
+    payload: { previous, updates: body },
+  });
   return NextResponse.json({ data: updated });
 }
 

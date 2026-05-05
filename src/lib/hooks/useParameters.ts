@@ -29,6 +29,7 @@ export function useUpdateParameters(scenarioId: string) {
       }),
     onSuccess: (data) => {
       qc.setQueryData(['parameters', scenarioId], data);
+      qc.invalidateQueries({ queryKey: ['audit', scenarioId] });
     },
   });
 }
@@ -40,6 +41,7 @@ export function useApplyLogic(scenarioId: string) {
       fetchJSON(`/api/scenarios/${scenarioId}/apply`, { method: 'POST' }),
     onSuccess: (data) => {
       qc.setQueryData(['board', scenarioId], data);
+      qc.invalidateQueries({ queryKey: ['audit', scenarioId] });
     },
   });
 }

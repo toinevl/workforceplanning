@@ -18,7 +18,7 @@ export function TeamColumn({ teamSnapshot, onMemberClick, readOnly }: TeamColumn
   const { setNodeRef, isOver } = useDroppable({ id: team.id, disabled: readOnly });
 
   return (
-    <div className="flex flex-col rounded-xl border border-gray-200 bg-gray-50 overflow-hidden min-h-[20rem]">
+    <div className="flex flex-col rounded-xl border border-gray-300 bg-gray-50 overflow-hidden min-h-[20rem]">
       <TeamHeader
         name={team.name}
         color={team.color}
@@ -48,10 +48,10 @@ export function TeamColumn({ teamSnapshot, onMemberClick, readOnly }: TeamColumn
           <div
             className={cn(
               'h-16 border-2 border-dashed rounded-lg flex items-center justify-center',
-              isOver ? 'border-blue-300 bg-blue-50' : 'border-gray-200'
+              isOver ? 'border-blue-500 bg-blue-50' : 'border-gray-400'
             )}
           >
-            <span className="text-xs text-gray-400">Drop here</span>
+            <span className="text-xs text-gray-600">Drop here</span>
           </div>
         )}
       </div>

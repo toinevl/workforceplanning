@@ -13,13 +13,16 @@ async function fetchJSON<T>(url: string, opts?: RequestInit): Promise<T> {
 export function useMoveMembers(scenarioId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (moves: Array<{ memberId: string; toTeamId: string | null }>) =>
+    mutationFn: (moves: Array<{ memberId: string; toTeamId: string | null; note?: string }>) =>
       fetchJSON<BoardState>('/api/assignments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ scenarioId, moves }),
       }),
-    onSuccess: (data) => qc.setQueryData(['board', scenarioId], data),
+    onSuccess: (data) => {
+      qc.setQueryData(['board', scenarioId], data);
+      qc.invalidateQueries({ queryKey: ['audit', scenarioId] });
+    },
   });
 }
 
@@ -33,6 +36,7 @@ export function useResetScenario(scenarioId: string) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['board', scenarioId] });
       qc.invalidateQueries({ queryKey: ['parameters', scenarioId] });
+      qc.invalidateQueries({ queryKey: ['audit', scenarioId] });
     },
   });
 }

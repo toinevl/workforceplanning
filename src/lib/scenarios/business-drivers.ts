@@ -1,4 +1,4 @@
-import type { StaffMember, Team, BusinessDriver, TeamSnapshot } from '../types/domain';
+import type { Team, BusinessDriver, TeamSnapshot } from '../types/domain';
 import type { BusinessDriverParams } from '../types/params';
 
 export interface SuggestedMove {

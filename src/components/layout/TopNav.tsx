@@ -17,14 +17,14 @@ interface TopNavProps {
 }
 
 export function TopNav({ board }: TopNavProps) {
-  const { toggleParametersPanel, toggleSnapshotHistory } = useWorkforceStore();
+  const { toggleParametersPanel, toggleSnapshotHistory, togglePapertrail } = useWorkforceStore();
   const resetMutation = useResetScenario(board?.scenario.id ?? '');
 
   return (
     <nav className="bg-white border-b border-gray-200 px-4 py-2.5 flex items-center gap-4 shrink-0">
       <Link
         href="/scenarios"
-        className="text-gray-400 hover:text-gray-600 text-sm font-medium transition-colors"
+        className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
       >
         ← Scenarios
       </Link>
@@ -49,13 +49,19 @@ export function TopNav({ board }: TopNavProps) {
           <div className="ml-auto flex items-center gap-2">
             <button
               onClick={toggleSnapshotHistory}
-              className="text-sm px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              className="text-sm px-3 py-1.5 border border-gray-400 text-gray-800 rounded-lg hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
             >
               Snapshots
             </button>
             <button
+              onClick={togglePapertrail}
+              className="text-sm px-3 py-1.5 border border-gray-400 text-gray-800 rounded-lg hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
+            >
+              Papertrail
+            </button>
+            <button
               onClick={toggleParametersPanel}
-              className="text-sm px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              className="text-sm px-3 py-1.5 border border-gray-400 text-gray-800 rounded-lg hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
             >
               Parameters
             </button>
@@ -65,7 +71,7 @@ export function TopNav({ board }: TopNavProps) {
                   if (confirm('Reset all scenario changes?')) resetMutation.mutate();
                 }}
                 disabled={resetMutation.isPending}
-                className="text-sm px-3 py-1.5 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 disabled:opacity-40 transition-colors"
+                className="text-sm px-3 py-1.5 border border-red-500 text-red-700 rounded-lg hover:bg-red-50 disabled:opacity-40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
               >
                 Reset
               </button>

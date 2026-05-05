@@ -36,6 +36,7 @@ export async function ensureTablesExist(): Promise<void> {
     'scenarioMemberStates',
     'scenarioTeamDrivers',
     'scenarioSnapshots',
+    'scenarioAuditEvents',
   ];
   await Promise.all(
     tables.map((t) => client.createTable(t).catch(() => {}))

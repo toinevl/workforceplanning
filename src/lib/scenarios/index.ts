@@ -2,6 +2,7 @@ import { getAllMembers } from '../api/members';
 import { getAllTeams } from '../api/teams';
 import { getScenario } from '../api/scenarios';
 import { applyMemberStates, setTeamDriver } from '../api/assignments';
+import { createAuditEvent } from '../api/audit';
 import { applySquadRemoval } from './squad-removal';
 import { computeRetirementWaveStates } from './retirement-wave';
 import { computeBusinessDriverStates } from './business-drivers';
@@ -33,9 +34,15 @@ export async function reapplyScenarioLogic(scenarioId: string): Promise<void> {
   } else if (scenario.type === 'business_drivers') {
     const driverStates = computeBusinessDriverStates(allTeams, params as BusinessDriverParams);
     await Promise.all(
-      driverStates.map(d => setTeamDriver(scenarioId, d.teamId, d.driver, d.priorityScore, d.targetFteDelta))
+      driverStates.map(d => setTeamDriver(scenarioId, d.teamId, d.driver, d.priorityScore, d.targetFteDelta, { logAudit: false }))
     );
   }
+
+  await createAuditEvent({
+    scenarioId,
+    eventType: 'scenario_logic_applied',
+    payload: { scenarioType: scenario.type },
+  });
 }
 
 export { computeSquadRemoval } from './squad-removal';

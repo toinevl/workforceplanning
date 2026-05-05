@@ -86,3 +86,29 @@ export interface ScenarioSummary {
   createdAt: string;
   updatedAt: string;
 }
+
+export type AuditEventType =
+  | 'member_moved'
+  | 'member_removed'
+  | 'team_driver_updated'
+  | 'parameters_updated'
+  | 'scenario_logic_applied'
+  | 'scenario_reset'
+  | 'snapshot_saved'
+  | 'snapshot_restored'
+  | 'snapshot_deleted'
+  | 'scenario_updated'
+  | 'scenario_note';
+
+export interface AuditEvent {
+  id: string;
+  scenarioId: string;
+  eventType: AuditEventType;
+  createdAt: string;
+  actor?: string;
+  note?: string;
+  memberId?: string;
+  fromTeamId?: string | null;
+  toTeamId?: string | null;
+  payload?: Record<string, unknown>;
+}

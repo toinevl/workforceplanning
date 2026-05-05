@@ -27,7 +27,10 @@ export function useSaveSnapshot(scenarioId: string) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ label }),
       }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['snapshots', scenarioId] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['snapshots', scenarioId] });
+      qc.invalidateQueries({ queryKey: ['audit', scenarioId] });
+    },
   });
 }
 
@@ -43,6 +46,7 @@ export function useRestoreSnapshot(scenarioId: string) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['board', scenarioId] });
       qc.invalidateQueries({ queryKey: ['parameters', scenarioId] });
+      qc.invalidateQueries({ queryKey: ['audit', scenarioId] });
     },
   });
 }
@@ -56,6 +60,9 @@ export function useDeleteSnapshot(scenarioId: string) {
       }).then((r) => {
         if (!r.ok) throw new Error('Delete failed');
       }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['snapshots', scenarioId] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['snapshots', scenarioId] });
+      qc.invalidateQueries({ queryKey: ['audit', scenarioId] });
+    },
   });
 }

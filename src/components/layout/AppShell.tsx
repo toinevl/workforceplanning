@@ -4,6 +4,7 @@ import { useWorkforceStore } from '@/lib/store/workforceStore';
 import { TopNav } from './TopNav';
 import { ParametersPanel } from '@/components/scenarios/ParametersPanel';
 import { SnapshotHistory } from '@/components/scenarios/SnapshotHistory';
+import { PapertrailPanel } from '@/components/scenarios/PapertrailPanel';
 import type { BoardState } from '@/lib/types/domain';
 
 interface AppShellProps {
@@ -15,8 +16,10 @@ export function AppShell({ board, children }: AppShellProps) {
   const {
     isParametersPanelOpen,
     isSnapshotHistoryOpen,
+    isPapertrailOpen,
     setParametersPanelOpen,
     setSnapshotHistoryOpen,
+    setPapertrailOpen,
   } = useWorkforceStore();
 
   return (
@@ -39,6 +42,13 @@ export function AppShell({ board, children }: AppShellProps) {
           <SnapshotHistory
             scenarioId={board.scenario.id}
             onClose={() => setSnapshotHistoryOpen(false)}
+          />
+        )}
+
+        {board && isPapertrailOpen && (
+          <PapertrailPanel
+            board={board}
+            onClose={() => setPapertrailOpen(false)}
           />
         )}
       </div>

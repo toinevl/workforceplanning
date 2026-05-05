@@ -3,6 +3,7 @@ import { getTableClient } from '../db/client';
 import { TABLE_SNAPSHOTS, TABLE_MEMBER_STATES, TABLE_TEAM_DRIVERS, REMOVED_SENTINEL, type SnapshotEntity, type MemberStateEntity, type TeamDriverEntity } from '../db/tables';
 import type { ScenarioSnapshot, SnapshotSummary } from '../types/snapshot';
 import { getScenarioBoardState, getScenario, updateScenario } from './scenarios';
+import { createAuditEvent } from './audit';
 import type { ScenarioParams } from '../types/params';
 
 function entityToSummary(e: SnapshotEntity): SnapshotSummary {
@@ -51,6 +52,11 @@ export async function saveSnapshot(scenarioId: string, label: string): Promise<S
 
   const client = getTableClient(TABLE_SNAPSHOTS);
   await client.upsertEntity<SnapshotEntity>(entity, 'Replace');
+  await createAuditEvent({
+    scenarioId,
+    eventType: 'snapshot_saved',
+    payload: { snapshotId, label },
+  });
 
   return {
     id: snapshotId,
@@ -144,9 +150,20 @@ export async function restoreSnapshot(scenarioId: string, snapshotId: string): P
 
   // Update scenario parameters to the snapshot's parameters
   await updateScenario(scenarioId, { parameters: JSON.stringify(snapshot.parameters) });
+  await createAuditEvent({
+    scenarioId,
+    eventType: 'snapshot_restored',
+    payload: { snapshotId, label: snapshot.label },
+  });
 }
 
 export async function deleteSnapshot(scenarioId: string, snapshotId: string): Promise<void> {
+  const snapshot = await getSnapshot(scenarioId, snapshotId);
   const client = getTableClient(TABLE_SNAPSHOTS);
   await client.deleteEntity(scenarioId, snapshotId);
+  await createAuditEvent({
+    scenarioId,
+    eventType: 'snapshot_deleted',
+    payload: { snapshotId, label: snapshot?.label },
+  });
 }

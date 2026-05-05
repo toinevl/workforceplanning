@@ -30,14 +30,14 @@ function RemovedZone({
 
   return (
     <div className="mt-4">
-      <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2 px-1">
+      <h3 className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2 px-1">
         Removed ({board.removedMembers.length})
       </h3>
       <div
         ref={setNodeRef}
         className={cn(
           'min-h-12 rounded-xl border-2 border-dashed p-2 flex flex-wrap gap-1.5 transition-colors duration-100',
-          isOver ? 'border-red-300 bg-red-50' : 'border-gray-200'
+          isOver ? 'border-red-500 bg-red-50' : 'border-gray-400'
         )}
       >
         {board.removedMembers.map((m) => (
@@ -50,7 +50,7 @@ function RemovedZone({
           </div>
         ))}
         {board.removedMembers.length === 0 && (
-          <span className="text-xs text-gray-400 m-auto">Drop to remove</span>
+          <span className="text-xs text-gray-600 m-auto">Drop to remove</span>
         )}
       </div>
     </div>
@@ -72,7 +72,9 @@ export function TeamBoard({ board, readOnly = false }: TeamBoardProps) {
     const currentTeam = board.teams.find((t) => t.members.some((m) => m.id === memberId));
     const currentTeamId = currentTeam?.team.id ?? null;
     if (currentTeamId === toTeamId) return;
-    moveMutation.mutate([{ memberId, toTeamId }]);
+    const note = window.prompt(`Add a note for moving ${member.name}?`, '');
+    if (note === null) return;
+    moveMutation.mutate([{ memberId, toTeamId, note: note.trim() || undefined }]);
   }
 
   const selectedMember = selectedMemberId
@@ -105,6 +107,7 @@ export function TeamBoard({ board, readOnly = false }: TeamBoardProps) {
 
       <MemberDetailSheet
         member={selectedMember}
+        scenarioId={board.scenario.id}
         teamName={selectedTeam?.team.name}
         teamDriver={selectedTeam?.driver}
         onClose={() => setSelectedMemberId(null)}

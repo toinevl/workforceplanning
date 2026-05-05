@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { cn } from '@/lib/utils/cn';
 import { useParameters, useUpdateParameters, useApplyLogic } from '@/lib/hooks/useParameters';
 import type { BoardState, BusinessDriver } from '@/lib/types/domain';
@@ -31,17 +30,23 @@ export function ParametersPanel({ board, onClose }: ParametersPanelProps) {
 
   if (!params) {
     return (
-      <aside className="w-72 shrink-0 border-l border-gray-200 bg-white flex items-center justify-center">
-        <span className="text-sm text-gray-400">Loading…</span>
+      <aside className="w-72 shrink-0 border-l border-gray-300 bg-white flex items-center justify-center">
+        <span className="text-sm text-gray-600">Loading...</span>
       </aside>
     );
   }
 
   return (
-    <aside className="w-72 shrink-0 border-l border-gray-200 bg-white flex flex-col">
-      <div className="flex items-center justify-between px-4 py-3 border-b">
+    <aside className="w-72 shrink-0 border-l border-gray-300 bg-white flex flex-col">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-300">
         <h2 className="font-semibold text-sm text-gray-900">Parameters</h2>
-        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+        <button
+          onClick={onClose}
+          className="text-gray-600 hover:text-gray-900 text-xl leading-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
+          aria-label="Close parameters"
+        >
+          x
+        </button>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4">
@@ -108,7 +113,7 @@ function SquadRemovalForm({
   return (
     <div className="space-y-3">
       <p className="text-xs text-gray-500">Select SQUAD members to remove from teams.</p>
-      {all.length === 0 && <p className="text-sm text-gray-400 italic">No SQUAD members found.</p>}
+      {all.length === 0 && <p className="text-sm text-gray-600 italic">No SQUAD members found.</p>}
       {all.map((m) => (
         <label key={m.id} className="flex items-center gap-2 cursor-pointer">
           <input
@@ -118,7 +123,7 @@ function SquadRemovalForm({
             className="rounded border-gray-300"
           />
           <span className="text-sm text-gray-700">{m.name}</span>
-          <span className="text-xs text-gray-400 ml-auto">{m.role}</span>
+          <span className="text-xs text-gray-600 ml-auto">{m.role}</span>
         </label>
       ))}
     </div>
@@ -145,7 +150,7 @@ function RetirementWaveForm({
           min={55}
           max={75}
           onChange={(e) => update({ retirementAge: +e.target.value })}
-          className="w-full border border-gray-200 rounded px-2 py-1 text-sm"
+          className="w-full border border-gray-400 rounded px-2 py-1 text-sm focus:border-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
         />
       </Field>
 
@@ -156,7 +161,7 @@ function RetirementWaveForm({
           min={10}
           max={45}
           onChange={(e) => update({ serviceYearsThreshold: +e.target.value })}
-          className="w-full border border-gray-200 rounded px-2 py-1 text-sm"
+          className="w-full border border-gray-400 rounded px-2 py-1 text-sm focus:border-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
         />
       </Field>
 
@@ -164,7 +169,7 @@ function RetirementWaveForm({
         <select
           value={params.horizonYears}
           onChange={(e) => update({ horizonYears: +e.target.value as 1 | 3 | 5 })}
-          className="w-full border border-gray-200 rounded px-2 py-1 text-sm"
+          className="w-full border border-gray-400 rounded px-2 py-1 text-sm focus:border-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
         >
           <option value={1}>1 year</option>
           <option value={3}>3 years</option>
@@ -239,10 +244,10 @@ function BusinessDriversForm({
                     key={d}
                     onClick={() => setTeamDriver(ts.team.id, d)}
                     className={cn(
-                      'text-xs px-2 py-0.5 rounded border transition-colors',
+                      'text-xs px-2 py-0.5 rounded border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500',
                       (params.teamDrivers[ts.team.id] ?? 'neutral') === d
                         ? 'bg-gray-900 text-white border-gray-900'
-                        : 'border-gray-200 text-gray-600 hover:border-gray-400'
+                        : 'border-gray-400 text-gray-700 hover:border-gray-700'
                     )}
                   >
                     {DRIVER_LABELS[d]}
@@ -250,7 +255,7 @@ function BusinessDriversForm({
                 ))}
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-400">Priority</span>
+                <span className="text-xs text-gray-600">Priority</span>
                 <input
                   type="range"
                   min={1}
@@ -280,10 +285,10 @@ function BusinessDriversForm({
                 type="number"
                 value={params.targetFteDelta[d] ?? 0}
                 onChange={(e) => setFteDelta(d, +e.target.value)}
-                className="w-16 border border-gray-200 rounded px-2 py-0.5 text-sm text-right"
+                className="w-16 border border-gray-400 rounded px-2 py-0.5 text-sm text-right focus:border-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
                 step={0.5}
               />
-              <span className="text-xs text-gray-400">FTE delta</span>
+              <span className="text-xs text-gray-600">FTE delta</span>
             </div>
           ))}
         </div>

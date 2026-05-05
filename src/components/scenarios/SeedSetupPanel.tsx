@@ -24,12 +24,26 @@ interface SeedSetupPanelProps {
 }
 
 export function SeedSetupPanel({ isPending, result, error, onSeed }: SeedSetupPanelProps) {
-  const [teams, setTeams] = useState<SeedTeamConfig[]>(() => loadStoredTeams());
+  const [teams, setTeams] = useState<SeedTeamConfig[]>(() => cloneDefaultTeams());
+  const [hasLoadedStoredTeams, setHasLoadedStoredTeams] = useState(false);
   const [activeAction, setActiveAction] = useState<'seed' | 'reset' | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      setTeams(loadStoredTeams());
+      setHasLoadedStoredTeams(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!hasLoadedStoredTeams) return;
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(teams));
-  }, [teams]);
+  }, [hasLoadedStoredTeams, teams]);
 
   const totals = useMemo(() => {
     return teams.reduce(
@@ -77,6 +91,7 @@ export function SeedSetupPanel({ isPending, result, error, onSeed }: SeedSetupPa
 
   function resetDraft() {
     setTeams(cloneDefaultTeams());
+    setHasLoadedStoredTeams(true);
     window.localStorage.removeItem(STORAGE_KEY);
   }
 

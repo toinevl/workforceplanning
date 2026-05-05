@@ -9,6 +9,7 @@ import {
 import type { Scenario, StaffMember, Team, ScenarioMemberState, BoardState, TeamSnapshot, ScenarioSummary } from '../types/domain';
 import type { ScenarioParams } from '../types/params';
 import { defaultParams } from '../types/params';
+import { createAuditEvent, deleteAuditEvents } from './audit';
 
 function entityToScenario(e: ScenarioEntity): Scenario {
   return {
@@ -63,7 +64,8 @@ export async function getScenarioList(): Promise<ScenarioSummary[]> {
     scenarios.map(async (scenario) => {
       // Count snapshots
       let snapshotCount = 0;
-      for await (const _ of snapshotClient.listEntities({ queryOptions: { filter: `PartitionKey eq '${scenario.id}'` } })) {
+      for await (const ignored of snapshotClient.listEntities({ queryOptions: { filter: `PartitionKey eq '${scenario.id}'` } })) {
+        void ignored;
         snapshotCount++;
       }
 
@@ -291,6 +293,7 @@ export async function deleteScenario(scenarioId: string): Promise<void> {
     deleteAll(stateClient, scenarioId),
     deleteAll(driverClient, scenarioId),
     deleteAll(snapshotClient, scenarioId),
+    deleteAuditEvents(scenarioId),
   ]);
 }
 
@@ -305,6 +308,11 @@ export async function resetScenario(scenarioId: string): Promise<void> {
     }
     await Promise.all(toDelete.map(e => client.deleteEntity(e.partitionKey, e.rowKey).catch(() => {})));
   };
+
+  await createAuditEvent({
+    scenarioId,
+    eventType: 'scenario_reset',
+  });
 
   await Promise.all([
     deleteAll(stateClient, scenarioId),

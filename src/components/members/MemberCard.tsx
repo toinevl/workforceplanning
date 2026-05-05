@@ -44,7 +44,7 @@ export function MemberCard({
         isDragging && 'opacity-40',
         isDragOverlay && 'shadow-lg rotate-1 cursor-grabbing',
         !isDragging && !isDragOverlay && !readOnly && 'cursor-grab hover:shadow-sm hover:border-gray-300',
-        isTransferred && 'border-blue-200 bg-blue-50',
+        isTransferred && 'border-blue-500 bg-blue-50',
         onClick && !readOnly && 'cursor-pointer'
       )}
     >
@@ -53,7 +53,7 @@ export function MemberCard({
           <p className="font-medium text-gray-900 truncate leading-tight">{member.name}</p>
           <p className="text-xs text-gray-500 truncate mt-0.5">{member.role}</p>
         </div>
-        <span className="shrink-0 text-xs text-gray-400 font-mono mt-0.5">{member.fte}FTE</span>
+        <span className="shrink-0 text-xs text-gray-600 font-mono mt-0.5">{member.fte}FTE</span>
       </div>
       <MemberBadges
         isSquad={member.isSquad}

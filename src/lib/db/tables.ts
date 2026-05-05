@@ -7,6 +7,7 @@ export const TABLE_SCENARIOS = 'scenarios';
 export const TABLE_MEMBER_STATES = 'scenarioMemberStates';
 export const TABLE_TEAM_DRIVERS = 'scenarioTeamDrivers';
 export const TABLE_SNAPSHOTS = 'scenarioSnapshots';
+export const TABLE_AUDIT_EVENTS = 'scenarioAuditEvents';
 
 // ── Entity types (Azure Table entities extend TableEntity with partitionKey + rowKey) ──
 
@@ -75,6 +76,19 @@ export interface SnapshotEntity extends TableEntity {
   totalFte: number;
   removedCount: number;
   createdAt: string;
+}
+
+export interface AuditEventEntity extends TableEntity {
+  partitionKey: string; // scenarioId
+  rowKey: string; // timestamp-sortable eventId
+  eventType: string;
+  createdAt: string;
+  actor?: string;
+  note?: string;
+  memberId?: string;
+  fromTeamId?: string;
+  toTeamId?: string;
+  payloadJson?: string;
 }
 
 // Sentinel value for "member removed from all teams"

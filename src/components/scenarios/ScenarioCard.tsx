@@ -74,21 +74,21 @@ export function ScenarioCard({ scenario, onDelete }: ScenarioCardProps) {
         </Link>
         <Link
           href={`/scenarios/${scenario.id}/compare`}
-          className="py-1.5 px-3 border border-gray-200 text-gray-600 text-sm rounded-lg hover:bg-gray-50 transition-colors"
+          className="py-1.5 px-3 border border-gray-400 text-gray-800 text-sm rounded-lg hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
         >
           Compare
         </Link>
         {onDelete && (
           <button
             onClick={onDelete}
-            className="py-1.5 px-3 border border-red-200 text-red-600 text-sm rounded-lg hover:bg-red-50 transition-colors"
+            className="py-1.5 px-3 border border-red-500 text-red-700 text-sm rounded-lg hover:bg-red-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
           >
             Delete
           </button>
         )}
       </div>
 
-      <p className="text-xs text-gray-400 mt-2 text-right">
+      <p className="text-xs text-gray-600 mt-2 text-right">
         {scenario.snapshotCount} snapshot{scenario.snapshotCount !== 1 ? 's' : ''}
       </p>
     </div>
