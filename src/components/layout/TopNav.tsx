@@ -1,9 +1,11 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useWorkforceStore } from '@/lib/store/workforceStore';
 import { ScenarioStats } from '@/components/scenarios/ScenarioStats';
 import { useResetScenario } from '@/lib/hooks/useTeamBoard';
+import { APP_NAME, APP_VERSION } from '@/lib/appInfo';
 import type { BoardState } from '@/lib/types/domain';
 
 const TYPE_LABELS = {
@@ -17,17 +19,42 @@ interface TopNavProps {
 }
 
 export function TopNav({ board }: TopNavProps) {
+  const pathname = usePathname();
   const { toggleParametersPanel, toggleSnapshotHistory, togglePapertrail } = useWorkforceStore();
   const resetMutation = useResetScenario(board?.scenario.id ?? '');
+  const isHome = pathname === '/' || pathname === '/scenarios';
+  const isSettings = pathname === '/settings';
 
   return (
-    <nav className="bg-white border-b border-gray-200 px-4 py-2.5 flex items-center gap-4 shrink-0">
-      <Link
-        href="/scenarios"
-        className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
-      >
-        ← Scenarios
-      </Link>
+    <nav className="bg-white border-b border-gray-200 px-4 py-2.5 flex flex-wrap items-center gap-3 shrink-0">
+      <div className="flex min-w-0 items-center gap-2">
+        <Link
+          href="/"
+          className="font-semibold text-gray-950 transition-colors hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
+        >
+          {APP_NAME}
+        </Link>
+        <span className="rounded border border-gray-300 bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-700">
+          v{APP_VERSION}
+        </span>
+      </div>
+
+      <div className="flex items-center gap-1">
+        <Link
+          href="/"
+          aria-current={isHome ? 'page' : undefined}
+          className="rounded px-2.5 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 aria-[current=page]:bg-gray-100 aria-[current=page]:text-gray-950"
+        >
+          Home
+        </Link>
+        <Link
+          href="/settings"
+          aria-current={isSettings ? 'page' : undefined}
+          className="rounded px-2.5 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 aria-[current=page]:bg-gray-100 aria-[current=page]:text-gray-950"
+        >
+          Settings
+        </Link>
+      </div>
 
       {board && (
         <>
@@ -36,7 +63,7 @@ export function TopNav({ board }: TopNavProps) {
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <span className="font-semibold text-gray-900 truncate">{board.scenario.name}</span>
-              <span className="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded">
+              <span className="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-700 rounded">
                 {TYPE_LABELS[board.scenario.type]}
               </span>
             </div>
@@ -46,7 +73,7 @@ export function TopNav({ board }: TopNavProps) {
             <ScenarioStats board={board} />
           </div>
 
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex flex-wrap items-center gap-2">
             <button
               onClick={toggleSnapshotHistory}
               className="text-sm px-3 py-1.5 border border-gray-400 text-gray-800 rounded-lg hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
@@ -84,17 +111,6 @@ export function TopNav({ board }: TopNavProps) {
             </Link>
           </div>
         </>
-      )}
-
-      {!board && (
-        <div className="ml-auto">
-          <Link
-            href="/scenarios"
-            className="font-semibold text-gray-900"
-          >
-            Workforce Planning
-          </Link>
-        </div>
       )}
     </nav>
   );

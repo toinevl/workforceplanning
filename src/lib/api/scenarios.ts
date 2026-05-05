@@ -50,6 +50,18 @@ function entityToTeam(e: TeamEntity): Team {
   };
 }
 
+function entityToScenarioMemberState(state: MemberStateEntity): ScenarioMemberState {
+  return {
+    scenarioId: state.partitionKey,
+    memberId: state.rowKey,
+    teamId: state.teamId === REMOVED_SENTINEL ? null : state.teamId,
+    status: state.status as ScenarioMemberState['status'],
+    overrideRole: state.overrideRole,
+    businessDriver: state.businessDriver as ScenarioMemberState['businessDriver'],
+    updatedAt: state.updatedAt,
+  };
+}
+
 export async function getScenarioList(): Promise<ScenarioSummary[]> {
   const scenarioClient = getTableClient(TABLE_SCENARIOS);
   const snapshotClient = getTableClient(TABLE_SNAPSHOTS);
@@ -165,7 +177,7 @@ export async function getScenarioBoardState(scenarioId: string): Promise<BoardSt
   const driverByTeamId = new Map(teamDriverEntities.map(d => [d.rowKey, d]));
 
   // Resolve each member's effective team for this scenario
-  const removedMembers: StaffMember[] = [];
+  const removedMembers: Array<StaffMember & { scenarioState?: ScenarioMemberState }> = [];
   const teamMemberMap = new Map<string, Array<StaffMember & { scenarioState?: ScenarioMemberState }>>();
 
   allTeams.forEach(t => teamMemberMap.set(t.id, []));
@@ -175,22 +187,15 @@ export async function getScenarioBoardState(scenarioId: string): Promise<BoardSt
     const effectiveTeamId = state ? state.teamId : member.baseTeamId;
 
     if (effectiveTeamId === REMOVED_SENTINEL || effectiveTeamId === null) {
-      removedMembers.push(member);
+      removedMembers.push({
+        ...member,
+        scenarioState: state ? entityToScenarioMemberState(state) : undefined,
+      });
     } else {
       const teamMembers = teamMemberMap.get(effectiveTeamId) ?? [];
       teamMembers.push({
         ...member,
-        scenarioState: state
-          ? {
-              scenarioId: state.partitionKey,
-              memberId: state.rowKey,
-              teamId: state.teamId === REMOVED_SENTINEL ? null : state.teamId,
-              status: state.status as ScenarioMemberState['status'],
-              overrideRole: state.overrideRole,
-              businessDriver: state.businessDriver as ScenarioMemberState['businessDriver'],
-              updatedAt: state.updatedAt,
-            }
-          : undefined,
+        scenarioState: state ? entityToScenarioMemberState(state) : undefined,
       });
       teamMemberMap.set(effectiveTeamId, teamMembers);
     }

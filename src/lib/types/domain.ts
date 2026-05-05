@@ -68,7 +68,7 @@ export interface TeamSnapshot {
 export interface BoardState {
   scenario: Scenario;
   teams: TeamSnapshot[];
-  removedMembers: StaffMember[];
+  removedMembers: Array<StaffMember & { scenarioState?: ScenarioMemberState }>;
   totalFte: number;
   totalHeadcount: number;
 }

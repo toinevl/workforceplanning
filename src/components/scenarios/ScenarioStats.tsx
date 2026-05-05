@@ -46,8 +46,8 @@ function Stat({ label, value, sub, className }: { label: string; value: string; 
   return (
     <div className={className}>
       <span className="font-semibold text-gray-900">{value}</span>
-      {sub && <span className="text-gray-500 ml-1">{sub}</span>}
-      <span className="text-gray-400 ml-1 text-xs">{label}</span>
+      {sub && <span className="text-gray-600 ml-1">{sub}</span>}
+      <span className="text-gray-600 ml-1 text-xs">{label}</span>
     </div>
   );
 }

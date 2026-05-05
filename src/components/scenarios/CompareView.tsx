@@ -60,11 +60,11 @@ function Side({
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
-        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{label}</span>
+        <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">{label}</span>
         <select
           value={selected}
           onChange={(e) => onSelect(e.target.value)}
-          className="flex-1 border border-gray-200 rounded px-2 py-1 text-sm"
+          className="flex-1 rounded border border-gray-500 bg-white px-2 py-1 text-sm text-gray-950 focus:border-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500"
         >
           <option value="live">Live Board</option>
           {snapshots.map((s) => (
@@ -81,8 +81,8 @@ function Side({
           <TeamBoard board={board} readOnly />
         </>
       ) : (
-        <div className="flex items-center justify-center h-48 border-2 border-dashed border-gray-200 rounded-xl">
-          <span className="text-sm text-gray-400">
+        <div className="flex items-center justify-center h-48 border-2 border-dashed border-gray-400 rounded-xl">
+          <span className="text-sm text-gray-600">
             {snapshots.length === 0 ? 'No snapshots saved yet' : 'Select a snapshot'}
           </span>
         </div>

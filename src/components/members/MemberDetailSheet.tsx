@@ -45,7 +45,7 @@ export function MemberDetailSheet({ member, scenarioId, teamName, teamDriver, on
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           <div>
             <h3 className="font-semibold text-lg text-gray-900">{member.name}</h3>
-            <p className="text-gray-500 text-sm">{member.role}</p>
+            <p className="text-gray-600 text-sm">{member.role}</p>
             {teamName && (
               <p className="text-xs text-gray-600 mt-0.5">
                 {member.scenarioState?.status === 'transferred' ? 'Moved to' : 'Team'}:{' '}
@@ -75,7 +75,7 @@ export function MemberDetailSheet({ member, scenarioId, teamName, teamDriver, on
 
           {member.tags.length > 0 && (
             <div>
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Tags</p>
+              <p className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1.5">Tags</p>
               <div className="flex flex-wrap gap-1">
                 {member.tags.map((tag) => (
                   <span key={tag} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">
@@ -88,14 +88,14 @@ export function MemberDetailSheet({ member, scenarioId, teamName, teamDriver, on
 
           {member.notes && (
             <div>
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Notes</p>
+              <p className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">Notes</p>
               <p className="text-sm text-gray-700">{member.notes}</p>
             </div>
           )}
 
           {member.scenarioState && (
             <div className="border-t pt-3">
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+              <p className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">
                 Scenario Overrides
               </p>
               <Stat label="Status" value={member.scenarioState.status} />
@@ -112,7 +112,7 @@ export function MemberDetailSheet({ member, scenarioId, teamName, teamDriver, on
             {auditEvents.length === 0 ? (
               <p className="text-sm text-gray-600">No activity for this member yet.</p>
             ) : (
-              <ul className="divide-y divide-gray-200 rounded border border-gray-200">
+              <ul className="divide-y divide-gray-200 rounded border border-gray-300">
                 {auditEvents.slice(0, 6).map((event) => (
                   <AuditRow key={event.id} event={event} memberName={member.name} />
                 ))}

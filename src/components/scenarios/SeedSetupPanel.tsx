@@ -101,12 +101,12 @@ export function SeedSetupPanel({ isPending, result, error, onSeed }: SeedSetupPa
   }
 
   return (
-    <section className="mb-6 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-      <div className="border-b border-gray-200 px-4 py-4 sm:px-5">
+    <section className="mb-6 overflow-hidden rounded-xl border border-gray-300 bg-white shadow-sm">
+      <div className="border-b border-gray-300 px-4 py-4 sm:px-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <h2 className="text-lg font-semibold text-gray-950">Sample Data Setup</h2>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-gray-600">
               Define the organization shape, then generate teams, members, retirees, SQUAD profiles, and scenarios.
             </p>
           </div>
@@ -119,7 +119,7 @@ export function SeedSetupPanel({ isPending, result, error, onSeed }: SeedSetupPa
         </div>
       </div>
 
-      <div className="hidden border-b border-gray-100 bg-gray-50/70 px-5 py-2 text-xs font-medium uppercase text-gray-500 md:grid md:grid-cols-[minmax(16rem,1fr)_7rem_7rem_7rem_5rem] md:gap-3">
+      <div className="hidden border-b border-gray-200 bg-gray-50/70 px-5 py-2 text-xs font-medium uppercase text-gray-700 md:grid md:grid-cols-[minmax(16rem,1fr)_7rem_7rem_7rem_5rem] md:gap-3">
         <span>Team</span>
         <span>Members</span>
         <span>Retirees</span>
@@ -135,7 +135,7 @@ export function SeedSetupPanel({ isPending, result, error, onSeed }: SeedSetupPa
                 type="color"
                 value={team.color}
                 onChange={(event) => updateTeam(index, { color: event.target.value })}
-                className="h-9 w-9 shrink-0 cursor-pointer rounded border border-gray-200 bg-white p-1"
+                className="h-9 w-9 shrink-0 cursor-pointer rounded border border-gray-400 bg-white p-1 focus:outline-none focus:ring-2 focus:ring-gray-500"
                 aria-label={`${team.name} color`}
               />
               <label className="min-w-0 flex-1">
@@ -144,7 +144,7 @@ export function SeedSetupPanel({ isPending, result, error, onSeed }: SeedSetupPa
                   type="text"
                   value={team.name}
                   onChange={(event) => updateTeam(index, { name: event.target.value })}
-                  className="h-10 w-full rounded-md border border-gray-200 px-3 text-sm font-medium text-gray-900 outline-none transition focus:border-gray-400 focus:ring-2 focus:ring-gray-100"
+                  className="h-10 w-full rounded-md border border-gray-400 bg-white px-3 text-sm font-medium text-gray-950 outline-none transition focus:border-gray-700 focus:ring-2 focus:ring-gray-500"
                 />
               </label>
             </div>
@@ -157,7 +157,7 @@ export function SeedSetupPanel({ isPending, result, error, onSeed }: SeedSetupPa
               type="button"
               onClick={() => setTeams((current) => current.filter((_, i) => i !== index))}
               disabled={teams.length <= 1}
-              className="h-10 rounded-md border border-gray-200 px-3 text-sm text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40 md:text-right"
+              className="h-10 rounded-md border border-gray-400 px-3 text-sm text-gray-800 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40 md:text-right focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
             >
               Remove
             </button>
@@ -165,7 +165,7 @@ export function SeedSetupPanel({ isPending, result, error, onSeed }: SeedSetupPa
         ))}
       </div>
 
-      <div className="flex flex-col gap-3 border-t border-gray-200 bg-gray-50/80 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+      <div className="flex flex-col gap-3 border-t border-gray-300 bg-gray-50/80 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
         <div className="min-h-5 text-sm">
           {validationMessage && <span className="text-red-600">{validationMessage}</span>}
           {!validationMessage && error && <span className="text-red-600">{error.message}</span>}
@@ -180,14 +180,14 @@ export function SeedSetupPanel({ isPending, result, error, onSeed }: SeedSetupPa
           <button
             type="button"
             onClick={addTeam}
-            className="h-10 rounded-md border border-gray-200 bg-white px-4 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+            className="h-10 rounded-md border border-gray-400 bg-white px-4 text-sm font-medium text-gray-800 transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
           >
             Add Team
           </button>
           <button
             type="button"
             onClick={resetDraft}
-            className="h-10 rounded-md border border-gray-200 bg-white px-4 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+            className="h-10 rounded-md border border-gray-400 bg-white px-4 text-sm font-medium text-gray-800 transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
           >
             Reset Defaults
           </button>
@@ -195,7 +195,7 @@ export function SeedSetupPanel({ isPending, result, error, onSeed }: SeedSetupPa
             type="button"
             onClick={() => submit(false)}
             disabled={!canSeed}
-            className="h-10 rounded-md border border-gray-300 bg-white px-4 text-sm font-medium text-gray-900 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+            className="h-10 rounded-md border border-gray-500 bg-white px-4 text-sm font-medium text-gray-950 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
           >
             {isPending && activeAction === 'seed' ? 'Generating...' : 'Generate Data'}
           </button>
@@ -261,9 +261,9 @@ function clampDraftNumber(value: unknown, min: number, max: number): number {
 
 function Metric({ label, value, className = '' }: { label: string; value: number; className?: string }) {
   return (
-    <div className={`rounded-md border border-gray-200 bg-gray-50 px-3 py-2 ${className}`}>
+    <div className={`rounded-md border border-gray-300 bg-gray-50 px-3 py-2 ${className}`}>
       <p className="text-base font-semibold leading-none text-gray-950">{value}</p>
-      <p className="mt-1 text-xs text-gray-500">{label}</p>
+      <p className="mt-1 text-xs text-gray-700">{label}</p>
     </div>
   );
 }
@@ -283,14 +283,14 @@ function NumberField({
 }) {
   return (
     <label>
-      <span className="mb-1 block text-xs font-medium text-gray-500 md:hidden">{label}</span>
+      <span className="mb-1 block text-xs font-medium text-gray-700 md:hidden">{label}</span>
       <input
         type="number"
         min={min}
         max={max}
         value={value}
         onChange={(event) => onChange(asNumber(event.target.value))}
-        className="h-10 w-full rounded-md border border-gray-200 px-3 text-sm text-gray-900 outline-none transition focus:border-gray-400 focus:ring-2 focus:ring-gray-100"
+        className="h-10 w-full rounded-md border border-gray-400 bg-white px-3 text-sm text-gray-950 outline-none transition focus:border-gray-700 focus:ring-2 focus:ring-gray-500"
       />
     </label>
   );

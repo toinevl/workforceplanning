@@ -45,7 +45,7 @@ export function SnapshotHistory({ scenarioId, onClose }: SnapshotHistoryProps) {
             onChange={(e) => setLabel(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSave()}
             placeholder="Snapshot label…"
-            className="flex-1 border border-gray-400 rounded px-2 py-1.5 text-sm min-w-0 focus:border-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            className="flex-1 border border-gray-500 bg-white rounded px-2 py-1.5 text-sm text-gray-950 placeholder:text-gray-600 min-w-0 focus:border-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500"
           />
           <button
             onClick={handleSave}
@@ -116,7 +116,7 @@ function SnapshotRow({
           <p className="text-xs text-gray-600 mt-0.5">{date}</p>
         </div>
       </div>
-      <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-500">
+      <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-600">
         <span>{snapshot.headcount} members</span>
         <span>{snapshot.totalFte.toFixed(1)} FTE</span>
         {snapshot.removedCount > 0 && <span>{snapshot.removedCount} removed</span>}

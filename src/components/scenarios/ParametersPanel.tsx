@@ -120,7 +120,7 @@ function SquadRemovalForm({
             type="checkbox"
             checked={(params.membersToRemove ?? []).includes(m.id)}
             onChange={() => toggle(m.id)}
-            className="rounded border-gray-300"
+            className="rounded border-gray-500 text-gray-900 accent-gray-900 focus:ring-2 focus:ring-gray-500"
           />
           <span className="text-sm text-gray-700">{m.name}</span>
           <span className="text-xs text-gray-600 ml-auto">{m.role}</span>
@@ -183,7 +183,7 @@ function RetirementWaveForm({
             type="checkbox"
             checked={params.autoFlagEligible}
             onChange={(e) => update({ autoFlagEligible: e.target.checked })}
-            className="rounded border-gray-300"
+            className="rounded border-gray-500 text-gray-900 accent-gray-900 focus:ring-2 focus:ring-gray-500"
           />
           <span className="text-sm text-gray-600">Automatically flag at-risk members</span>
         </label>
@@ -225,7 +225,7 @@ function BusinessDriversForm({
   return (
     <div className="space-y-5">
       <div>
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+        <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
           Team Drivers
         </p>
         <div className="space-y-2">
@@ -274,7 +274,7 @@ function BusinessDriversForm({
       </div>
 
       <div>
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+        <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
           FTE Targets by Driver
         </p>
         <div className="space-y-1.5">

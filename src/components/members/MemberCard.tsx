@@ -30,7 +30,10 @@ export function MemberCard({
     : undefined;
 
   const isTransferred = member.scenarioState?.status === 'transferred';
+  const isRemoved = member.scenarioState?.status === 'removed';
   const memberDriver = member.scenarioState?.businessDriver ?? teamDriver;
+  const statusLabel = isTransferred ? 'Moved' : isRemoved ? 'Removed' : null;
+  const statusTitle = isTransferred ? 'Moved from base team' : isRemoved ? 'Removed from scenario' : undefined;
 
   return (
     <div
@@ -45,15 +48,31 @@ export function MemberCard({
         isDragOverlay && 'shadow-lg rotate-1 cursor-grabbing',
         !isDragging && !isDragOverlay && !readOnly && 'cursor-grab hover:shadow-sm hover:border-gray-300',
         isTransferred && 'border-blue-500 bg-blue-50',
+        isRemoved && 'border-red-500 bg-red-50',
         onClick && !readOnly && 'cursor-pointer'
       )}
+      aria-label={statusLabel ? `${member.name}, ${statusTitle}` : member.name}
     >
       <div className="flex items-start justify-between gap-1">
         <div className="min-w-0">
           <p className="font-medium text-gray-900 truncate leading-tight">{member.name}</p>
-          <p className="text-xs text-gray-500 truncate mt-0.5">{member.role}</p>
+          <p className="text-xs text-gray-600 truncate mt-0.5">{member.role}</p>
         </div>
-        <span className="shrink-0 text-xs text-gray-600 font-mono mt-0.5">{member.fte}FTE</span>
+        <div className="flex shrink-0 flex-col items-end gap-1">
+          <span className="text-xs text-gray-600 font-mono mt-0.5">{member.fte}FTE</span>
+          {statusLabel && (
+            <span
+              title={statusTitle}
+              className={cn(
+                'rounded px-1.5 py-0.5 text-[0.6875rem] font-semibold leading-none',
+                isTransferred && 'bg-blue-100 text-blue-800 border border-blue-300',
+                isRemoved && 'bg-red-100 text-red-800 border border-red-300'
+              )}
+            >
+              {statusLabel}
+            </span>
+          )}
+        </div>
       </div>
       <MemberBadges
         isSquad={member.isSquad}

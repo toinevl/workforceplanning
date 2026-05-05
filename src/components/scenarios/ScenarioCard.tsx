@@ -34,7 +34,7 @@ export function ScenarioCard({ scenario, onDelete }: ScenarioCardProps) {
         <div className="min-w-0">
           <h3 className="font-semibold text-gray-900 truncate">{scenario.name}</h3>
           {scenario.description && (
-            <p className="text-sm text-gray-500 mt-0.5 line-clamp-2">{scenario.description}</p>
+            <p className="text-sm text-gray-600 mt-0.5 line-clamp-2">{scenario.description}</p>
           )}
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
@@ -53,15 +53,15 @@ export function ScenarioCard({ scenario, onDelete }: ScenarioCardProps) {
       <div className="grid grid-cols-3 gap-2 mb-4 text-center">
         <div className="bg-gray-50 rounded p-2">
           <p className="text-lg font-semibold text-gray-900">{scenario.headcount}</p>
-          <p className="text-xs text-gray-500">Members</p>
+          <p className="text-xs text-gray-600">Members</p>
         </div>
         <div className="bg-gray-50 rounded p-2">
           <p className="text-lg font-semibold text-gray-900">{scenario.totalFte.toFixed(1)}</p>
-          <p className="text-xs text-gray-500">FTE</p>
+          <p className="text-xs text-gray-600">FTE</p>
         </div>
         <div className="bg-gray-50 rounded p-2">
           <p className="text-lg font-semibold text-gray-900">{scenario.removedCount}</p>
-          <p className="text-xs text-gray-500">Removed</p>
+          <p className="text-xs text-gray-600">Removed</p>
         </div>
       </div>
 

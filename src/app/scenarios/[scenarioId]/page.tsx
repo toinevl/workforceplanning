@@ -17,12 +17,12 @@ export default function ScenarioPage({ params }: ScenarioPageProps) {
     <AppShell board={board}>
       {isLoading && (
         <div className="flex items-center justify-center py-20">
-          <span className="text-gray-400">Loading board…</span>
+          <span className="text-gray-600">Loading board...</span>
         </div>
       )}
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm">
+        <div className="bg-red-50 border border-red-400 rounded-lg p-4 text-red-800 text-sm">
           Failed to load scenario. {(error as Error).message}
         </div>
       )}

@@ -61,7 +61,7 @@ export function PapertrailPanel({ board, onClose }: PapertrailPanelProps) {
         <select
           value={memberFilter}
           onChange={(event) => setMemberFilter(event.target.value)}
-          className="w-full rounded border border-gray-400 px-2 py-1.5 text-sm text-gray-800 focus:border-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+          className="w-full rounded border border-gray-500 bg-white px-2 py-1.5 text-sm text-gray-950 focus:border-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500"
         >
           <option value="all">All activity</option>
           {members.map((member) => (
@@ -74,7 +74,7 @@ export function PapertrailPanel({ board, onClose }: PapertrailPanelProps) {
             onChange={(event) => setNote(event.target.value)}
             onKeyDown={(event) => event.key === 'Enter' && handleAddNote()}
             placeholder="Add scenario note"
-            className="min-w-0 flex-1 rounded border border-gray-400 px-2 py-1.5 text-sm text-gray-800 focus:border-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            className="min-w-0 flex-1 rounded border border-gray-500 bg-white px-2 py-1.5 text-sm text-gray-950 placeholder:text-gray-600 focus:border-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500"
           />
           <button
             onClick={handleAddNote}
