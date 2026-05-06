@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workforce Planning</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; }
+    .drag-over { outline: 2px solid #6366f1 !important; background: #eef2ff !important; }
+    .drag-over-red { outline: 2px dashed #f43f5e !important; background: #fff1f2 !important; }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useCallback, useRef } = React;
+
+    // =====================================================================
+    // API
+    // =====================================================================
+    async function apiFetch(path, options = {}) {
+      const res = await fetch(path, {
+        headers: { 'Content-Type': 'application/json' },
+        ...options,
+      });
+      if (res.status === 204) return null;
+      const text = await res.text();
+      if (!text.trim()) {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return null;
+      }
+      let json;
+      try { json = JSON.parse(text); }
+      catch { throw new Error(`Server error (${res.status}): ${text.slice(0, 120)}`); }
+      if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`);
+      return json.data;
+    }
+
+    const api = {
+      fetchScenarios:    ()            => apiFetch('/api/scenarios'),
+      createScenario:    (data)        => apiFetch('/api/scenarios', { method: 'POST', body: JSON.stringify(data) }),
+      deleteScenario:    (id)          => apiFetch(`/api/scenarios/${id}`, { method: 'DELETE' }),
+      fetchBoard:        (id)          => apiFetch(`/api/scenarios/${id}/board`),
+      fetchParameters:   (id)          => apiFetch(`/api/scenarios/${id}/parameters`),
+      updateParameters:  (id, params)  => apiFetch(`/api/scenarios/${id}/parameters`, { method: 'PUT', body: JSON.stringify(params) }),
+      applyLogic:        (id)          => apiFetch(`/api/scenarios/${id}/apply`, { method: 'POST' }),
+      moveMembers:       (id, moves)   => apiFetch('/api/assignments', { method: 'POST', body: JSON.stringify({ scenarioId: id, moves }) }),
+      resetScenario:     (id)          => apiFetch(`/api/scenarios/${id}/reset`, { method: 'POST' }),
+      fetchSnapshots:    (id)          => apiFetch(`/api/scenarios/${id}/snapshots`),
+      saveSnapshot:      (id, label)   => apiFetch(`/api/scenarios/${id}/snapshots`, { method: 'POST', body: JSON.stringify({ label }) }),
+      restoreSnapshot:   (id, snapId)  => apiFetch(`/api/scenarios/${id}/snapshots/${snapId}/restore`, { method: 'POST' }),
+      deleteSnapshot:    (id, snapId)  => apiFetch(`/api/scenarios/${id}/snapshots/${snapId}`, { method: 'DELETE' }),
+      seed:              ()            => apiFetch('/api/seed', { method: 'POST' }),
+    };
+
+    // =====================================================================
+    // Hash routing
+    // =====================================================================
+    function getRoute() {
+      const hash = window.location.hash.replace(/^#/, '') || '/scenarios';
+      const m = hash.match(/^\/scenarios\/([^/]+)$/);
+      if (m) return { page: 'board', scenarioId: m[1] };
+      return { page: 'scenarios' };
+    }
+
+    function navigate(path) { window.location.hash = path; }
+
+    // =====================================================================
+    // Constants
+    // =====================================================================
+    const TYPE_LABELS = {
+      squad_removal:    'Squad Removal',
+      retirement_wave:  'Retirement Wave',
+      business_drivers: 'Business Drivers',
+    };
+    const TYPE_COLORS = {
+      squad_removal:    'bg-red-100 text-red-700',
+      retirement_wave:  'bg-amber-100 text-amber-700',
+      business_drivers: 'bg-blue-100 text-blue-700',
+    };
+    const STATUS_COLORS = {
+      draft:   'bg-gray-100 text-gray-600',
+      active:  'bg-green-100 text-green-700',
+      locked:  'bg-slate-100 text-slate-600',
+    };
+    const TEAM_COLORS = {
+      'Team Alpha':   '#6366f1',
+      'Team Bravo':   '#0ea5e9',
+      'Team Charlie': '#10b981',
+      'Team Delta':   '#f59e0b',
+      'Team Echo':    '#f43f5e',
+      'Team Foxtrot': '#8b5cf6',
+    };
+    function teamColor(name) { return TEAM_COLORS[name] || '#6b7280'; }
+
+    // =====================================================================
+    // Shared components
+    // =====================================================================
+    function Badge({ label, className }) {
+      return (
+        <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${className}`}>
+          {label}
+        </span>
+      );
+    }
+
+    function Spinner() {
+      return <div className="p-8 text-sm text-gray-400">Loading…</div>;
+    }
+
+    function ErrorMsg({ msg }) {
+      return <div className="p-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded">{msg}</div>;
+    }
+
+    // =====================================================================
+    // App — root router
+    // =====================================================================
+    function App() {
+      const [route, setRoute] = useState(getRoute);
+
+      useEffect(() => {
+        const onHash = () => setRoute(getRoute());
+        window.addEventListener('hashchange', onHash);
+        return () => window.removeEventListener('hashchange', onHash);
+      }, []);
+
+      if (route.page === 'board') return <BoardPage scenarioId={route.scenarioId} />;
+      return <ScenariosPage />;
+    }
+
+    // =====================================================================
+    // ScenariosPage
+    // =====================================================================
+    function ScenariosPage() {
+      const [scenarios, setScenarios] = useState([]);
+      const [loading, setLoading]     = useState(true);
+      const [error, setError]         = useState(null);
+      const [showCreate, setShowCreate] = useState(false);
+      const [seeding, setSeeding]     = useState(false);
+
+      const load = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+          const data = await api.fetchScenarios();
+          setScenarios(data || []);
+        } catch (e) {
+          setError(e.message);
+        } finally {
+          setLoading(false);
+        }
+      }, []);
+
+      useEffect(() => { load(); }, [load]);
+
+      async function handleSeed() {
+        setSeeding(true);
+        try { await api.seed(); await load(); }
+        catch (e) { alert('Seed failed: ' + e.message); }
+        finally { setSeeding(false); }
+      }
+
+      async function handleDelete(id) {
+        if (!confirm('Delete this scenario and all its data?')) return;
+        try { await api.deleteScenario(id); load(); }
+        catch (e) { alert('Delete failed: ' + e.message); }
+      }
+
+      return (
+        <div className="max-w-5xl mx-auto p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-2xl font-bold text-gray-900">Workforce Planning</h1>
+            <div className="flex gap-2">
+              <button
+                onClick={handleSeed}
+                disabled={seeding}
+                className="px-3 py-1.5 text-sm border border-gray-300 bg-white hover:bg-gray-50 rounded disabled:opacity-50"
+              >
+                {seeding ? 'Seeding…' : 'Seed Data'}
+              </button>
+              <button
+                onClick={() => setShowCreate(true)}
+                className="px-3 py-1.5 text-sm bg-indigo-600 text-white hover:bg-indigo-700 rounded"
+              >
+                + New Scenario
+              </button>
+            </div>
+          </div>
+
+          {error && <ErrorMsg msg={error} />}
+
+          {loading ? <Spinner /> : scenarios.length === 0 ? (
+            <div className="text-center py-20 text-gray-500">
+              <p className="mb-4 text-sm">No scenarios yet.</p>
+              <button
+                onClick={handleSeed}
+                disabled={seeding}
+                className="px-5 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50"
+              >
+                {seeding ? 'Seeding…' : 'Seed demo data (56 staff · 6 teams · 3 scenarios)'}
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {scenarios.map(s => (
+                <ScenarioCard
+                  key={s.id}
+                  scenario={s}
+                  onOpen={() => navigate(`/scenarios/${s.id}`)}
+                  onDelete={() => handleDelete(s.id)}
+                />
+              ))}
+            </div>
+          )}
+
+          {showCreate && (
+            <CreateModal
+              onClose={() => setShowCreate(false)}
+              onCreate={async (data) => {
+                try {
+                  const s = await api.createScenario(data);
+                  setShowCreate(false);
+                  navigate(`/scenarios/${s.id}`);
+                } catch (e) {
+                  alert('Create failed: ' + e.message);
+                }
+              }}
+            />
+          )}
+        </div>
+      );
+    }
+
+    function ScenarioCard({ scenario: s, onOpen, onDelete }) {
+      return (
+        <div className="bg-white rounded-lg border border-gray-200 p-4 flex flex-col gap-3 shadow-sm">
+          <div className="flex items-start justify-between gap-2">
+            <h2 className="font-semibold text-gray-900 text-sm leading-snug flex-1">{s.name}</h2>
+            <Badge label={s.status} className={STATUS_COLORS[s.status] || STATUS_COLORS.draft} />
+          </div>
+          <Badge label={TYPE_LABELS[s.type] || s.type} className={TYPE_COLORS[s.type] || 'bg-gray-100 text-gray-600'} />
+          {s.description && (
+            <p className="text-xs text-gray-500 leading-relaxed">{s.description}</p>
+          )}
+          <div className="flex gap-2 mt-auto pt-1">
+            <button onClick={onOpen} className="flex-1 px-3 py-1.5 text-xs bg-indigo-600 text-white rounded hover:bg-indigo-700">
+              Open
+            </button>
+            <button onClick={onDelete} className="px-3 py-1.5 text-xs border border-red-200 text-red-600 rounded hover:bg-red-50">
+              Delete
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // =====================================================================
+    // CreateModal
+    // =====================================================================
+    function CreateModal({ onClose, onCreate }) {
+      const [type, setType]               = useState('squad_removal');
+      const [name, setName]               = useState('');
+      const [description, setDescription] = useState('');
+      const [saving, setSaving]           = useState(false);
+
+      async function handleSubmit(e) {
+        e.preventDefault();
+        if (!name.trim()) return;
+        setSaving(true);
+        try { await onCreate({ type, name: name.trim(), description: description.trim() }); }
+        finally { setSaving(false); }
+      }
+
+      return (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={onClose}>
+          <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">New Scenario</h2>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
+                <div className="flex flex-col gap-1.5">
+                  {Object.entries(TYPE_LABELS).map(([value, label]) => (
+                    <label key={value} className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
+                      <input
+                        type="radio" name="type" value={value}
+                        checked={type === value} onChange={() => setType(value)}
+                      />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                <input
+                  className="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  value={name} onChange={e => setName(e.target.value)}
+                  placeholder="e.g. Q3 Reorganisation" required autoFocus
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description <span className="text-gray-400 font-normal">(optional)</span></label>
+                <textarea
+                  className="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
+                  value={description} onChange={e => setDescription(e.target.value)}
+                  rows={2} placeholder="Brief description…"
+                />
+              </div>
+              <div className="flex gap-2 justify-end pt-1">
+                <button type="button" onClick={onClose} className="px-4 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
+                  Cancel
+                </button>
+                <button type="submit" disabled={saving || !name.trim()} className="px-4 py-1.5 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50">
+                  {saving ? 'Creating…' : 'Create'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      );
+    }
+
+    // =====================================================================
+    // BoardPage
+    // =====================================================================
+    function BoardPage({ scenarioId }) {
+      const [board, setBoard]               = useState(null);
+      const [loading, setLoading]           = useState(true);
+      const [error, setError]               = useState(null);
+      const [selectedMember, setSelectedMember] = useState(null);
+      const [showParams, setShowParams]     = useState(false);
+      const [showSnapshots, setShowSnapshots] = useState(false);
+      const [params, setParams]             = useState(null);
+      const [snapshots, setSnapshots]       = useState([]);
+      const [dragOverId, setDragOverId]     = useState(null);
+      const [resetting, setResetting]       = useState(false);
+      const dragData = useRef(null);
+
+      const loadBoard = useCallback(async () => {
+        try {
+          const data = await api.fetchBoard(scenarioId);
+          setBoard(data);
+          setError(null);
+        } catch (e) {
+          setError(e.message);
+        } finally {
+          setLoading(false);
+        }
+      }, [scenarioId]);
+
+      useEffect(() => { loadBoard(); }, [loadBoard]);
+
+      async function loadParams() {
+        try {
+          const p = await api.fetchParameters(scenarioId);
+          setParams(p);
+        } catch (e) {
+          setParams({});
+        }
+      }
+
+      async function loadSnapshots() {
+        try {
+          const data = await api.fetchSnapshots(scenarioId);
+          setSnapshots(data || []);
+        } catch { setSnapshots([]); }
+      }
+
+      function toggleParams() {
+        if (!showParams) loadParams();
+        setShowParams(v => !v);
+        setShowSnapshots(false);
+      }
+
+      function toggleSnapshots() {
+        if (!showSnapshots) loadSnapshots();
+        setShowSnapshots(v => !v);
+        setShowParams(false);
+      }
+
+      async function handleReset() {
+        if (!confirm('Reset all moves in this scenario?')) return;
+        setResetting(true);
+        try { await api.resetScenario(scenarioId); await loadBoard(); }
+        catch (e) { alert('Reset failed: ' + e.message); }
+        finally { setResetting(false); }
+      }
+
+      // Drag-drop handlers
+      function onDragStart(e, memberId, fromTeamId) {
+        dragData.current = { memberId, fromTeamId };
+        e.dataTransfer.effectAllowed = 'move';
+      }
+
+      function onDragOver(e, targetId) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        setDragOverId(targetId);
+      }
+
+      function onDragLeave(e, targetId) {
+        if (!e.currentTarget.contains(e.relatedTarget)) setDragOverId(null);
+      }
+
+      async function onDrop(e, toTeamId) {
+        e.preventDefault();
+        setDragOverId(null);
+        const d = dragData.current;
+        dragData.current = null;
+        if (!d) return;
+        const dest = toTeamId === 'removed' ? 'REMOVED' : toTeamId;
+        const src  = d.fromTeamId === 'removed' ? 'REMOVED' : d.fromTeamId;
+        if (dest === src) return;
+        try {
+          const updated = await api.moveMembers(scenarioId, [{ memberId: d.memberId, toTeamId: dest }]);
+          setBoard(updated);
+        } catch (e) { alert('Move failed: ' + e.message); }
+      }
+
+      // Find which team the selected member is currently in
+      function memberCurrentTeam(member) {
+        if (!board || !member) return '';
+        for (const ts of board.teams) {
+          if (ts.members.some(m => m.id === member.id)) return ts.team.name;
+        }
+        return 'Removed';
+      }
+
+      if (loading) return <Spinner />;
+      if (error)   return (
+        <div className="p-6">
+          <button onClick={() => navigate('/scenarios')} className="text-sm text-indigo-600 hover:underline mb-4 block">← Back to scenarios</button>
+          <ErrorMsg msg={error} />
+        </div>
+      );
+      if (!board) return null;
+
+      const scenario = board.scenario;
+      const sidebarOpen = showParams || showSnapshots;
+
+      return (
+        <div className="flex flex-col min-h-screen">
+          {/* Top nav */}
+          <nav className="bg-white border-b border-gray-200 px-4 py-2.5 flex items-center gap-2 flex-wrap">
+            <button
+              onClick={() => navigate('/scenarios')}
+              className="text-sm text-gray-500 hover:text-gray-800 mr-1"
+            >
+              ← Scenarios
+            </button>
+            <span className="text-gray-300 select-none">/</span>
+            <span className="font-semibold text-gray-900 text-sm">{scenario.name}</span>
+            <Badge label={TYPE_LABELS[scenario.type] || scenario.type} className={TYPE_COLORS[scenario.type] || 'bg-gray-100 text-gray-600'} />
+            <Badge label={scenario.status} className={STATUS_COLORS[scenario.status] || STATUS_COLORS.draft} />
+            <div className="ml-auto flex gap-2">
+              <button
+                onClick={toggleParams}
+                className={`px-3 py-1 text-xs rounded border transition-colors ${showParams ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+              >
+                Parameters
+              </button>
+              <button
+                onClick={toggleSnapshots}
+                className={`px-3 py-1 text-xs rounded border transition-colors ${showSnapshots ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+              >
+                Snapshots
+              </button>
+              <button
+                onClick={handleReset}
+                disabled={resetting}
+                className="px-3 py-1 text-xs rounded border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50"
+              >
+                {resetting ? 'Resetting…' : 'Reset'}
+              </button>
+            </div>
+          </nav>
+
+          {/* Stats strip */}
+          <div className="bg-white border-b border-gray-100 px-4 py-1.5 flex gap-6 text-xs text-gray-500">
+            <span>Staff: <strong className="text-gray-800">{board.totalHeadcount}</strong></span>
+            <span>FTE: <strong className="text-gray-800">{(board.totalFte || 0).toFixed(1)}</strong></span>
+            <span>Removed: <strong className="text-gray-800">{(board.removedMembers || []).length}</strong></span>
+          </div>
+
+          {/* Body */}
+          <div className="flex flex-1 overflow-hidden">
+            {/* Board area */}
+            <div className="flex-1 overflow-auto p-4">
+              {/* Team columns */}
+              <div
+                className="grid gap-3"
+                style={{ gridTemplateColumns: `repeat(${board.teams.length}, minmax(150px, 1fr))` }}
+              >
+                {board.teams.map(ts => (
+                  <TeamColumn
+                    key={ts.team.id}
+                    teamSnapshot={ts}
+                    isDragOver={dragOverId === ts.team.id}
+                    onDragStart={onDragStart}
+                    onDragOver={e => onDragOver(e, ts.team.id)}
+                    onDragLeave={e => onDragLeave(e, ts.team.id)}
+                    onDrop={e => onDrop(e, ts.team.id)}
+                    onMemberClick={setSelectedMember}
+                  />
+                ))}
+              </div>
+
+              {/* Removed zone */}
+              <RemovedZone
+                members={board.removedMembers || []}
+                isDragOver={dragOverId === 'removed'}
+                onDragStart={onDragStart}
+                onDragOver={e => onDragOver(e, 'removed')}
+                onDragLeave={e => onDragLeave(e, 'removed')}
+                onDrop={e => onDrop(e, 'removed')}
+                onMemberClick={setSelectedMember}
+              />
+            </div>
+
+            {/* Right sidebar */}
+            {showParams && (
+              <ParametersPanel
+                scenario={scenario}
+                board={board}
+                params={params}
+                onParamsChange={setParams}
+                onApply={async () => {
+                  if (params) await api.updateParameters(scenarioId, params);
+                  const updated = await api.applyLogic(scenarioId);
+                  setBoard(updated);
+                }}
+                onClose={() => setShowParams(false)}
+              />
+            )}
+            {showSnapshots && (
+              <SnapshotPanel
+                scenarioId={scenarioId}
+                snapshots={snapshots}
+                onSave={async (label) => { await api.saveSnapshot(scenarioId, label); loadSnapshots(); }}
+                onRestore={async (snapId) => { await api.restoreSnapshot(scenarioId, snapId); await loadBoard(); loadSnapshots(); }}
+                onDelete={async (snapId) => { await api.deleteSnapshot(scenarioId, snapId); loadSnapshots(); }}
+                onClose={() => setShowSnapshots(false)}
+              />
+            )}
+          </div>
+
+          {/* Member detail sheet */}
+          {selectedMember && (
+            <MemberSheet
+              member={selectedMember}
+              teamName={memberCurrentTeam(selectedMember)}
+              onClose={() => setSelectedMember(null)}
+            />
+          )}
+        </div>
+      );
+    }
+
+    // =====================================================================
+    // TeamColumn
+    // =====================================================================
+    function TeamColumn({ teamSnapshot, isDragOver, onDragStart, onDragOver, onDragLeave, onDrop, onMemberClick }) {
+      const { team, members, totalFte, headcount, driver } = teamSnapshot;
+      const color = teamColor(team.name);
+
+      return (
+        <div
+          className={`bg-white rounded-lg border-2 flex flex-col transition-colors ${isDragOver ? 'border-indigo-400 bg-indigo-50' : 'border-gray-200'}`}
+          style={{ minHeight: '200px' }}
+          onDragOver={onDragOver}
+          onDragLeave={onDragLeave}
+          onDrop={onDrop}
+        >
+          {/* Header */}
+          <div
+            className="px-3 py-2 rounded-t-lg"
+            style={{ borderLeft: `4px solid ${color}`, background: `${color}12` }}
+          >
+            <div className="font-semibold text-xs text-gray-800 truncate">{team.name}</div>
+            <div className="text-xs text-gray-500">{headcount} · {(totalFte || 0).toFixed(1)} FTE</div>
+            {driver && (
+              <span className="text-xs bg-white/80 px-1 rounded text-gray-600">{driver}</span>
+            )}
+          </div>
+
+          {/* Members */}
+          <div className="p-2 flex flex-col gap-1.5 flex-1">
+            {members.length === 0 && (
+              <div className="text-xs text-gray-300 text-center py-4">empty</div>
+            )}
+            {members.map(m => (
+              <MemberCard
+                key={m.id}
+                member={m}
+                teamId={team.id}
+                onDragStart={onDragStart}
+                onClick={() => onMemberClick(m)}
+              />
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // =====================================================================
+    // MemberCard
+    // =====================================================================
+    function MemberCard({ member, teamId, onDragStart, onClick }) {
+      return (
+        <div
+          draggable
+          onDragStart={e => onDragStart(e, member.id, teamId)}
+          onClick={onClick}
+          className="bg-gray-50 border border-gray-200 rounded px-2 py-1.5 cursor-grab active:cursor-grabbing hover:border-gray-300 hover:bg-white transition-colors select-none"
+        >
+          <div className="flex items-start justify-between gap-1">
+            <div className="min-w-0">
+              <div className="text-xs font-medium text-gray-900 leading-tight truncate">{member.name}</div>
+              <div className="text-xs text-gray-400 leading-tight truncate">{member.role}</div>
+            </div>
+            <div className="flex flex-col items-end gap-0.5 shrink-0">
+              <span className="text-xs bg-gray-200 text-gray-600 px-1 rounded">{member.fte}</span>
+              {member.isSquad && (
+                <span className="text-xs bg-purple-100 text-purple-700 px-1 rounded">SQUAD</span>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // =====================================================================
+    // RemovedZone
+    // =====================================================================
+    function RemovedZone({ members, isDragOver, onDragStart, onDragOver, onDragLeave, onDrop, onMemberClick }) {
+      return (
+        <div className="mt-4">
+          <div className="text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">
+            Removed ({members.length})
+          </div>
+          <div
+            className={`rounded-lg border-2 border-dashed p-3 transition-colors ${isDragOver ? 'border-red-400 bg-red-50' : 'border-gray-300 bg-white'}`}
+            style={{ minHeight: '56px' }}
+            onDragOver={onDragOver}
+            onDragLeave={onDragLeave}
+            onDrop={onDrop}
+          >
+            {members.length === 0 ? (
+              <p className="text-xs text-gray-300 text-center py-1">Drop a member here to remove them</p>
+            ) : (
+              <div className="flex flex-wrap gap-1.5">
+                {members.map(m => (
+                  <div
+                    key={m.id}
+                    draggable
+                    onDragStart={e => onDragStart(e, m.id, 'removed')}
+                    onClick={() => onMemberClick(m)}
+                    className="bg-white border border-red-200 text-xs text-gray-700 px-2 py-1 rounded cursor-grab active:cursor-grabbing hover:border-red-300 select-none"
+                  >
+                    {m.name}
+                    {m.isSquad && <span className="ml-1 text-purple-500 text-xs">(SQUAD)</span>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // =====================================================================
+    // MemberSheet — side drawer
+    // =====================================================================
+    function MemberSheet({ member, teamName, onClose }) {
+      return (
+        <div className="fixed inset-0 bg-black/30 z-40" onClick={onClose}>
+          <div
+            className="absolute right-0 top-0 bottom-0 w-80 bg-white shadow-2xl p-5 overflow-y-auto"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="font-semibold text-gray-900">{member.name}</h2>
+              <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+            </div>
+            <dl className="flex flex-col gap-4 text-sm">
+              <InfoRow label="Role"         value={member.role} />
+              <InfoRow label="Team"         value={teamName} />
+              <InfoRow label="FTE"          value={member.fte} />
+              <InfoRow label="Start date"   value={member.startDate} />
+              {member.birthYear             && <InfoRow label="Birth year"          value={member.birthYear} />}
+              {member.retirementEligibleYear && <InfoRow label="Retirement eligible" value={member.retirementEligibleYear} />}
+              {member.isSquad               && <InfoRow label="SQUAD member"        value="Yes" />}
+              {member.tags?.length > 0      && <InfoRow label="Tags"               value={member.tags.join(', ')} />}
+              {member.notes                 && <InfoRow label="Notes"              value={member.notes} />}
+            </dl>
+          </div>
+        </div>
+      );
+    }
+
+    function InfoRow({ label, value }) {
+      return (
+        <div>
+          <dt className="text-xs text-gray-400 mb-0.5">{label}</dt>
+          <dd className="font-medium text-gray-800">{String(value)}</dd>
+        </div>
+      );
+    }
+
+    // =====================================================================
+    // ParametersPanel
+    // =====================================================================
+    function ParametersPanel({ scenario, board, params, onParamsChange, onApply, onClose }) {
+      const [applying, setApplying] = useState(false);
+
+      // Collect all squad members across teams + removed zone
+      const squadMembers = [];
+      for (const ts of (board?.teams || [])) {
+        for (const m of ts.members) {
+          if (m.isSquad) squadMembers.push({ ...m, currentTeam: ts.team.name });
+        }
+      }
+      for (const m of (board?.removedMembers || [])) {
+        if (m.isSquad) squadMembers.push({ ...m, currentTeam: 'Removed' });
+      }
+
+      function toggleMember(id) {
+        if (!params) return;
+        const current = params.membersToRemove || [];
+        const next = current.includes(id)
+          ? current.filter(x => x !== id)
+          : [...current, id];
+        onParamsChange({ ...params, membersToRemove: next });
+      }
+
+      async function handleApply() {
+        setApplying(true);
+        try { await onApply(); }
+        catch (e) { alert('Apply failed: ' + e.message); }
+        finally { setApplying(false); }
+      }
+
+      return (
+        <div className="w-72 shrink-0 bg-white border-l border-gray-200 flex flex-col overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+            <h3 className="font-semibold text-sm text-gray-900">Parameters</h3>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-4">
+            {scenario.type === 'squad_removal' ? (
+              <>
+                <p className="text-xs text-gray-500 mb-3 leading-relaxed">
+                  Check members to explicitly target for removal. Leave all unchecked to remove every SQUAD member.
+                </p>
+                {squadMembers.length === 0 ? (
+                  <p className="text-xs text-gray-400">No SQUAD members in this scenario.</p>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    {squadMembers.map(m => {
+                      const checked = (params?.membersToRemove || []).includes(m.id);
+                      return (
+                        <label key={m.id} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => toggleMember(m.id)}
+                            className="rounded border-gray-300"
+                          />
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium text-gray-800 leading-tight">{m.name}</div>
+                            <div className="text-xs text-gray-400">{m.currentTeam}</div>
+                          </div>
+                        </label>
+                      );
+                    })}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="text-sm text-gray-500">
+                <p className="mb-2">Parameters panel for <strong>{TYPE_LABELS[scenario.type] || scenario.type}</strong> is not yet implemented.</p>
+                <p className="text-xs text-gray-400">You can still drag and drop members between teams.</p>
+              </div>
+            )}
+          </div>
+
+          {scenario.type === 'squad_removal' && (
+            <div className="px-4 py-3 border-t border-gray-100">
+              <button
+                onClick={handleApply}
+                disabled={applying}
+                className="w-full py-1.5 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50"
+              >
+                {applying ? 'Applying…' : 'Apply Logic'}
+              </button>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // =====================================================================
+    // SnapshotPanel
+    // =====================================================================
+    function SnapshotPanel({ scenarioId, snapshots, onSave, onRestore, onDelete, onClose }) {
+      const [label, setLabel]   = useState('');
+      const [saving, setSaving] = useState(false);
+
+      async function handleSave() {
+        if (!label.trim()) return;
+        setSaving(true);
+        try { await onSave(label.trim()); setLabel(''); }
+        catch (e) { alert('Save failed: ' + e.message); }
+        finally { setSaving(false); }
+      }
+
+      return (
+        <div className="w-72 shrink-0 bg-white border-l border-gray-200 flex flex-col overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+            <h3 className="font-semibold text-sm text-gray-900">Snapshots</h3>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+          </div>
+
+          {/* Save row */}
+          <div className="px-4 py-3 border-b border-gray-100 flex gap-2">
+            <input
+              className="flex-1 border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              placeholder="Label for this snapshot…"
+              value={label}
+              onChange={e => setLabel(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSave()}
+            />
+            <button
+              onClick={handleSave}
+              disabled={saving || !label.trim()}
+              className="px-2.5 py-1 text-xs bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50 shrink-0"
+            >
+              {saving ? '…' : 'Save'}
+            </button>
+          </div>
+
+          {/* Snapshot list */}
+          <div className="flex-1 overflow-y-auto p-4">
+            {snapshots.length === 0 ? (
+              <p className="text-xs text-gray-400">No snapshots yet. Save one above.</p>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {snapshots.map(snap => (
+                  <div key={snap.id} className="border border-gray-200 rounded-md p-3">
+                    <div className="text-sm font-medium text-gray-800 mb-0.5 truncate">{snap.label}</div>
+                    <div className="text-xs text-gray-400 mb-1.5">
+                      {new Date(snap.createdAt).toLocaleString()}
+                    </div>
+                    <div className="text-xs text-gray-500 mb-2">
+                      {snap.headcount} staff · {(snap.totalFte || 0).toFixed(1)} FTE · {snap.removedCount ?? 0} removed
+                    </div>
+                    <div className="flex gap-1.5">
+                      <button
+                        onClick={() => { if (confirm(`Restore "${snap.label}"?`)) onRestore(snap.id); }}
+                        className="flex-1 px-2 py-1 text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 rounded hover:bg-indigo-100"
+                      >
+                        Restore
+                      </button>
+                      <button
+                        onClick={() => { if (confirm(`Delete "${snap.label}"?`)) onDelete(snap.id); }}
+                        className="px-2 py-1 text-xs text-red-500 border border-red-200 rounded hover:bg-red-50"
+                        title="Delete"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // =====================================================================
+    // Mount
+    // =====================================================================
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
