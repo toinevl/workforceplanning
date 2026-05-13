@@ -3,6 +3,9 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "appName": { "value": "workforceplanning" },
-    "environment": { "value": "prod" }
+    "appServiceName": { "value": "alicante" },
+    "environment": { "value": "prod" },
+    "location": { "value": "northeurope" },
+    "storageAccountName": { "value": "saworkforceplan" }
   }
 }

@@ -76,7 +76,7 @@ Outputs include the App Service URL and Storage account name.
 
 Set the following GitHub Actions secrets in the repo:
 
-- `AZURE_APP_NAME` — the App Service name (e.g. `workforceplanning-prod`).
+- `AZURE_APP_NAME` — the App Service name (`alicante`).
 - `AZURE_RESOURCE_GROUP` — the resource group containing the App Service (e.g. `rgWorkforcePlan`).
 - `AZURE_CLIENT_ID` — client ID of the Azure AD app registration used for OIDC login.
 - `AZURE_TENANT_ID` — Azure AD tenant ID.
