@@ -1,10 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { ScenarioCard } from '@/components/scenarios/ScenarioCard';
 import { useScenarioList, useCreateScenario, useDeleteScenario } from '@/lib/hooks/useScenario';
 import type { ScenarioType } from '@/lib/types/domain';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 
 const TYPES: { value: ScenarioType; label: string; desc: string }[] = [
   { value: 'squad_removal', label: 'Squad Removal', desc: 'Remove SQUAD members from teams' },
@@ -18,7 +19,11 @@ export function ScenarioDashboard() {
   const deleteMutation = useDeleteScenario();
 
   const [showCreate, setShowCreate] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const [form, setForm] = useState({ type: 'squad_removal' as ScenarioType, name: '', description: '' });
+  const dialogTitleId = useId();
+  const nameInputId = useId();
+  const descInputId = useId();
 
   function handleCreate() {
     if (!form.name.trim()) return;
@@ -37,7 +42,7 @@ export function ScenarioDashboard() {
         </div>
         <button
           onClick={() => setShowCreate(true)}
-          className="shrink-0 text-sm px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-700 transition-colors"
+          className="shrink-0 text-sm px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
           + New Scenario
         </button>
@@ -64,7 +69,7 @@ export function ScenarioDashboard() {
           <div className="flex flex-col gap-2 sm:flex-row">
             <button
               onClick={() => setShowCreate(true)}
-              className="text-sm px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              className="text-sm px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               New Scenario
             </button>
@@ -83,17 +88,23 @@ export function ScenarioDashboard() {
           <ScenarioCard
             key={s.id}
             scenario={s}
-            onDelete={() => {
-              if (confirm(`Delete "${s.name}"?`)) deleteMutation.mutate(s.id);
-            }}
+            onDelete={() => setDeleteTarget({ id: s.id, name: s.name })}
           />
         ))}
       </div>
 
       {showCreate && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-            <h2 className="font-semibold text-gray-900 text-lg mb-4">New Scenario</h2>
+        <div
+          className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4"
+          onClick={(e) => { if (e.target === e.currentTarget) setShowCreate(false); }}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={dialogTitleId}
+          >
+            <h2 id={dialogTitleId} className="font-semibold text-gray-900 text-lg mb-4">New Scenario</h2>
 
             <div className="space-y-4">
               <div>
@@ -119,8 +130,9 @@ export function ScenarioDashboard() {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700">Name</label>
+                <label htmlFor={nameInputId} className="text-sm font-medium text-gray-700">Name</label>
                 <input
+                  id={nameInputId}
                   type="text"
                   value={form.name}
                   onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
@@ -132,8 +144,9 @@ export function ScenarioDashboard() {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700">Description (optional)</label>
+                <label htmlFor={descInputId} className="text-sm font-medium text-gray-700">Description (optional)</label>
                 <textarea
+                  id={descInputId}
                   value={form.description}
                   onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                   rows={2}
@@ -145,14 +158,14 @@ export function ScenarioDashboard() {
             <div className="flex gap-2 mt-6">
               <button
                 onClick={() => setShowCreate(false)}
-                className="flex-1 py-2 border border-gray-400 text-gray-800 text-sm rounded-lg hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
+                className="flex-1 py-2.5 border border-gray-400 text-gray-800 text-sm rounded-lg hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
               >
                 Cancel
               </button>
               <button
                 onClick={handleCreate}
                 disabled={!form.name.trim() || createMutation.isPending}
-                className="flex-1 py-2 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-700 disabled:opacity-40 transition-colors"
+                className="flex-1 py-2.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-40 transition-colors"
               >
                 {createMutation.isPending ? 'Creating...' : 'Create'}
               </button>
@@ -164,6 +177,26 @@ export function ScenarioDashboard() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title="Delete scenario?"
+        description={
+          deleteTarget
+            ? `This will permanently delete "${deleteTarget.name}" and all of its scenario data.`
+            : ''
+        }
+        confirmLabel="Delete"
+        pending={deleteMutation.isPending}
+        error={deleteMutation.isError ? (deleteMutation.error as Error).message : null}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => {
+          if (!deleteTarget) return;
+          deleteMutation.mutate(deleteTarget.id, {
+            onSuccess: () => setDeleteTarget(null),
+          });
+        }}
+      />
     </div>
   );
 }

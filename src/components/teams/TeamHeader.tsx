@@ -10,6 +10,13 @@ const DRIVER_COLORS: Record<BusinessDriver, string> = {
   neutral: 'text-gray-700 bg-gray-50 border-gray-300',
 };
 
+const DRIVER_LABELS: Record<BusinessDriver, string> = {
+  grow: 'Grow',
+  contain: 'Contain',
+  slim: 'Slim',
+  neutral: 'Neutral',
+};
+
 interface TeamHeaderProps {
   name: string;
   color: string;
@@ -43,7 +50,7 @@ export function TeamHeader({ name, color, headcount, totalFte, driver, priorityS
               DRIVER_COLORS[driver]
             )}
           >
-            {driver}
+            {DRIVER_LABELS[driver]}
           </span>
         )}
       </div>

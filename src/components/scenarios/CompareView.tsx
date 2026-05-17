@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useBoardState } from '@/lib/hooks/useScenario';
-import { useSnapshots } from '@/lib/hooks/useSnapshots';
+import { useSnapshot, useSnapshots } from '@/lib/hooks/useSnapshots';
 import { TeamBoard } from '@/components/teams/TeamBoard';
 import { ScenarioStats } from './ScenarioStats';
 import type { BoardState } from '@/lib/types/domain';
@@ -18,27 +18,55 @@ export function CompareView({ scenarioId }: CompareViewProps) {
 
   const [leftSnapId, setLeftSnapId] = useState<string>('live');
   const [rightSnapId, setRightSnapId] = useState<string>(snapshots[0]?.id ?? 'live');
+  const [mobileActive, setMobileActive] = useState<'Left' | 'Right'>('Left');
 
-  const leftBoard = leftSnapId === 'live' ? liveBoard : getBoardFromSnapshot(snapshots, leftSnapId);
-  const rightBoard = rightSnapId === 'live' ? liveBoard : getBoardFromSnapshot(snapshots, rightSnapId);
+  const leftSnapshot = useSnapshot(scenarioId, leftSnapId);
+  const rightSnapshot = useSnapshot(scenarioId, rightSnapId);
+  const leftBoard = leftSnapId === 'live' ? liveBoard : leftSnapshot.data?.boardState;
+  const rightBoard = rightSnapId === 'live' ? liveBoard : rightSnapshot.data?.boardState;
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-2 gap-6">
-        <Side
-          label="Left"
-          snapshots={snapshots}
-          selected={leftSnapId}
-          onSelect={setLeftSnapId}
-          board={leftBoard}
-        />
-        <Side
-          label="Right"
-          snapshots={snapshots}
-          selected={rightSnapId}
-          onSelect={setRightSnapId}
-          board={rightBoard}
-        />
+      {/* Mobile toggle — hidden on large screens */}
+      <div className="flex justify-center gap-2 lg:hidden">
+        {(['Left', 'Right'] as const).map((side) => (
+          <button
+            key={side}
+            onClick={() => setMobileActive(side)}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+              mobileActive === side
+                ? 'bg-gray-900 text-white border-gray-900'
+                : 'bg-white text-gray-700 border-gray-400 hover:border-gray-600'
+            }`}
+          >
+            {side}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className={mobileActive === 'Left' ? 'block lg:block' : 'hidden lg:block'}>
+          <Side
+            label="Left"
+            snapshots={snapshots}
+            selected={leftSnapId}
+            onSelect={setLeftSnapId}
+            board={leftBoard}
+            isLoading={leftSnapId !== 'live' && leftSnapshot.isLoading}
+            isError={leftSnapId !== 'live' && leftSnapshot.isError}
+          />
+        </div>
+        <div className={mobileActive === 'Right' ? 'block lg:block' : 'hidden lg:block'}>
+          <Side
+            label="Right"
+            snapshots={snapshots}
+            selected={rightSnapId}
+            onSelect={setRightSnapId}
+            board={rightBoard}
+            isLoading={rightSnapId !== 'live' && rightSnapshot.isLoading}
+            isError={rightSnapId !== 'live' && rightSnapshot.isError}
+          />
+        </div>
       </div>
     </div>
   );
@@ -50,12 +78,16 @@ function Side({
   selected,
   onSelect,
   board,
+  isLoading,
+  isError,
 }: {
   label: string;
   snapshots: SnapshotSummary[];
   selected: string;
   onSelect: (id: string) => void;
   board: BoardState | undefined;
+  isLoading: boolean;
+  isError: boolean;
 }) {
   return (
     <div className="space-y-3">
@@ -83,7 +115,7 @@ function Side({
       ) : (
         <div className="flex items-center justify-center h-48 border-2 border-dashed border-gray-400 rounded-xl">
           <span className="text-sm text-gray-600">
-            {snapshots.length === 0 ? 'No snapshots saved yet' : 'Select a snapshot'}
+            {getEmptyMessage({ snapshots, selected, isLoading, isError })}
           </span>
         </div>
       )}
@@ -91,11 +123,19 @@ function Side({
   );
 }
 
-function getBoardFromSnapshot(snapshots: SnapshotSummary[], snapId: string): BoardState | undefined {
-  // Snapshots summaries don't carry full board state; CompareView works with live board + summaries.
-  // For a richer compare, the page can fetch full snapshot data server-side.
-  // Here we return undefined so the compare page can handle it separately if needed.
-  void snapshots;
-  void snapId;
-  return undefined;
+function getEmptyMessage({
+  snapshots,
+  selected,
+  isLoading,
+  isError,
+}: {
+  snapshots: SnapshotSummary[];
+  selected: string;
+  isLoading: boolean;
+  isError: boolean;
+}) {
+  if (isLoading) return 'Loading snapshot...';
+  if (isError) return 'Snapshot could not be loaded';
+  if (snapshots.length === 0) return 'No snapshots saved yet';
+  return selected === 'live' ? 'Loading live board...' : 'Select a snapshot';
 }

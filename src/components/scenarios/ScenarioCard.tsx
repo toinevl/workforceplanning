@@ -68,20 +68,20 @@ export function ScenarioCard({ scenario, onDelete }: ScenarioCardProps) {
       <div className="flex items-center gap-2">
         <Link
           href={`/scenarios/${scenario.id}`}
-          className="flex-1 text-center py-1.5 px-3 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors"
+          className="flex-1 text-center py-2.5 px-3 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors"
         >
-          Open
+          View Scenario
         </Link>
         <Link
           href={`/scenarios/${scenario.id}/compare`}
-          className="py-1.5 px-3 border border-gray-400 text-gray-800 text-sm rounded-lg hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
+          className="py-2.5 px-3 border border-gray-400 text-gray-800 text-sm rounded-lg hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
         >
           Compare
         </Link>
         {onDelete && (
           <button
             onClick={onDelete}
-            className="py-1.5 px-3 border border-red-500 text-red-700 text-sm rounded-lg hover:bg-red-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+            className="py-2.5 px-3 border border-red-500 text-red-700 text-sm rounded-lg hover:bg-red-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
           >
             Delete
           </button>

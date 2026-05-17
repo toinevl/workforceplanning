@@ -2,13 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ScenarioParams } from '../types/params';
-
-async function fetchJSON<T>(url: string, opts?: RequestInit): Promise<T> {
-  const res = await fetch(url, opts);
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-  const json = await res.json();
-  return json.data as T;
-}
+import { fetchJSON } from '../utils/fetchJSON';
 
 export function useParameters(scenarioId: string) {
   return useQuery<ScenarioParams>({

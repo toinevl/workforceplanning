@@ -1,18 +1,20 @@
-'use client';
-
-import { use } from 'react';
+import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { AppShell } from '@/components/layout/AppShell';
 import { CompareView } from '@/components/scenarios/CompareView';
-import { useBoardState } from '@/lib/hooks/useScenario';
+import { getScenarioBoardState } from '@/lib/api/scenarios';
 
 interface ComparePageProps {
   params: Promise<{ scenarioId: string }>;
 }
 
-export default function ComparePage({ params }: ComparePageProps) {
-  const { scenarioId } = use(params);
-  const { data: board, isLoading } = useBoardState(scenarioId);
+export default async function ComparePage({ params }: ComparePageProps) {
+  const { scenarioId } = await params;
+  const board = await getScenarioBoardState(scenarioId);
+
+  if (!board) {
+    notFound();
+  }
 
   return (
     <AppShell board={board}>
@@ -24,12 +26,7 @@ export default function ComparePage({ params }: ComparePageProps) {
           Back to Board
         </Link>
         <h1 className="mb-4 text-xl font-semibold text-gray-900">Compare View</h1>
-        {isLoading && (
-          <div className="flex items-center justify-center py-20">
-            <span className="text-gray-600">Loading...</span>
-          </div>
-        )}
-        {!isLoading && <CompareView scenarioId={scenarioId} />}
+        <CompareView scenarioId={scenarioId} />
       </div>
     </AppShell>
   );

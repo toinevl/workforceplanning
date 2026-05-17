@@ -1,30 +1,38 @@
-import { TableServiceClient, TableClient } from '@azure/data-tables';
+import { TableServiceClient, TableClient, type TableServiceClientOptions } from '@azure/data-tables';
 
 let _serviceClient: TableServiceClient | null = null;
 
 function getConnectionString(): string {
-  const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
-  if (!connectionString) {
-    throw new Error('AZURE_STORAGE_CONNECTION_STRING environment variable is not set');
-  }
-  return connectionString;
+  return process.env.AZURE_STORAGE_CONNECTION_STRING ?? 'UseDevelopmentStorage=true';
+}
+
+function getClientOptions(connectionString: string): TableServiceClientOptions {
+  const isLocal =
+    connectionString === 'UseDevelopmentStorage=true' ||
+    connectionString.includes('127.0.0.1') ||
+    connectionString.includes('localhost');
+
+  return {
+    allowInsecureConnection: isLocal,
+    retryOptions: {
+      maxRetries: isLocal ? 1 : 3,
+      retryDelayInMs: isLocal ? 250 : 1_000,
+      maxRetryDelayInMs: isLocal ? 1_000 : 64_000,
+    },
+  };
 }
 
 export function getServiceClient(): TableServiceClient {
   if (!_serviceClient) {
     const cs = getConnectionString();
-    const allowInsecure = cs.includes('127.0.0.1') || cs.includes('localhost');
-    const clientOptions = allowInsecure ? { allowInsecureConnection: true } : undefined;
-    _serviceClient = TableServiceClient.fromConnectionString(cs, clientOptions);
+    _serviceClient = TableServiceClient.fromConnectionString(cs, getClientOptions(cs));
   }
   return _serviceClient;
 }
 
 export function getTableClient(tableName: string): TableClient {
   const cs = getConnectionString();
-  const allowInsecure = cs.includes('127.0.0.1') || cs.includes('localhost');
-  const clientOptions = allowInsecure ? { allowInsecureConnection: true } : undefined;
-  return TableClient.fromConnectionString(cs, tableName, clientOptions);
+  return TableClient.fromConnectionString(cs, tableName, getClientOptions(cs));
 }
 
 export async function ensureTablesExist(): Promise<void> {

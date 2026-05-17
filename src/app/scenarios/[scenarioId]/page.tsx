@@ -1,33 +1,23 @@
-'use client';
-
-import { use } from 'react';
+import { notFound } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
 import { TeamBoard } from '@/components/teams/TeamBoard';
-import { useBoardState } from '@/lib/hooks/useScenario';
+import { getScenarioBoardState } from '@/lib/api/scenarios';
 
 interface ScenarioPageProps {
   params: Promise<{ scenarioId: string }>;
 }
 
-export default function ScenarioPage({ params }: ScenarioPageProps) {
-  const { scenarioId } = use(params);
-  const { data: board, isLoading, error } = useBoardState(scenarioId);
+export default async function ScenarioPage({ params }: ScenarioPageProps) {
+  const { scenarioId } = await params;
+  const board = await getScenarioBoardState(scenarioId);
+
+  if (!board) {
+    notFound();
+  }
 
   return (
     <AppShell board={board}>
-      {isLoading && (
-        <div className="flex items-center justify-center py-20">
-          <span className="text-gray-600">Loading board...</span>
-        </div>
-      )}
-
-      {error && (
-        <div className="bg-red-50 border border-red-400 rounded-lg p-4 text-red-800 text-sm">
-          Failed to load scenario. {(error as Error).message}
-        </div>
-      )}
-
-      {board && <TeamBoard board={board} />}
+      <TeamBoard board={board} />
     </AppShell>
   );
 }

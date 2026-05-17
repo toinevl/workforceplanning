@@ -1,7 +1,11 @@
 'use client';
 
+import { useEffect, useRef, useId, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent } from 'react';
+import { createPortal } from 'react-dom';
 import { MemberBadges } from './MemberBadges';
 import { AuditRow } from '@/components/scenarios/PapertrailPanel';
+import { CloseButton } from '@/components/ui/CloseButton';
+import { SectionLabel } from '@/components/ui/SectionLabel';
 import { useAuditEvents } from '@/lib/hooks/useAudit';
 import type { StaffMember, ScenarioMemberState, BusinessDriver } from '@/lib/types/domain';
 
@@ -13,9 +17,97 @@ interface MemberDetailSheetProps {
   onClose: () => void;
 }
 
+const STATUS_LABELS: Record<string, string> = {
+  active: 'Active',
+  transferred: 'Transferred',
+  removed: 'Removed',
+};
+
 export function MemberDetailSheet({ member, scenarioId, teamName, teamDriver, onClose }: MemberDetailSheetProps) {
   const { data: auditEvents = [] } = useAuditEvents(scenarioId, member?.id);
-  if (!member) return null;
+  const sheetRef = useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const previousActiveElement = useRef<HTMLElement | null>(null);
+  const onCloseRef = useRef(onClose);
+  const titleId = useId();
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  useEffect(() => {
+    if (!member) return;
+
+    previousActiveElement.current = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    closeButtonRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onCloseRef.current();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [member]);
+
+  useEffect(() => {
+    if (!member) {
+      previousActiveElement.current?.focus?.();
+      previousActiveElement.current = null;
+    }
+  }, [member]);
+
+  if (!member || typeof document === 'undefined') return null;
+
+  function handleBackdropClick(event: ReactMouseEvent<HTMLDivElement>) {
+    if (event.target === event.currentTarget) onClose();
+  }
+
+  function handleKeyDown(event: ReactKeyboardEvent<HTMLDivElement>) {
+    if (event.key !== 'Tab') return;
+
+    const focusable = Array.from(
+      sheetRef.current?.querySelectorAll<HTMLElement>(
+        [
+          'button:not([disabled])',
+          '[href]',
+          'input:not([disabled])',
+          'select:not([disabled])',
+          'textarea:not([disabled])',
+          '[tabindex]:not([tabindex="-1"])',
+        ].join(', ')
+      ) ?? []
+    ).filter((element) => !element.hasAttribute('disabled'));
+
+    if (focusable.length === 0) {
+      event.preventDefault();
+      return;
+    }
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const active = document.activeElement as HTMLElement | null;
+
+    if (event.shiftKey) {
+      if (!active || active === first || !sheetRef.current?.contains(active)) {
+        event.preventDefault();
+        last.focus();
+      }
+      return;
+    }
+
+    if (active === last || !sheetRef.current?.contains(active)) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
 
   const now = new Date();
   const tenureYears = member.startDate
@@ -24,22 +116,28 @@ export function MemberDetailSheet({ member, scenarioId, teamName, teamDriver, on
       )
     : null;
 
-  return (
+  return createPortal(
     <>
       <div
         className="fixed inset-0 bg-black/20 z-40"
-        onClick={onClose}
+        onClick={handleBackdropClick}
       />
-      <div className="fixed right-0 top-0 h-full w-80 bg-white shadow-xl z-50 flex flex-col">
+      <div
+        ref={sheetRef}
+        className="fixed bottom-0 left-0 right-0 h-[85vh] sm:bottom-auto sm:top-0 sm:left-auto sm:right-0 sm:h-full sm:w-80 bg-white shadow-xl z-50 flex flex-col overflow-y-auto"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
+        onKeyDown={handleKeyDown}
+      >
         <div className="flex items-center justify-between px-4 py-3 border-b">
-          <h2 className="font-semibold text-gray-900">Member Details</h2>
-          <button
+          <h2 id={titleId} className="font-semibold text-gray-900">Member Details</h2>
+          <CloseButton
+            ref={closeButtonRef}
             onClick={onClose}
-            className="text-gray-600 hover:text-gray-900 text-xl leading-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
-            aria-label="Close"
-          >
-            x
-          </button>
+            className="text-gray-600 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
+          />
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -75,7 +173,7 @@ export function MemberDetailSheet({ member, scenarioId, teamName, teamDriver, on
 
           {member.tags.length > 0 && (
             <div>
-              <p className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1.5">Tags</p>
+              <SectionLabel>Tags</SectionLabel>
               <div className="flex flex-wrap gap-1">
                 {member.tags.map((tag) => (
                   <span key={tag} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">
@@ -88,17 +186,15 @@ export function MemberDetailSheet({ member, scenarioId, teamName, teamDriver, on
 
           {member.notes && (
             <div>
-              <p className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">Notes</p>
+              <SectionLabel>Notes</SectionLabel>
               <p className="text-sm text-gray-700">{member.notes}</p>
             </div>
           )}
 
           {member.scenarioState && (
             <div className="border-t pt-3">
-              <p className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">
-                Scenario Overrides
-              </p>
-              <Stat label="Status" value={member.scenarioState.status} />
+              <SectionLabel>Scenario Overrides</SectionLabel>
+              <Stat label="Status" value={STATUS_LABELS[member.scenarioState.status] ?? member.scenarioState.status} />
               {member.scenarioState.overrideRole && (
                 <Stat label="Override Role" value={member.scenarioState.overrideRole} />
               )}
@@ -106,9 +202,7 @@ export function MemberDetailSheet({ member, scenarioId, teamName, teamDriver, on
           )}
 
           <div className="border-t pt-3">
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-              Papertrail
-            </p>
+            <SectionLabel>Papertrail</SectionLabel>
             {auditEvents.length === 0 ? (
               <p className="text-sm text-gray-600">No activity for this member yet.</p>
             ) : (
@@ -121,7 +215,8 @@ export function MemberDetailSheet({ member, scenarioId, teamName, teamDriver, on
           </div>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   );
 }
 

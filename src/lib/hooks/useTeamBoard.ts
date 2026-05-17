@@ -2,13 +2,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { BoardState } from '../types/domain';
-
-async function fetchJSON<T>(url: string, opts?: RequestInit): Promise<T> {
-  const res = await fetch(url, opts);
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-  const json = await res.json();
-  return json.data as T;
-}
+import { fetchJSON } from '../utils/fetchJSON';
 
 export function useMoveMembers(scenarioId: string) {
   const qc = useQueryClient();

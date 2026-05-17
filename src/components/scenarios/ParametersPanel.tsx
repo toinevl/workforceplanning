@@ -1,6 +1,9 @@
 'use client';
 
+import { useId } from 'react';
 import { cn } from '@/lib/utils/cn';
+import { CloseButton } from '@/components/ui/CloseButton';
+import { SectionLabel } from '@/components/ui/SectionLabel';
 import { useParameters, useUpdateParameters, useApplyLogic } from '@/lib/hooks/useParameters';
 import type { BoardState, BusinessDriver } from '@/lib/types/domain';
 import type { SquadRemovalParams, RetirementWaveParams, BusinessDriverParams } from '@/lib/types/params';
@@ -30,23 +33,20 @@ export function ParametersPanel({ board, onClose }: ParametersPanelProps) {
 
   if (!params) {
     return (
-      <aside className="w-72 shrink-0 border-l border-gray-300 bg-white flex items-center justify-center">
+      <aside className="w-full sm:w-72 shrink-0 border-l border-gray-300 bg-white flex items-center justify-center">
         <span className="text-sm text-gray-600">Loading...</span>
       </aside>
     );
   }
 
   return (
-    <aside className="w-72 shrink-0 border-l border-gray-300 bg-white flex flex-col">
+    <aside className="w-full sm:w-72 shrink-0 border-l border-gray-300 bg-white flex flex-col overflow-y-auto">
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-300">
         <h2 className="font-semibold text-sm text-gray-900">Parameters</h2>
-        <button
+        <CloseButton
           onClick={onClose}
-          className="text-gray-600 hover:text-gray-900 text-xl leading-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
-          aria-label="Close parameters"
-        >
-          x
-        </button>
+          className="text-gray-600 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
+        />
       </div>
 
       <div className="flex-1 overflow-y-auto p-4">
@@ -76,7 +76,7 @@ export function ParametersPanel({ board, onClose }: ParametersPanelProps) {
         <button
           onClick={handleApply}
           disabled={applyLogic.isPending}
-          className="w-full py-2 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors"
+          className="w-full py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
         >
           {applyLogic.isPending ? 'Applying…' : 'Apply Logic'}
         </button>
@@ -137,14 +137,20 @@ function RetirementWaveForm({
   params: RetirementWaveParams;
   onChange: (p: RetirementWaveParams) => void;
 }) {
+  const retirementAgeId = useId();
+  const serviceYearsId = useId();
+  const horizonYearsId = useId();
+  const autoFlagId = useId();
+
   function update(partial: Partial<RetirementWaveParams>) {
     onChange({ ...params, ...partial });
   }
 
   return (
     <div className="space-y-4">
-      <Field label="Retirement Age">
+      <Field label="Retirement Age" htmlFor={retirementAgeId}>
         <input
+          id={retirementAgeId}
           type="number"
           value={params.retirementAge}
           min={55}
@@ -154,8 +160,9 @@ function RetirementWaveForm({
         />
       </Field>
 
-      <Field label="Service Years Threshold">
+      <Field label="Service Years Threshold" htmlFor={serviceYearsId}>
         <input
+          id={serviceYearsId}
           type="number"
           value={params.serviceYearsThreshold}
           min={10}
@@ -165,8 +172,9 @@ function RetirementWaveForm({
         />
       </Field>
 
-      <Field label="Planning Horizon">
+      <Field label="Planning Horizon" htmlFor={horizonYearsId}>
         <select
+          id={horizonYearsId}
           value={params.horizonYears}
           onChange={(e) => update({ horizonYears: +e.target.value as 1 | 3 | 5 })}
           className="w-full border border-gray-400 rounded px-2 py-1 text-sm focus:border-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
@@ -177,9 +185,10 @@ function RetirementWaveForm({
         </select>
       </Field>
 
-      <Field label="Auto-flag Eligible">
+      <Field label="Auto-flag Eligible" htmlFor={autoFlagId}>
         <label className="flex items-center gap-2 cursor-pointer">
           <input
+            id={autoFlagId}
             type="checkbox"
             checked={params.autoFlagEligible}
             onChange={(e) => update({ autoFlagEligible: e.target.checked })}
@@ -225,9 +234,7 @@ function BusinessDriversForm({
   return (
     <div className="space-y-5">
       <div>
-        <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
-          Team Drivers
-        </p>
+        <SectionLabel>Team Drivers</SectionLabel>
         <div className="space-y-2">
           {board.teams.map((ts) => (
             <div key={ts.team.id} className="space-y-1">
@@ -297,10 +304,13 @@ function BusinessDriversForm({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children, htmlFor }: { label: string; children: React.ReactNode; htmlFor?: string }) {
+  const id = useId();
+  const inputId = htmlFor || id;
+
   return (
     <div className="space-y-1">
-      <label className="text-xs font-medium text-gray-600">{label}</label>
+      <label htmlFor={inputId} className="text-xs font-medium text-gray-600">{label}</label>
       {children}
     </div>
   );

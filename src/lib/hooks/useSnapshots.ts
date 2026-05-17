@@ -1,20 +1,22 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { SnapshotSummary } from '../types/snapshot';
-
-async function fetchJSON<T>(url: string, opts?: RequestInit): Promise<T> {
-  const res = await fetch(url, opts);
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-  const json = await res.json();
-  return json.data as T;
-}
+import type { ScenarioSnapshot, SnapshotSummary } from '../types/snapshot';
+import { fetchJSON } from '../utils/fetchJSON';
 
 export function useSnapshots(scenarioId: string) {
   return useQuery<SnapshotSummary[]>({
     queryKey: ['snapshots', scenarioId],
     queryFn: () => fetchJSON(`/api/scenarios/${scenarioId}/snapshots`),
     enabled: !!scenarioId,
+  });
+}
+
+export function useSnapshot(scenarioId: string, snapshotId: string) {
+  return useQuery<ScenarioSnapshot>({
+    queryKey: ['snapshot', scenarioId, snapshotId],
+    queryFn: () => fetchJSON(`/api/scenarios/${scenarioId}/snapshots/${snapshotId}`),
+    enabled: !!scenarioId && snapshotId !== 'live',
   });
 }
 

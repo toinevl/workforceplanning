@@ -35,6 +35,32 @@ export function DndProvider({ children, members, onMove }: DndProviderProps) {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
+      accessibility={{
+        screenReaderInstructions: {
+          draggable: 'Press Space to pick up. Use arrow keys to move. Press Space to drop, Escape to cancel.',
+        },
+        announcements: {
+          onDragStart: ({ active }) => {
+            const member = members.find(m => m.id === active.id);
+            return `Picked up ${member?.name || 'member'}.`;
+          },
+          onDragOver: ({ over }) =>
+            over ? `Moving over drop target.` : undefined,
+          onDragEnd: ({ active, over }) => {
+            const member = members.find(m => m.id === active.id);
+            if (over) {
+              return over.id === '__removed__'
+                ? `Dropped ${member?.name || 'member'} into removed.`
+                : `Dropped ${member?.name || 'member'} into team.`;
+            }
+            return `Drop cancelled.`;
+          },
+          onDragCancel: ({ active }) => {
+            const member = members.find(m => m.id === active.id);
+            return `Drop cancelled. ${member?.name || 'Member'} was returned to original position.`;
+          },
+        },
+      }}
     >
       {children}
       <BoardDragOverlay activeMemberId={activeMemberId} members={members} />

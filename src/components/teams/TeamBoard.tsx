@@ -1,9 +1,12 @@
 'use client';
 
+import { useMemo, useState } from 'react';
+import { toast } from 'sonner';
 import { useDroppable } from '@dnd-kit/core';
 import { cn } from '@/lib/utils/cn';
 import { DndProvider } from '@/components/dnd/DndProvider';
 import { TeamColumn } from './TeamColumn';
+import { NoteDialog } from './NoteDialog';
 import { MemberCard } from '@/components/members/MemberCard';
 import { MemberDetailSheet } from '@/components/members/MemberDetailSheet';
 import { useWorkforceStore } from '@/lib/store/workforceStore';
@@ -60,11 +63,28 @@ function RemovedZone({
 export function TeamBoard({ board, readOnly = false }: TeamBoardProps) {
   const { selectedMemberId, setSelectedMemberId } = useWorkforceStore();
   const moveMutation = useMoveMembers(board.scenario.id);
+  const [pendingMove, setPendingMove] = useState<{
+    memberId: string;
+    memberName: string;
+    toTeamId: string | null;
+    destinationLabel: string;
+  } | null>(null);
 
   const allMembers = [
     ...board.teams.flatMap((t) => t.members),
     ...board.removedMembers,
   ];
+
+  const teamLabels = useMemo(
+    () =>
+      new Map(
+        board.teams.map((ts) => [
+          ts.team.id,
+          ts.team.name,
+        ])
+      ),
+    [board.teams]
+  );
 
   function handleMove(memberId: string, toTeamId: string | null) {
     const member = allMembers.find((m) => m.id === memberId);
@@ -72,9 +92,12 @@ export function TeamBoard({ board, readOnly = false }: TeamBoardProps) {
     const currentTeam = board.teams.find((t) => t.members.some((m) => m.id === memberId));
     const currentTeamId = currentTeam?.team.id ?? null;
     if (currentTeamId === toTeamId) return;
-    const note = window.prompt(`Add a note for moving ${member.name}?`, '');
-    if (note === null) return;
-    moveMutation.mutate([{ memberId, toTeamId, note: note.trim() || undefined }]);
+    setPendingMove({
+      memberId,
+      memberName: member.name,
+      toTeamId,
+      destinationLabel: toTeamId ? teamLabels.get(toTeamId) ?? 'Unknown team' : 'Removed',
+    });
   }
 
   const selectedMember = selectedMemberId
@@ -85,10 +108,33 @@ export function TeamBoard({ board, readOnly = false }: TeamBoardProps) {
     ? board.teams.find((t) => t.members.some((m) => m.id === selectedMemberId))
     : undefined;
 
+  function commitPendingMove(note?: string) {
+    if (!pendingMove) return;
+    moveMutation.mutate(
+      [
+        {
+          memberId: pendingMove.memberId,
+          toTeamId: pendingMove.toTeamId,
+          note: note?.trim() || undefined,
+        },
+      ],
+      {
+        onSuccess: () => {
+          toast.success(`Moved ${pendingMove.memberName} to ${pendingMove.destinationLabel}`);
+          setPendingMove(null);
+        },
+        onError: () => {
+          toast.error('Move failed — try again');
+        },
+      }
+    );
+  }
+
   return (
     <>
       <DndProvider members={allMembers} onMove={handleMove}>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="overflow-x-auto">
+        <div className="grid grid-flow-col auto-cols-[minmax(160px,1fr)] gap-3">
           {board.teams.map((ts) => (
             <TeamColumn
               key={ts.team.id}
@@ -98,12 +144,22 @@ export function TeamBoard({ board, readOnly = false }: TeamBoardProps) {
             />
           ))}
         </div>
+        </div>
         <RemovedZone
           board={board}
           readOnly={readOnly}
           onMemberClick={setSelectedMemberId}
         />
       </DndProvider>
+
+      <NoteDialog
+        open={pendingMove !== null}
+        memberName={pendingMove?.memberName ?? ''}
+        destinationLabel={pendingMove?.destinationLabel ?? ''}
+        saving={moveMutation.isPending}
+        onSkip={() => commitPendingMove(undefined)}
+        onSave={(note) => commitPendingMove(note)}
+      />
 
       <MemberDetailSheet
         member={selectedMember}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { CloseButton } from '@/components/ui/CloseButton';
 import { useAddScenarioNote, useAuditEvents } from '@/lib/hooks/useAudit';
 import type { AuditEvent, BoardState } from '@/lib/types/domain';
 
@@ -35,6 +36,7 @@ export function PapertrailPanel({ board, onClose }: PapertrailPanelProps) {
     [board]
   );
   const memberById = new Map(members.map((m) => [m.id, m.name]));
+  const teamById = new Map(board.teams.map((t) => [t.team.id, t.team.name]));
   const filteredEvents = memberFilter === 'all'
     ? events
     : events.filter((event) => event.memberId === memberFilter);
@@ -45,16 +47,13 @@ export function PapertrailPanel({ board, onClose }: PapertrailPanelProps) {
   }
 
   return (
-    <aside className="w-80 shrink-0 border-l border-gray-300 bg-white flex flex-col">
+    <aside className="w-full sm:w-80 shrink-0 border-l border-gray-300 bg-white flex flex-col overflow-y-auto">
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-300">
         <h2 className="font-semibold text-sm text-gray-900">Papertrail</h2>
-        <button
+        <CloseButton
           onClick={onClose}
-          className="text-gray-600 hover:text-gray-900 text-xl leading-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
-          aria-label="Close papertrail"
-        >
-          x
-        </button>
+          className="flex items-center justify-center min-h-[44px] min-w-[44px] text-gray-600 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
+        />
       </div>
 
       <div className="p-4 border-b border-gray-300 space-y-3">
@@ -79,7 +78,7 @@ export function PapertrailPanel({ board, onClose }: PapertrailPanelProps) {
           <button
             onClick={handleAddNote}
             disabled={!note.trim() || addNote.isPending}
-            className="rounded bg-gray-900 px-3 py-1.5 text-sm text-white transition-colors hover:bg-gray-700 disabled:opacity-50"
+            className="rounded bg-blue-600 px-3 py-2.5 text-sm text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
           >
             Add
           </button>
@@ -103,6 +102,7 @@ export function PapertrailPanel({ board, onClose }: PapertrailPanelProps) {
               key={event.id}
               event={event}
               memberName={event.memberId ? memberById.get(event.memberId) : undefined}
+              teamById={teamById}
             />
           ))}
         </ul>
@@ -111,7 +111,7 @@ export function PapertrailPanel({ board, onClose }: PapertrailPanelProps) {
   );
 }
 
-export function AuditRow({ event, memberName }: { event: AuditEvent; memberName?: string }) {
+export function AuditRow({ event, memberName, teamById }: { event: AuditEvent; memberName?: string; teamById?: Map<string, string> }) {
   const date = new Date(event.createdAt).toLocaleString(undefined, {
     month: 'short',
     day: 'numeric',
@@ -132,7 +132,7 @@ export function AuditRow({ event, memberName }: { event: AuditEvent; memberName?
       )}
       {(event.fromTeamId !== undefined || event.toTeamId !== undefined) && (
         <p className="mt-1 text-xs text-gray-600">
-          {event.fromTeamId ?? 'Removed'} to {event.toTeamId ?? 'Removed'}
+          {event.fromTeamId ? (teamById?.get(event.fromTeamId) ?? 'Unknown team') : 'Removed'} to {event.toTeamId ? (teamById?.get(event.toTeamId) ?? 'Unknown team') : 'Removed'}
         </p>
       )}
       {event.note && (

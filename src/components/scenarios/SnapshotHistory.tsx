@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useSnapshots, useSaveSnapshot, useRestoreSnapshot, useDeleteSnapshot } from '@/lib/hooks/useSnapshots';
 import type { SnapshotSummary } from '@/lib/types/snapshot';
+import { CloseButton } from '@/components/ui/CloseButton';
 
 interface SnapshotHistoryProps {
   scenarioId: string;
@@ -28,13 +29,7 @@ export function SnapshotHistory({ scenarioId, onClose }: SnapshotHistoryProps) {
     <aside className="w-72 shrink-0 border-l border-gray-300 bg-white flex flex-col">
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-300">
         <h2 className="font-semibold text-sm text-gray-900">Snapshots</h2>
-        <button
-          onClick={onClose}
-          className="text-gray-600 hover:text-gray-900 text-xl leading-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
-          aria-label="Close snapshots"
-        >
-          x
-        </button>
+        <CloseButton onClick={onClose} aria-label="Close snapshots" />
       </div>
 
       <div className="p-4 border-b border-gray-300">
@@ -50,7 +45,7 @@ export function SnapshotHistory({ scenarioId, onClose }: SnapshotHistoryProps) {
           <button
             onClick={handleSave}
             disabled={!label.trim() || saveSnapshot.isPending}
-            className="px-3 py-1.5 bg-gray-900 text-white text-sm rounded hover:bg-gray-700 disabled:opacity-50 transition-colors shrink-0"
+            className="px-3 py-2.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50 transition-colors shrink-0"
           >
             Save
           </button>
@@ -125,14 +120,14 @@ function SnapshotRow({
         <button
           onClick={onRestore}
           disabled={isRestoring}
-          className="text-xs px-2 py-1 border border-gray-400 text-gray-800 rounded hover:bg-gray-50 disabled:opacity-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
+          className="text-xs px-3 py-2.5 border border-gray-400 text-gray-800 rounded hover:bg-gray-50 disabled:opacity-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
         >
           {isRestoring ? 'Restoring…' : 'Restore'}
         </button>
         <button
           onClick={onDelete}
           disabled={isDeleting}
-          className="text-xs px-2 py-1 border border-red-500 text-red-700 rounded hover:bg-red-50 disabled:opacity-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+          className="text-xs px-3 py-2.5 border border-red-500 text-red-700 rounded hover:bg-red-50 disabled:opacity-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
         >
           {isDeleting ? '…' : 'Delete'}
         </button>
