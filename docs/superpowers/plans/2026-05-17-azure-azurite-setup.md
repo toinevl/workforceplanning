@@ -413,7 +413,18 @@ Open `http://localhost:3001`. If pages load (they'll show errors connecting to A
 
 - [ ] **Step 4: Trigger CI/CD deploy**
 
-Push to `main` (or trigger manually via GitHub Actions → "Build and Deploy to Azure App Service" → "Run workflow"):
+> **BLOCKER (2026-05-17):** The App Service (`alicante`) has a persistent Kudu deployment lock from previous failed deployment attempts. Every push triggers a 409 Conflict from OneDeploy. The workflow, secrets, and OIDC are all correctly configured — the problem is solely a Kudu lock state.
+>
+> **Fix before next push:** Run one of these to clear the lock:
+> ```bash
+> az webapp restart --name alicante --resource-group rgWorkforcePlan
+> # or: az webapp stop ... then az webapp start ...
+> ```
+> Then push to main or trigger the workflow manually.
+>
+> **What was tried:** (1) `azure/webapps-deploy@v3` → 409, (2) `az webapp deploy --type zip` → 400, (3) Kudu `/api/zipdeploy` curl → 400. Root cause: all OneDeploy variants conflict with an active Run-From-Zip deployment lock.
+>
+> **Note:** Resource group in secrets is `rgWorkforcePlan` (not `workforceplanning-rg` as the plan originally stated — infra was already in `rgWorkforcePlan`).
 
 ```bash
 git push origin main
@@ -424,10 +435,10 @@ Watch the workflow in GitHub Actions. All steps should be green.
 - [ ] **Step 5: Verify Azure App Service**
 
 ```bash
-az webapp browse --name alicante --resource-group workforceplanning-rg
+az webapp browse --name alicante --resource-group rgWorkforcePlan
 ```
 
-Or open `https://alicante.azurewebsites.net` in a browser. The app should load.
+Or open `https://alicante-eghjf7b0aadefpey.polandcentral-01.azurewebsites.net` in a browser. The app should load.
 
 - [ ] **Step 6: Verify storage tables are created**
 
