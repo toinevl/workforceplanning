@@ -9,7 +9,9 @@
     "lint": "eslint",
     "dev:seed": "npx tsx scripts/seed-dev.ts",
     "type-check": "tsc --noEmit",
-    "azurite": "npx azurite --silent --location ./azurite-data"
+    "azurite": "npx azurite --silent --location ./azurite-data",
+    "azurite:clean": "rm -rf ./azurite-data && mkdir ./azurite-data && npm run azurite",
+    "dev:full": "npm run azurite & sleep 2 && npm run dev"
   },
   "dependencies": {
     "@azure/data-tables": "^13.3.2",
