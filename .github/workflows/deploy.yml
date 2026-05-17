@@ -74,9 +74,30 @@ jobs:
         run: |
           cd .next/standalone
           zip -r ../../deployment.zip .
-          az webapp deploy \
+          cd ../..
+
+          CREDS=$(az webapp deployment list-publishing-credentials \
             --name "$APP_NAME" \
             --resource-group "$RESOURCE_GROUP" \
-            --src-path ../../deployment.zip \
-            --type zip \
-            --async false
+            --query "{user:publishingUserName, pass:publishingPassword}" \
+            --output json)
+          KUDU_USER=$(echo "$CREDS" | jq -r .user)
+          KUDU_PASS=$(echo "$CREDS" | jq -r .pass)
+          SCM_HOST=$(az webapp show \
+            --name "$APP_NAME" \
+            --resource-group "$RESOURCE_GROUP" \
+            --query "enabledHostNames[?contains(@, '.scm.')]" \
+            --output tsv | head -1)
+
+          HTTP_CODE=$(curl -s -o /tmp/deploy_response.txt -w "%{http_code}" \
+            -X POST "https://$SCM_HOST/api/zipdeploy?isAsync=false" \
+            --user "$KUDU_USER:$KUDU_PASS" \
+            -H "Content-Type: application/zip" \
+            --data-binary "@deployment.zip")
+
+          cat /tmp/deploy_response.txt
+          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+            echo "Deployment failed with HTTP $HTTP_CODE"
+            exit 1
+          fi
+          echo "Deployment succeeded with HTTP $HTTP_CODE"
