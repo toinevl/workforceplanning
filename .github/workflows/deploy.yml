@@ -41,7 +41,8 @@ jobs:
               "AZURE_STORAGE_CONNECTION_STRING=$CONN_STR" \
               NODE_ENV=production \
               NEXT_TELEMETRY_DISABLED=1 \
-              WEBSITE_RUN_FROM_PACKAGE=1
+              WEBSITE_RUN_FROM_PACKAGE=1 \
+              PORT=8080
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -62,9 +63,14 @@ jobs:
           AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
           NEXT_TELEMETRY_DISABLED: '1'
 
+      - name: Prepare standalone deployment package
+        run: |
+          cp -r public .next/standalone/
+          cp -r .next/static .next/standalone/.next/
+
       - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ secrets.AZURE_APP_NAME }}
           publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
-          package: .
+          package: .next/standalone
