@@ -28,21 +28,6 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Set App Service application settings
-        env:
-          APP_NAME: ${{ secrets.AZURE_APP_NAME }}
-          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
-          CONN_STR: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
-        run: |
-          az webapp config appsettings set \
-            --name "$APP_NAME" \
-            --resource-group "$RESOURCE_GROUP" \
-            --settings \
-              "AZURE_STORAGE_CONNECTION_STRING=$CONN_STR" \
-              NODE_ENV=production \
-              NEXT_TELEMETRY_DISABLED=1 \
-              PORT=8080
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -68,36 +53,24 @@ jobs:
           cp -r .next/static .next/standalone/.next/
 
       - name: Deploy to Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ secrets.AZURE_APP_NAME }}
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
+          package: .next/standalone
+
+      - name: Update App Service application settings
         env:
           APP_NAME: ${{ secrets.AZURE_APP_NAME }}
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+          CONN_STR: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
         run: |
-          cd .next/standalone
-          zip -r ../../deployment.zip .
-          cd ../..
-
-          CREDS=$(az webapp deployment list-publishing-credentials \
+          az webapp config appsettings set \
             --name "$APP_NAME" \
             --resource-group "$RESOURCE_GROUP" \
-            --query "{user:publishingUserName, pass:publishingPassword}" \
-            --output json)
-          KUDU_USER=$(echo "$CREDS" | jq -r .user)
-          KUDU_PASS=$(echo "$CREDS" | jq -r .pass)
-          SCM_HOST=$(az webapp show \
-            --name "$APP_NAME" \
-            --resource-group "$RESOURCE_GROUP" \
-            --query "enabledHostNames[?contains(@, '.scm.')]" \
-            --output tsv | head -1)
-
-          HTTP_CODE=$(curl -s -o /tmp/deploy_response.txt -w "%{http_code}" \
-            -X POST "https://$SCM_HOST/api/zipdeploy?isAsync=false" \
-            --user "$KUDU_USER:$KUDU_PASS" \
-            -H "Content-Type: application/zip" \
-            --data-binary "@deployment.zip")
-
-          cat /tmp/deploy_response.txt
-          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
-            echo "Deployment failed with HTTP $HTTP_CODE"
-            exit 1
-          fi
-          echo "Deployment succeeded with HTTP $HTTP_CODE"
+            --settings \
+              "AZURE_STORAGE_CONNECTION_STRING=$CONN_STR" \
+              NODE_ENV=production \
+              NEXT_TELEMETRY_DISABLED=1 \
+              WEBSITE_RUN_FROM_PACKAGE=1 \
+              PORT=8080
