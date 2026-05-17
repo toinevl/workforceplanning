@@ -1,4 +1,6 @@
 @description('Storage account name (3-24 lowercase alphanumeric)')
+@minLength(3)
+@maxLength(24)
 param name string
 
 param location string

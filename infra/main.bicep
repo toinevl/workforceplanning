@@ -3,6 +3,9 @@ targetScope = 'resourceGroup'
 @description('Base name for all resources')
 param appName string = 'workforceplanning'
 
+@description('App Service name')
+param appServiceName string = 'alicante'
+
 @description('Azure region')
 param location string = resourceGroup().location
 
@@ -10,12 +13,15 @@ param location string = resourceGroup().location
 @allowed(['dev', 'staging', 'prod'])
 param environment string = 'prod'
 
-var uniqueSuffix = uniqueString(resourceGroup().id)
+@description('Existing or desired Storage account name for Azure Tables')
+@minLength(3)
+@maxLength(24)
+param storageAccountName string = 'saworkforceplan'
 
 module storage 'modules/storage.bicep' = {
   name: 'storage'
   params: {
-    name: '${appName}${uniqueSuffix}'
+    name: storageAccountName
     location: location
     environmentName: environment
   }
@@ -32,7 +38,7 @@ module plan 'modules/app-service-plan.bicep' = {
 module app 'modules/app-service.bicep' = {
   name: 'appService'
   params: {
-    name: '${appName}-${environment}'
+    name: appServiceName
     location: location
     serverFarmId: plan.outputs.id
     storageConnectionString: storage.outputs.connectionString
