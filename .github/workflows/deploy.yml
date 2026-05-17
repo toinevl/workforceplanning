@@ -68,8 +68,15 @@ jobs:
           cp -r .next/static .next/standalone/.next/
 
       - name: Deploy to Azure App Service
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: ${{ secrets.AZURE_APP_NAME }}
-          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
-          package: .next/standalone
+        env:
+          APP_NAME: ${{ secrets.AZURE_APP_NAME }}
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+        run: |
+          cd .next/standalone
+          zip -r ../../deployment.zip .
+          az webapp deploy \
+            --name "$APP_NAME" \
+            --resource-group "$RESOURCE_GROUP" \
+            --src-path ../../deployment.zip \
+            --type zip \
+            --async false
