@@ -26,10 +26,6 @@ resource webApp 'Microsoft.Web/sites@2023-01-01' = {
           value: '1'
         }
         {
-          name: 'WEBSITE_RUN_FROM_PACKAGE'
-          value: '1'
-        }
-        {
           name: 'WEBSITE_NODE_DEFAULT_VERSION'
           value: '~22'
         }
