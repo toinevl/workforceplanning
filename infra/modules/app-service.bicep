@@ -11,6 +11,7 @@ resource webApp 'Microsoft.Web/sites@2023-01-01' = {
     httpsOnly: true
     siteConfig: {
       nodeVersion: '~22'
+      appCommandLine: 'node server.js'
       appSettings: [
         {
           name: 'AZURE_STORAGE_CONNECTION_STRING'
@@ -29,12 +30,12 @@ resource webApp 'Microsoft.Web/sites@2023-01-01' = {
           value: '1'
         }
         {
-          name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
-          value: 'true'
-        }
-        {
           name: 'WEBSITE_NODE_DEFAULT_VERSION'
           value: '~22'
+        }
+        {
+          name: 'PORT'
+          value: '8080'
         }
       ]
       webSocketsEnabled: false
