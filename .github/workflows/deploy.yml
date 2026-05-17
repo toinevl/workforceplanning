@@ -72,5 +72,4 @@ jobs:
               "AZURE_STORAGE_CONNECTION_STRING=$CONN_STR" \
               NODE_ENV=production \
               NEXT_TELEMETRY_DISABLED=1 \
-              WEBSITE_RUN_FROM_PACKAGE=1 \
               PORT=8080
