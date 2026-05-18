@@ -1,19 +1,24 @@
 ---
+gsd_state_version: 1.0
 milestone: v2.0
-name: Enterprise Departments
-status: planning
+milestone_name: milestone
+status: executing
+last_updated: "2026-05-18T14:30:00.000Z"
+last_activity: 2026-05-18 -- Phase 1 Plan 01 completed
 progress:
-  phases_total: 5
-  phases_complete: 0
-  phases_in_progress: 0
+  total_phases: 5
+  completed_phases: 0
+  total_plans: 3
+  completed_plans: 1
+  percent: 33
 ---
 
 ## Current Position
 
-Phase: Not started (roadmap defined, ready to plan Phase 1)
-Plan: —
-Status: Planning
-Last activity: 2026-05-18 — Roadmap created (5 phases, 24 requirements)
+Phase: 1 (Production Hardening + Schema Foundation) — EXECUTING
+Plan: 2 of 3
+Status: Completed Plan 1 (Schema Foundation)
+Last activity: 2026-05-18 -- Phase 1 Plan 01 completed with 2 tasks
 
 ## Project Reference
 
@@ -25,6 +30,7 @@ See: .planning/PROJECT.md (updated 2026-05-18)
 ## Accumulated Context
 
 ### Decisions
+
 - Departments use `/departments/[deptId]` routing (not a switcher widget)
 - Scenarios remain cross-department — no dept-scoped scenarios in v2.0
 - No per-department access control in v2.0
@@ -33,9 +39,13 @@ See: .planning/PROJECT.md (updated 2026-05-18)
 - Rollup stats computed in single pass (3 parallel partition scans, group in memory)
 - Detail page is read-only baseline staffing — not a scenario board
 - Color picker: custom swatch palette (10 Tailwind colors) + native `<input type="color">`; no new library
+- **[Plan 01]** DepartmentEntity uses fixed partitionKey='department' (consistent with teams='team')
+- **[Plan 01]** Team.departmentId is optional for backward compatibility (no destructive migration)
 
 ### Blockers
+
 (none)
 
 ### Todos
+
 (none)
