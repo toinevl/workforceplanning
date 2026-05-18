@@ -2,7 +2,7 @@ import { TableServiceClient, TableClient, type TableServiceClientOptions } from 
 
 let _serviceClient: TableServiceClient | null = null;
 
-function getConnectionString(): string {
+export function getConnectionString(): string {
   return process.env.AZURE_STORAGE_CONNECTION_STRING ?? 'UseDevelopmentStorage=true';
 }
 
@@ -38,6 +38,7 @@ export function getTableClient(tableName: string): TableClient {
 export async function ensureTablesExist(): Promise<void> {
   const client = getServiceClient();
   const tables = [
+    'departments',
     'teams',
     'staffMembers',
     'scenarios',
