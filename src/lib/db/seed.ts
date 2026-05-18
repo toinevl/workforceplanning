@@ -1,7 +1,8 @@
-import { getTableClient, ensureTablesExist } from './client';
+import { TableClient } from '@azure/data-tables';
+import { getTableClient, ensureTablesExist, getConnectionString } from './client';
 import {
-  TABLE_TEAMS, TABLE_STAFF, TABLE_SCENARIOS,
-  type TeamEntity, type StaffMemberEntity, type ScenarioEntity,
+  TABLE_TEAMS, TABLE_STAFF, TABLE_SCENARIOS, TABLE_DEPARTMENTS,
+  type TeamEntity, type StaffMemberEntity, type ScenarioEntity, type DepartmentEntity,
 } from './tables';
 import { v4 as uuidv4 } from 'uuid';
 import { defaultParams } from '../types/params';
@@ -27,6 +28,12 @@ const TEAMS = [
   { key: 'delta',   name: 'Team Delta',   color: '#f59e0b', sortOrder: 3 },
   { key: 'echo',    name: 'Team Echo',    color: '#f43f5e', sortOrder: 4 },
   { key: 'foxtrot', name: 'Team Foxtrot', color: '#8b5cf6', sortOrder: 5 },
+];
+
+const DEPARTMENTS = [
+  { name: 'Engineering', color: '#6366f1', sortOrder: 0 },
+  { name: 'Product', color: '#3b82f6', sortOrder: 1 },
+  { name: 'Operations', color: '#22c55e', sortOrder: 2 },
 ];
 
 const DEFAULT_COLORS = ['#2563eb', '#0891b2', '#059669', '#d97706', '#dc2626', '#7c3aed', '#db2777', '#475569'];
@@ -211,6 +218,19 @@ function computeRetirementEligibleYear(member: SeedMember): number | undefined {
   return candidates.length > 0 ? Math.min(...candidates) : undefined;
 }
 
+async function ensureDefaultDepartment(departmentClient: TableClient): Promise<void> {
+  const now = new Date().toISOString();
+  await departmentClient.upsertEntity<DepartmentEntity>({
+    partitionKey: 'department',
+    rowKey: 'default',
+    name: 'Default',
+    color: '#6b7280',
+    sortOrder: 99,
+    createdAt: now,
+    updatedAt: now,
+  }, 'Replace');
+}
+
 export async function runSeed(options?: SeedOptions): Promise<{ teams: number; members: number; scenarios: number }> {
   await ensureTablesExist();
   const configuredTeams = normalizeSeedTeams(options);
@@ -219,36 +239,71 @@ export async function runSeed(options?: SeedOptions): Promise<{ teams: number; m
   const teamClient = getTableClient(TABLE_TEAMS);
   const staffClient = getTableClient(TABLE_STAFF);
   const scenarioClient = getTableClient(TABLE_SCENARIOS);
+  const departmentClient = getTableClient(TABLE_DEPARTMENTS);
   const memberStateClient = getTableClient('scenarioMemberStates');
   const teamDriverClient = getTableClient('scenarioTeamDrivers');
   const snapshotsClient = getTableClient('scenarioSnapshots');
 
   if (options?.resetFirst) {
+    // Production safety guard: prevent accidental deletion in production
+    const connectionString = getConnectionString();
+    const isProduction = process.env.NODE_ENV === 'production' || !connectionString.includes('UseDevelopmentStorage');
+    if (isProduction) {
+      throw new Error('Cannot reset seed on production connection string. This would delete all live teams data.');
+    }
+
     await Promise.all([
       deleteByPartitionKey(teamClient, 'team'),
       deleteByPartitionKey(staffClient, 'member'),
       deleteByPartitionKey(scenarioClient, 'scenario'),
+      deleteByPartitionKey(departmentClient, 'department'),
       deleteAllEntities(memberStateClient),
       deleteAllEntities(teamDriverClient),
       deleteAllEntities(snapshotsClient),
     ]);
   }
 
+  // Create sample departments
+  const now = new Date().toISOString();
+  const departmentMap: Record<string, string> = {};
+  for (const dept of DEPARTMENTS) {
+    const deptId = uuidv4();
+    departmentMap[dept.name] = deptId;
+    await departmentClient.upsertEntity<DepartmentEntity>({
+      partitionKey: 'department',
+      rowKey: deptId,
+      name: dept.name,
+      color: dept.color,
+      sortOrder: dept.sortOrder,
+      createdAt: now,
+      updatedAt: now,
+    }, 'Replace');
+  }
+
   // Insert teams
   const teamIdMap: Record<string, string> = {};
+  const deptArray = Object.values(departmentMap);
   for (const [index, team] of configuredTeams.entries()) {
     const id = team.id ?? `team-${slugify(team.name)}-${index + 1}`;
     teamIdMap[id] = id;
     if (team.key) teamIdMap[team.key] = id;
     teamIdMap[`custom-${index}`] = id;
+
+    // Assign departments in round-robin fashion
+    const assignedDeptId = deptArray[index % deptArray.length];
+
     await teamClient.upsertEntity<TeamEntity>({
       partitionKey: 'team',
       rowKey: id,
       name: team.name,
       color: team.color,
       sortOrder: index,
+      departmentId: assignedDeptId,
     }, 'Replace');
   }
+
+  // Ensure default department is created (idempotent sentinel pattern)
+  await ensureDefaultDepartment(departmentClient);
 
   // Insert staff members
   for (const member of membersToSeed) {
@@ -277,7 +332,6 @@ export async function runSeed(options?: SeedOptions): Promise<{ teams: number; m
     { type: 'business_drivers', name: 'Business Drivers', description: 'Reorganize teams based on business priorities: grow, contain, or slim down each team.' },
   ];
 
-  const now = new Date().toISOString();
   for (const s of scenariosToCreate) {
     const id = uuidv4();
     const parameters = JSON.stringify(defaultParams(s.type));

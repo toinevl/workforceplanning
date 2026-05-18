@@ -19,6 +19,7 @@ export interface TeamEntity extends TableEntity {
   description?: string;
   color: string;
   sortOrder: number;
+  departmentId?: string;
 }
 
 export interface StaffMemberEntity extends TableEntity {
