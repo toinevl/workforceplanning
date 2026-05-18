@@ -10,6 +10,7 @@ import type { Scenario, StaffMember, Team, ScenarioMemberState, BoardState, Team
 import type { ScenarioParams } from '../types/params';
 import { defaultParams } from '../types/params';
 import { createAuditEvent, deleteAuditEvents } from './audit';
+import { entityToTeam } from '../db/mappers';
 
 function entityToScenario(e: ScenarioEntity): Scenario {
   return {
@@ -37,16 +38,6 @@ function entityToMember(e: StaffMemberEntity): StaffMember {
     baseTeamId: e.baseTeamId,
     tags: JSON.parse(e.tags || '[]'),
     notes: e.notes,
-  };
-}
-
-function entityToTeam(e: TeamEntity): Team {
-  return {
-    id: e.rowKey,
-    name: e.name,
-    description: e.description,
-    color: e.color,
-    sortOrder: e.sortOrder,
   };
 }
 
