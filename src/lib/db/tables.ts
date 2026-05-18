@@ -8,6 +8,7 @@ export const TABLE_MEMBER_STATES = 'scenarioMemberStates';
 export const TABLE_TEAM_DRIVERS = 'scenarioTeamDrivers';
 export const TABLE_SNAPSHOTS = 'scenarioSnapshots';
 export const TABLE_AUDIT_EVENTS = 'scenarioAuditEvents';
+export const TABLE_DEPARTMENTS = 'departments';
 
 // ── Entity types (Azure Table entities extend TableEntity with partitionKey + rowKey) ──
 
@@ -33,6 +34,18 @@ export interface StaffMemberEntity extends TableEntity {
   baseTeamId: string;
   tags: string; // JSON array string
   notes?: string;
+}
+
+export interface DepartmentEntity extends TableEntity {
+  partitionKey: 'department';
+  rowKey: string; // departmentId
+  name: string;
+  description?: string;
+  color: string;
+  deptHead?: string;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ScenarioEntity extends TableEntity {
