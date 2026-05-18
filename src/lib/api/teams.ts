@@ -1,16 +1,7 @@
 import { getTableClient } from '../db/client';
 import { TABLE_TEAMS, type TeamEntity } from '../db/tables';
 import type { Team } from '../types/domain';
-
-function entityToTeam(e: TeamEntity): Team {
-  return {
-    id: e.rowKey,
-    name: e.name,
-    description: e.description,
-    color: e.color,
-    sortOrder: e.sortOrder,
-  };
-}
+import { entityToTeam } from '../db/mappers';
 
 export async function getAllTeams(): Promise<Team[]> {
   const client = getTableClient(TABLE_TEAMS);
