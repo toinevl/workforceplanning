@@ -17,12 +17,22 @@ export interface StaffMember {
   notes?: string;
 }
 
+export interface Department {
+  id: string;
+  name: string;
+  description?: string;
+  color: string;
+  deptHead?: string;
+  sortOrder: number;
+}
+
 export interface Team {
   id: string;
   name: string;
   description?: string;
   color: string; // hex color
   sortOrder: number;
+  departmentId?: string;
 }
 
 export interface ScenarioMemberState {
