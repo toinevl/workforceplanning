@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { AppShell } from '@/components/layout/AppShell';
 import { SeedSetupPanel } from '@/components/scenarios/SeedSetupPanel';
 import { useSeed } from '@/lib/hooks/useScenario';
+import { DepartmentsSection } from '@/components/departments/DepartmentsSection';
 
 export default function SettingsPage() {
   const seedMutation = useSeed();
@@ -46,6 +47,16 @@ export default function SettingsPage() {
             .
           </div>
         )}
+
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold text-gray-900">Departments</h2>
+          <p className="mt-1 text-sm text-gray-600">
+            Create and manage departments to organise your teams by function or business unit.
+          </p>
+          <div className="mt-4">
+            <DepartmentsSection />
+          </div>
+        </div>
       </div>
     </AppShell>
   );
