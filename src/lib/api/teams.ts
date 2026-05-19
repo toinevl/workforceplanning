@@ -21,3 +21,25 @@ export async function getTeam(teamId: string): Promise<Team | null> {
     return null;
   }
 }
+
+export async function updateTeam(
+  teamId: string,
+  updates: Partial<{ name: string; color: string; description?: string; departmentId?: string }>
+): Promise<Team> {
+  const client = getTableClient(TABLE_TEAMS);
+  const existing = await client.getEntity<TeamEntity>('team', teamId);
+
+  // Build the updated entity, explicitly handling departmentId removal
+  const updated: TeamEntity = {
+    ...existing,
+    ...updates,
+  };
+
+  // If departmentId is explicitly undefined (unassign), remove it from entity
+  if ('departmentId' in updates && updates.departmentId === undefined) {
+    delete updated.departmentId;
+  }
+
+  await client.upsertEntity(updated, 'Replace');
+  return entityToTeam(updated);
+}

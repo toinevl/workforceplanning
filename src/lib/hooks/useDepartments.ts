@@ -66,7 +66,7 @@ export function useMigrateDepartments() {
       fetch('/api/admin/migrate-departments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ departmentId }),
+        body: JSON.stringify({ defaultDepartmentId: departmentId }),
       }).then(async (r) => {
         const json = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(json.error ?? 'Migration failed');

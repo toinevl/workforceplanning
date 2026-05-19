@@ -8,6 +8,7 @@ export function entityToTeam(e: TeamEntity): Team {
     description: e.description,
     color: e.color,
     sortOrder: e.sortOrder,
+    departmentId: e.departmentId,
   };
 }
 
