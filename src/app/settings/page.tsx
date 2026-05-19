@@ -5,9 +5,13 @@ import { AppShell } from '@/components/layout/AppShell';
 import { SeedSetupPanel } from '@/components/scenarios/SeedSetupPanel';
 import { useSeed } from '@/lib/hooks/useScenario';
 import { DepartmentsSection } from '@/components/departments/DepartmentsSection';
+import { BulkMigrateButton } from '@/components/departments/BulkMigrateButton';
+import { useTeamList } from '@/lib/hooks/useTeams';
 
 export default function SettingsPage() {
   const seedMutation = useSeed();
+  const teamList = useTeamList();
+  const unassignedTeamCount = (teamList.data ?? []).filter((t) => !t.departmentId).length;
 
   return (
     <AppShell>
@@ -55,6 +59,16 @@ export default function SettingsPage() {
           </p>
           <div className="mt-4">
             <DepartmentsSection />
+          </div>
+        </div>
+
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold text-gray-900">Bulk Team Assignment</h2>
+          <p className="mt-1 text-sm text-gray-600">
+            Assign all unassigned teams to a default department. This action is permanent and can only be performed once.
+          </p>
+          <div className="mt-4">
+            <BulkMigrateButton unassignedTeamCount={unassignedTeamCount} />
           </div>
         </div>
       </div>
