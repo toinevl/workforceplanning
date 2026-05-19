@@ -9,8 +9,8 @@
 
 ## Phases
 
-- [ ] **Phase 1: Production Hardening + Schema Foundation** - Guard live data, consolidate mappers, create Department entity and table
-- [ ] **Phase 2: Department CRUD API** - All data access, API routes, rollup computation, and migration endpoint
+- [x] **Phase 1: Production Hardening + Schema Foundation** - Guard live data, consolidate mappers, create Department entity and table
+- [x] **Phase 2: Department CRUD API** - All data access, API routes, rollup computation, and migration endpoint
 - [x] **Phase 3: Department Management UI** - Department form, CRUD in Settings, team assignment dropdown
 - [ ] **Phase 4: Navigation + Departments Listing** - Top nav update, `/departments` listing with rollup stats and Unassigned bucket
 - [ ] **Phase 5: Department Detail Page + Visual Integration** - `/departments/[deptId]` detail page and color badges on board
@@ -154,9 +154,9 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Production Hardening + Schema Foundation | 0/? | Not started | - |
-| 2. Department CRUD API | 0/? | Not started | - |
-| 3. Department Management UI | 4/4 | Planning complete | 2026-05-18 |
+| 1. Production Hardening + Schema Foundation | 3/3 | Complete | 2026-05-18 |
+| 2. Department CRUD API | 2/2 | Complete | 2026-05-18 |
+| 3. Department Management UI | 4/4 | Complete | 2026-05-19 |
 | 4. Navigation + Departments Listing | 0/? | Not started | - |
 | 5. Department Detail Page + Visual Integration | 0/? | Not started | - |
 
