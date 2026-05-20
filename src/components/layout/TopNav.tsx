@@ -27,6 +27,7 @@ export function TopNav({ board }: TopNavProps) {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const isHome = pathname === '/' || pathname === '/scenarios';
   const isSettings = pathname === '/settings';
+  const isDepartments = pathname.startsWith('/departments');
 
   return (
     <nav className="bg-white border-b border-gray-200 px-4 py-2.5 flex flex-wrap items-center gap-3 shrink-0">
@@ -60,6 +61,13 @@ export function TopNav({ board }: TopNavProps) {
           className="rounded px-2.5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 aria-[current=page]:bg-gray-100 aria-[current=page]:text-gray-950"
         >
           Settings
+        </Link>
+        <Link
+          href="/departments"
+          aria-current={isDepartments ? 'page' : undefined}
+          className="rounded px-2.5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 aria-[current=page]:bg-gray-100 aria-[current=page]:text-gray-950"
+        >
+          Departments
         </Link>
       </div>
 
