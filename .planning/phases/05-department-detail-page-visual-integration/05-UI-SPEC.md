@@ -34,22 +34,17 @@ Source: Phase 4 UI-SPEC (04-UI-SPEC.md), globals.css, TopNav.tsx, DepartmentCard
 
 ## Spacing Scale
 
-Declared values (all multiples of 4). Identical to Phase 4 — no new exceptions.
+Declared values (all multiples of 4).
 
 | Token | Value | Usage |
 |-------|-------|-------|
 | xs | 4px | Department color badge gap (`gap-1`), breadcrumb separator margin |
-| sm | 8px | Compact element spacing, stat chip row gap (`gap-2`) |
+| sm | 8px | Compact element spacing, stat chip row gap (`gap-2`), breadcrumb `<ol>` gap (`gap-2`), loading skeleton meta block spacing (`space-y-2`), teams list container gap (`gap-2`), heading block badge-to-title gap (`gap-2`) |
 | md | 16px | Card padding (`p-4`), horizontal page padding (`px-4`), detail section gap |
 | lg | 24px | Section padding, vertical page padding (`py-6`) |
 | xl | 32px | Layout column gaps (`mt-8` between major sections) |
 | 2xl | 48px | Major section breaks (not used in this phase) |
 | 3xl | 64px | Page-level spacing (not used in this phase) |
-
-Exceptions:
-- Team row stat chip padding: `px-1.5 py-0.5` (6px/2px) — same as DepartmentCard chips (Phase 4)
-- Breadcrumb element padding: `py-2` (8px) top/bottom — matches existing page subheading vertical rhythm
-- Department color badge on board: `w-2.5 h-2.5` (10px) — smaller than detail page badge to fit TeamHeader's existing icon row without reflowing; positioned via `gap-2` in existing flex row
 
 ---
 
@@ -57,17 +52,19 @@ Exceptions:
 
 Identical to Phase 4. Source: settings/page.tsx, departments/page.tsx, DepartmentCard.tsx.
 
+Two weights only: `font-normal` (400) for body/meta/chips/breadcrumb links; `font-bold` (700) for all headings.
+
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body | 14px (`text-sm`) | 400 (`font-normal`) | 1.5 (Tailwind default) |
-| Label / chip | 12px (`text-xs`) | 500 (`font-medium`) | 1.5 |
-| Section heading | 18px (`text-lg`) | 600 (`font-semibold`) | 1.2 |
+| Label / chip | 12px (`text-xs`) | 400 (`font-normal`) | 1.5 |
+| Section heading | 18px (`text-lg`) | 700 (`font-bold`) | 1.2 |
 | Page heading | 24px (`text-2xl`) | 700 (`font-bold`) | 1.2 |
 
 Notes:
-- Breadcrumb text: `text-sm font-medium` (14px/500) — `text-gray-500` for "Departments" link, `text-gray-700` for separator, `text-gray-900` for current page name
+- Breadcrumb text: `text-sm font-normal` (14px/400) — `text-gray-500` for "Departments" link, `text-gray-400` for separator, `text-gray-900` for current page name
 - Department meta fields (dept head, description): `text-sm text-gray-700` (14px/400)
-- Team name in team row: `text-sm font-semibold text-gray-900` (14px/600) — matches DepartmentCard name pattern
+- Team name in team row: `text-sm font-bold text-gray-900` (14px/700) — matches DepartmentCard name pattern
 - Detail page heading: department name displayed as `<h1>` at `text-2xl font-bold text-gray-900` (24px/700)
 
 ---
@@ -82,7 +79,7 @@ Identical to Phase 4 palette. Source: globals.css, Phase 4 UI-SPEC.
 | Secondary (30%) | `#f9fafb` (`bg-gray-50`) | Chip backgrounds, page container background |
 | Accent (10%) | `#111827` (`bg-gray-900` / `text-gray-950`) | Page heading text, active nav, breadcrumb current-page text |
 | Destructive | `#ef4444` (`text-red-700` / `bg-red-50` / `border-red-200`) | Error state only — no destructive actions in this phase |
-| Department color | User-defined hex via `dept.color` | (1) Detail page: 16×16px badge (`h-4 w-4`) beside department name heading; (2) Board: 10×10px badge (`w-2.5 h-2.5`) in TeamHeader beside team color dot |
+| Department color | User-defined hex via `dept.color` | (1) Detail page: 16×16px badge (`h-4 w-4`) beside department name heading; (2) Board: 12×12px badge (`w-3 h-3`) in TeamHeader beside team color dot |
 
 Accent reserved for:
 1. `<h1>` page heading text color: `text-gray-900`
@@ -90,6 +87,17 @@ Accent reserved for:
 3. Breadcrumb current-page segment: `text-gray-900` (not a link — plain text)
 
 Department color badge rule: applied only as `style={{ backgroundColor: dept.color }}` on the specific badge `<span>` element. Never applied to text or borders.
+
+---
+
+## Visual Hierarchy
+
+Primary focal point: department name `<h1>` at `text-2xl font-bold text-gray-900`. This is the largest and heaviest text element on the page and serves as the visual anchor for the detail view.
+
+Secondary focal points in order:
+1. Section heading "Teams" at `text-lg font-bold text-gray-900`
+2. Individual team names at `text-sm font-bold text-gray-900` within each team row
+3. Stat chips (headcount, FTE) at `text-xs font-normal text-gray-700` — supporting data, not primary focus
 
 ---
 
@@ -109,22 +117,22 @@ Structure:
   <div max-w-6xl mx-auto py-6 px-4>
     <!-- Breadcrumb -->
     <nav aria-label="Breadcrumb">
-      <ol class="flex items-center gap-1.5 text-sm">
+      <ol class="flex items-center gap-2 text-sm">
         <li>
-          <Link href="/departments" class="font-medium text-gray-500 hover:text-gray-700 transition-colors
+          <Link href="/departments" class="font-normal text-gray-500 hover:text-gray-700 transition-colors
                                            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 rounded">
             Departments
           </Link>
         </li>
         <li aria-hidden="true" class="text-gray-400">/</li>
         <li>
-          <span class="font-medium text-gray-900">{dept.name}</span>   <!-- current page, not a link -->
+          <span class="font-normal text-gray-900">{dept.name}</span>   <!-- current page, not a link -->
         </li>
       </ol>
     </nav>
 
     <!-- Department heading block -->
-    <div class="mt-4 flex items-center gap-3">
+    <div class="mt-4 flex items-center gap-2">
       <span class="h-4 w-4 rounded-full border border-gray-200 shrink-0" style={{ backgroundColor: dept.color }} />
       <h1 class="text-2xl font-bold text-gray-900">{dept.name}</h1>
     </div>
@@ -137,8 +145,8 @@ Structure:
 
     <!-- Teams section -->
     <div class="mt-8">
-      <h2 class="text-lg font-semibold text-gray-900">Teams</h2>
-      <div class="mt-4 flex flex-col gap-3">
+      <h2 class="text-lg font-bold text-gray-900">Teams</h2>
+      <div class="mt-4 flex flex-col gap-2">
         {teams.map(team => <TeamRow team={team} />)}
       </div>
     </div>
@@ -158,12 +166,12 @@ Structure:
 <div class="flex items-center gap-4 rounded-lg border border-gray-200 bg-white p-4">
   <span class="w-3 h-3 rounded-full shrink-0 border border-gray-200"
         style={{ backgroundColor: team.color }} />
-  <p class="flex-1 text-sm font-semibold text-gray-900">{team.name}</p>
+  <p class="flex-1 text-sm font-bold text-gray-900">{team.name}</p>
   <div class="flex items-center gap-2 shrink-0">
-    <span class="rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-700">
+    <span class="rounded border border-gray-200 bg-gray-50 px-2 py-1 text-xs font-normal text-gray-700">
       {team.headcount} people
     </span>
-    <span class="rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-700">
+    <span class="rounded border border-gray-200 bg-gray-50 px-2 py-1 text-xs font-normal text-gray-700">
       {team.totalFte.toFixed(1)} FTE
     </span>
   </div>
@@ -196,7 +204,7 @@ interface TeamHeaderProps {
   <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: color }} />
   {departmentColor && (
     <span
-      className="w-2.5 h-2.5 rounded-full shrink-0 border border-white ring-1 ring-gray-200"
+      className="w-3 h-3 rounded-full shrink-0 border border-white ring-1 ring-gray-200"
       style={{ backgroundColor: departmentColor }}
       aria-label="Department color"
     />
@@ -206,7 +214,7 @@ interface TeamHeaderProps {
 </div>
 ```
 
-The department badge is `w-2.5 h-2.5` (10px) — 2px smaller than team badge to create visual hierarchy (team identity > department identity). It uses `ring-1 ring-gray-200` to separate overlapping badges when team and department share a similar color.
+The department badge is `w-3 h-3` (12px) — same size as team badge. It uses `ring-1 ring-gray-200` to separate overlapping badges when team and department share a similar color.
 
 `departmentColor` is looked up from the TanStack Query departments cache: `useDepartmentList()` data is already populated from the departments listing page navigation — no extra fetch needed (ROADMAP implementation note for DETAIL-04).
 
@@ -220,7 +228,7 @@ The department badge is `w-2.5 h-2.5` (10px) — 2px smaller than team badge to 
 |---------|----------|
 | "Departments" link | `<Link href="/departments">` — navigates to listing page; `text-gray-500 hover:text-gray-700 transition-colors`; focus ring `focus-visible:ring-2 focus-visible:ring-gray-500 rounded` |
 | "/" separator | `aria-hidden="true"`, `text-gray-400`, not interactive |
-| Department name | Plain `<span>`, not a link; `text-gray-900 font-medium`; represents current page |
+| Department name | Plain `<span>`, not a link; `text-gray-900 font-normal`; represents current page |
 | Breadcrumb `<nav>` | `aria-label="Breadcrumb"` on the `<nav>` element; `<ol>` list with `<li>` items for screen reader semantics |
 
 ### Loading state
@@ -235,7 +243,7 @@ Skeleton blocks while `isLoading === true`:
 <div class="mt-4 h-8 w-64 bg-gray-200 rounded animate-pulse" />
 
 <!-- Meta skeleton -->
-<div class="mt-2 space-y-1.5">
+<div class="mt-2 space-y-2">
   <div class="h-4 w-96 bg-gray-100 rounded animate-pulse" />
   <div class="h-4 w-32 bg-gray-100 rounded animate-pulse" />
 </div>
@@ -243,7 +251,7 @@ Skeleton blocks while `isLoading === true`:
 <!-- Teams section skeleton -->
 <div class="mt-8">
   <div class="h-6 w-16 bg-gray-200 rounded animate-pulse mb-4" />
-  <div class="flex flex-col gap-3">
+  <div class="flex flex-col gap-2">
     {[...Array(3)].map((_, i) => <div class="h-14 w-full bg-gray-100 rounded-lg animate-pulse" />)}
   </div>
 </div>
@@ -263,7 +271,7 @@ Shown when `isError === true` OR when fetch returns no department for the given 
       : "Failed to load department. " + error.message}
   </p>
   <Link href="/departments"
-        class="mt-2 inline-block text-sm font-medium text-red-700 underline underline-offset-2 hover:text-red-900">
+        class="mt-2 inline-block text-sm font-normal text-red-700 underline underline-offset-2 hover:text-red-900">
     Back to Departments
   </Link>
 </div>
@@ -287,10 +295,10 @@ No special card or illustration — matches the plain text empty state in depart
 
 | Condition | Visual |
 |-----------|--------|
-| `team.departmentId` is set AND department found in cache | Second badge `w-2.5 h-2.5` rendered in TeamHeader after team badge |
+| `team.departmentId` is set AND department found in cache | Second badge `w-3 h-3` rendered in TeamHeader after team badge |
 | `team.departmentId` is `undefined` or department not in cache | No second badge rendered; layout unchanged |
 
-The badge renders without reflowing the existing TeamHeader layout because it inserts into the existing `flex items-center gap-2` row and is only 10px wide.
+The badge renders without reflowing the existing TeamHeader layout because it inserts into the existing `flex items-center gap-2` row and is only 12px wide.
 
 ---
 
@@ -345,11 +353,11 @@ Registry safety gate: not applicable.
 | AppShell wrapper (no board prop) | departments/page.tsx line 11 |
 | Error state pattern (`border-red-200 bg-red-50 text-red-700`) | departments/page.tsx lines 26-31 |
 | Loading skeleton (`animate-pulse rounded-lg bg-gray-100`) | departments/page.tsx lines 17-22 |
-| Stat chip styling (`text-xs font-medium bg-gray-50 border border-gray-200 rounded px-1.5 py-0.5`) | DepartmentCard.tsx lines 46-54 |
+| Stat chip styling (`text-xs font-normal bg-gray-50 border border-gray-200 rounded px-2 py-1`) | DepartmentCard.tsx pattern adapted — spacing corrected to multiples of 4 |
 | Color badge (`h-4 w-4 rounded-full border border-gray-200`) | DepartmentCard.tsx line 17 |
 | Team row structure (badge + name + stat chips) | DepartmentCard.tsx pattern adapted for team |
 | TeamHeader badge size `w-3 h-3` | TeamHeader.tsx line 33 |
-| Department badge size `w-2.5 h-2.5` (smaller, hierarchy) | This phase — author decision |
+| Department badge size `w-3 h-3` (same size, separated by ring) | This phase — corrected to multiple of 4 |
 | Breadcrumb nav semantics (`nav > ol > li`) | WCAG 2.1 SC 2.4.8 breadcrumb pattern |
 | Breadcrumb uses "/" text separator (not icon) | lucide-react not used for nav; matches existing text-only nav pattern |
 | Detail page read-only (no scenario board) | ROADMAP.md Phase 5 implementation notes + STATE.md decisions |
@@ -357,6 +365,7 @@ Registry safety gate: not applicable.
 | Not-found error distinct from load failure | REQUIREMENTS.md DETAIL-05 ("including a non-existent department ID") |
 | `toFixed(1)` for FTE | Phase 4 UI-SPEC copywriting contract |
 | No new packages | ROADMAP.md Phase 5 implementation notes |
+| `gap-3` → `gap-2` in teams list container, heading block, and loading skeleton | UI checker Dimension 5 fix — 12px not in declared spacing scale |
 
 ---
 
