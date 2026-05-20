@@ -36,15 +36,21 @@ A planner can open a scenario, see their full team structure, and quickly model 
 - ✓ User can view an audit trail of all scenario changes — v1.0
 - ✓ App is deployed to Azure App Service with Azure Table Storage — v1.0
 
+### Validated (v2.0)
+
+- ✓ User can create, edit, and delete departments with name, color, description, and dept head — Phase 3
+- ✓ User can assign teams to departments — Phase 3
+- ✓ Existing teams are migrated to a default department on first run — Phase 3
+
+### Validated (v2.0 — Phase 4)
+
+- ✓ User can view all departments on a listing page with rollup FTE/headcount stats — Phase 4
+- ✓ Navigation includes Departments as a top-level section — Phase 4
+
 ### Active (v2.0)
 
-- [ ] User can create, edit, and delete departments with name, color, description, and dept head
-- [ ] User can assign teams to departments
-- [ ] User can view all departments on a listing page with rollup FTE/headcount stats
 - [ ] User can navigate to a department detail page showing its teams
 - [ ] Teams board within a department shows only that department's teams
-- [ ] Navigation includes Departments as a top-level section
-- [ ] Existing teams are migrated to a default department on first run
 
 ### Out of Scope
 
@@ -89,7 +95,10 @@ A planner can open a scenario, see their full team structure, and quickly model 
 | Flat partition key for teams (`'team'`) | Simple queries, v1 had single org | — Revisit for v2 (dept-scoped queries) |
 | WEBSITE_RUN_FROM_PACKAGE blob deploy | Bypasses OneDeploy 409 conflict | ✓ Good — stable deployment |
 | Scenarios are cross-org | Keep planning at org level | — v2 confirms this stays unchanged |
-| Departments as pages not switcher | User prefers `/departments/[id]` routing | — Pending implementation |
+| Departments as pages not switcher | User prefers `/departments/[id]` routing | ✓ Implemented — Phase 3 |
+| Raw fetch in delete/migrate hooks | `fetchJSON` throws before body can be read; 409 needs `assignedTeamCount` | ✓ Pattern established — Phase 3 |
+| Custom dialog for BulkMigrateButton | `ConfirmDialog` accepts only primitive strings — no children slot for dropdown | ✓ Implemented — Phase 3 |
+| `unassignedTeamCount` from `useTeamList` | `Department[]` objects don't carry team membership; teams query needed | ✓ Established pattern — Phase 3 |
 
 ## Evolution
 
@@ -109,4 +118,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-18 — Milestone v2.0 started*
+*Last updated: 2026-05-20 — After Phase 4 (Navigation + Departments Listing)*
