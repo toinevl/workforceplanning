@@ -1,11 +1,11 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { Department } from '../types/domain';
+import type { Department, DepartmentWithStats } from '../types/domain';
 import { fetchJSON } from '../utils/fetchJSON';
 
 export function useDepartmentList() {
-  return useQuery<Department[]>({
+  return useQuery<DepartmentWithStats[]>({
     queryKey: ['departments'],
     queryFn: () => fetchJSON('/api/departments'),
   });

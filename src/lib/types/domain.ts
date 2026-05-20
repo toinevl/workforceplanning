@@ -26,6 +26,12 @@ export interface Department {
   sortOrder: number;
 }
 
+export interface DepartmentWithStats extends Department {
+  headcount: number;
+  totalFte: number;
+  teamCount: number;
+}
+
 export interface Team {
   id: string;
   name: string;
