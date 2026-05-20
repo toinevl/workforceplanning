@@ -12,7 +12,7 @@
 - [x] **Phase 1: Production Hardening + Schema Foundation** - Guard live data, consolidate mappers, create Department entity and table
 - [x] **Phase 2: Department CRUD API** - All data access, API routes, rollup computation, and migration endpoint
 - [x] **Phase 3: Department Management UI** - Department form, CRUD in Settings, team assignment dropdown
-- [ ] **Phase 4: Navigation + Departments Listing** - Top nav update, `/departments` listing with rollup stats and Unassigned bucket
+- [x] **Phase 4: Navigation + Departments Listing** - Top nav update, `/departments` listing with rollup stats and Unassigned bucket (completed 2026-05-20)
 - [ ] **Phase 5: Department Detail Page + Visual Integration** - `/departments/[deptId]` detail page and color badges on board
 
 ---
@@ -111,7 +111,10 @@
 4. Teams with no `departmentId` appear in a clearly labeled "Unassigned" bucket with aggregate headcount and FTE
 5. The page shows a loading skeleton while data fetches and a descriptive error state on fetch failure
 
-**Plans**: TBD
+**Plans**: 2 plans in 2 waves
+
+- [x] 04-01-PLAN.md — DepartmentWithStats type, useDepartmentList type fix, Departments nav link (Wave 1)
+- [x] 04-02-PLAN.md — /departments listing page + DepartmentCard component (Wave 2)
 
 **UI hint**: yes
 
@@ -157,7 +160,7 @@
 | 1. Production Hardening + Schema Foundation | 3/3 | Complete | 2026-05-18 |
 | 2. Department CRUD API | 2/2 | Complete | 2026-05-18 |
 | 3. Department Management UI | 4/4 | Complete | 2026-05-19 |
-| 4. Navigation + Departments Listing | 0/? | Not started | - |
+| 4. Navigation + Departments Listing | 2/2 | Complete   | 2026-05-20 |
 | 5. Department Detail Page + Visual Integration | 0/? | Not started | - |
 
 ---
