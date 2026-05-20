@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getDepartmentsWithStats, createDepartment } from '@/lib/api/departments';
 
+const HEX_COLOR_RE = /^#[0-9A-Fa-f]{6}$/;
+
 /**
  * GET /api/departments
  * Returns all departments with rollup stats (headcount, FTE, team count)
@@ -23,8 +25,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Missing or invalid name' }, { status: 400 });
   }
 
-  if (!body.color || typeof body.color !== 'string' || body.color.trim() === '') {
-    return NextResponse.json({ error: 'Missing or invalid color' }, { status: 400 });
+  if (!body.color || typeof body.color !== 'string' || !HEX_COLOR_RE.test(body.color)) {
+    return NextResponse.json({ error: 'Color must be a valid hex color (e.g. #a3b4c5)' }, { status: 400 });
   }
 
   // Extract optional fields

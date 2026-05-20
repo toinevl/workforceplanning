@@ -1,5 +1,26 @@
 import { NextResponse } from 'next/server';
-import { updateDepartment, deleteDepartment } from '@/lib/api/departments';
+import { getDepartmentById, updateDepartment, deleteDepartment } from '@/lib/api/departments';
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const HEX_COLOR_RE = /^#[0-9A-Fa-f]{6}$/;
+
+/**
+ * GET /api/departments/[id]
+ * Returns a single department
+ */
+export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  if (!UUID_RE.test(id)) {
+    return NextResponse.json({ error: 'Department not found' }, { status: 404 });
+  }
+  const department = await getDepartmentById(id);
+
+  if (!department) {
+    return NextResponse.json({ error: 'Department not found' }, { status: 404 });
+  }
+
+  return NextResponse.json({ data: department });
+}
 
 /**
  * PATCH /api/departments/[id]
@@ -8,6 +29,9 @@ import { updateDepartment, deleteDepartment } from '@/lib/api/departments';
  */
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  if (!UUID_RE.test(id)) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
   const body = await req.json();
 
   // Validate that at least one updateable field is present
@@ -21,8 +45,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: 'Name must be a non-empty string if provided' }, { status: 400 });
   }
 
-  if (color !== undefined && (typeof color !== 'string' || color.trim() === '')) {
-    return NextResponse.json({ error: 'Color must be a non-empty string if provided' }, { status: 400 });
+  if (color !== undefined && (typeof color !== 'string' || !HEX_COLOR_RE.test(color))) {
+    return NextResponse.json({ error: 'Color must be a valid hex color (e.g. #a3b4c5)' }, { status: 400 });
   }
 
   // Build updates object with only provided fields
@@ -52,6 +76,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
  */
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  if (!UUID_RE.test(id)) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
 
   const result = await deleteDepartment(id);
 
