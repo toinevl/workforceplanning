@@ -8,19 +8,15 @@ A web-based workforce planning tool for org leaders to model staffing scenarios 
 
 A planner can open a scenario, see their full team structure, and quickly model "what if" staffing changes without touching production HR data.
 
-## Current Milestone: v2.0 Enterprise Departments
+## Current State
 
-**Goal:** Introduce a Department layer above teams — each department gets its own page, visual identity (color, description, department head), and rollup stats; scenarios remain cross-department.
+**Shipped:** v2.0 Enterprise Departments — 2026-05-20 (archived 2026-05-29) · 5 phases, 12 plans
 
-**Target features:**
-- Department entity (name, color, description, dept head)
-- Department CRUD in Settings
-- `/departments` listing page with rollup stats (FTE, headcount per dept)
-- `/departments/[deptId]` detail page showing that department's teams and board
-- Team entity gets `departmentId` field with migration for existing teams
-- Navigation updated to include Departments as a top-level section
-- Seed/dev tooling updated to support multi-department setup
-- Scenarios and board view remain cross-department (unchanged)
+A Department layer now sits above teams. Each department has a detail page, visual identity (color, description, department head), and rollup stats (FTE/headcount). Teams carry a `departmentId`; existing teams migrated to a Default department on first run. Navigation includes a Departments section; the scenario board shows department color badges. Scenarios remain cross-department.
+
+## Next Milestone
+
+_To be defined — start with `/gsd:new-milestone`._
 
 ## Requirements
 
@@ -41,16 +37,14 @@ A planner can open a scenario, see their full team structure, and quickly model 
 - ✓ User can create, edit, and delete departments with name, color, description, and dept head — Phase 3
 - ✓ User can assign teams to departments — Phase 3
 - ✓ Existing teams are migrated to a default department on first run — Phase 3
-
-### Validated (v2.0 — Phase 4)
-
 - ✓ User can view all departments on a listing page with rollup FTE/headcount stats — Phase 4
 - ✓ Navigation includes Departments as a top-level section — Phase 4
+- ✓ User can navigate to a department detail page showing its teams — Phase 5
+- ✓ Department detail page shows per-team headcount/FTE rollups; board carries department color badges — Phase 5
 
-### Active (v2.0)
+### Active (next milestone)
 
-- [ ] User can navigate to a department detail page showing its teams
-- [ ] Teams board within a department shows only that department's teams
+_None yet — define with `/gsd:new-milestone`._
 
 ### Out of Scope
 
@@ -68,12 +62,13 @@ A planner can open a scenario, see their full team structure, and quickly model 
 - Tailwind CSS + Shadcn-style custom UI components
 - Deployed: Azure App Service with WEBSITE_RUN_FROM_PACKAGE blob-storage method
 
-**Codebase state entering v2.0:**
-- Flat team structure — all teams in a single `teams` table with `partitionKey: 'team'`
-- Staff members have `baseTeamId` pointing directly to a team (no dept layer)
-- `BoardState` fetches all teams across the entire org (no dept filter)
-- Settings page has a seed setup panel; no team management CRUD yet
-- Navigation: Home (scenarios), Settings — no departments section
+**Codebase state after v2.0:**
+- Teams carry an optional `departmentId`; a `departments` table holds department records and is created on startup
+- Existing teams migrate to a Default department via an idempotent (sentinel-guarded) migration endpoint
+- Settings page has department CRUD, team→department assignment, and a one-time bulk migration button
+- `/departments` listing (rollup stats + Unassigned bucket) and `/departments/[deptId]` read-only detail page
+- Navigation: Scenarios, Departments, Settings — board team headers show department color badges
+- Type-check, lint (0 errors), and production build all pass
 
 **Known constraints:**
 - Azure Table Storage has no foreign keys — referential integrity enforced in app layer
@@ -99,6 +94,9 @@ A planner can open a scenario, see their full team structure, and quickly model 
 | Raw fetch in delete/migrate hooks | `fetchJSON` throws before body can be read; 409 needs `assignedTeamCount` | ✓ Pattern established — Phase 3 |
 | Custom dialog for BulkMigrateButton | `ConfirmDialog` accepts only primitive strings — no children slot for dropdown | ✓ Implemented — Phase 3 |
 | `unassignedTeamCount` from `useTeamList` | `Department[]` objects don't carry team membership; teams query needed | ✓ Established pattern — Phase 3 |
+| `TeamWithStats` from `GET /api/teams?departmentId` | Detail page needs per-team headcount/FTE; computed server-side in one members pass | ✓ Implemented — Phase 5 |
+| Department detail page is read-only | Detail is a baseline-staffing view, not a scenario board | ✓ Implemented — Phase 5 |
+| `fetchJSON` reads error body before throwing | API errors carry structured `{ error }`; surfacing it gives usable messages | ✓ Code-review fix — Phase 5 |
 
 ## Evolution
 
@@ -118,4 +116,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-20 — After Phase 4 (Navigation + Departments Listing)*
+*Last updated: 2026-05-29 — after v2.0 Enterprise Departments milestone*
