@@ -1,13 +1,21 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { Team } from '../types/domain';
+import type { Team, TeamWithStats } from '../types/domain';
 import { fetchJSON } from '../utils/fetchJSON';
 
 export function useTeamList() {
   return useQuery<Team[]>({
     queryKey: ['teams'],
     queryFn: () => fetchJSON('/api/teams'),
+  });
+}
+
+export function useDepartmentTeams(departmentId: string) {
+  return useQuery<TeamWithStats[]>({
+    queryKey: ['teams', 'department', departmentId],
+    queryFn: () => fetchJSON(`/api/teams?departmentId=${encodeURIComponent(departmentId)}`),
+    enabled: !!departmentId,
   });
 }
 

@@ -41,6 +41,11 @@ export interface Team {
   departmentId?: string;
 }
 
+export interface TeamWithStats extends Team {
+  headcount: number;
+  totalFte: number;
+}
+
 export interface ScenarioMemberState {
   scenarioId: string;
   memberId: string;

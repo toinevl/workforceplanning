@@ -20,13 +20,22 @@ const DRIVER_LABELS: Record<BusinessDriver, string> = {
 interface TeamHeaderProps {
   name: string;
   color: string;
+  departmentColor?: string;
   headcount: number;
   totalFte: number;
   driver?: BusinessDriver;
   priorityScore?: number;
 }
 
-export function TeamHeader({ name, color, headcount, totalFte, driver, priorityScore }: TeamHeaderProps) {
+export function TeamHeader({
+  name,
+  color,
+  departmentColor,
+  headcount,
+  totalFte,
+  driver,
+  priorityScore,
+}: TeamHeaderProps) {
   return (
     <div className="px-3 py-2.5 border-b border-gray-200 bg-white rounded-t-xl">
       <div className="flex items-center gap-2 mb-1">
@@ -34,6 +43,13 @@ export function TeamHeader({ name, color, headcount, totalFte, driver, priorityS
           className="w-3 h-3 rounded-full shrink-0"
           style={{ backgroundColor: color }}
         />
+        {departmentColor && (
+          <span
+            className="w-3 h-3 rounded-full shrink-0 border border-white ring-1 ring-gray-200"
+            style={{ backgroundColor: departmentColor }}
+            aria-label="Department color"
+          />
+        )}
         <h3 className="font-semibold text-gray-800 text-sm leading-tight truncate">{name}</h3>
         {priorityScore && (
           <span className="ml-auto shrink-0 text-xs text-gray-600">P{priorityScore}</span>

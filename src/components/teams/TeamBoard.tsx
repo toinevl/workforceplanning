@@ -10,6 +10,7 @@ import { NoteDialog } from './NoteDialog';
 import { MemberCard } from '@/components/members/MemberCard';
 import { MemberDetailSheet } from '@/components/members/MemberDetailSheet';
 import { useWorkforceStore } from '@/lib/store/workforceStore';
+import { useDepartmentList } from '@/lib/hooks/useDepartments';
 import { useMoveMembers } from '@/lib/hooks/useTeamBoard';
 import type { BoardState } from '@/lib/types/domain';
 
@@ -62,6 +63,7 @@ function RemovedZone({
 
 export function TeamBoard({ board, readOnly = false }: TeamBoardProps) {
   const { selectedMemberId, setSelectedMemberId } = useWorkforceStore();
+  const departmentsQuery = useDepartmentList();
   const moveMutation = useMoveMembers(board.scenario.id);
   const [pendingMove, setPendingMove] = useState<{
     memberId: string;
@@ -84,6 +86,16 @@ export function TeamBoard({ board, readOnly = false }: TeamBoardProps) {
         ])
       ),
     [board.teams]
+  );
+
+  const departmentColors = useMemo(
+    () =>
+      new Map(
+        (departmentsQuery.data ?? [])
+          .filter((dept) => dept.id !== 'unassigned')
+          .map((dept) => [dept.id, dept.color])
+      ),
+    [departmentsQuery.data]
   );
 
   function handleMove(memberId: string, toTeamId: string | null) {
@@ -139,6 +151,7 @@ export function TeamBoard({ board, readOnly = false }: TeamBoardProps) {
             <TeamColumn
               key={ts.team.id}
               teamSnapshot={ts}
+              departmentColor={ts.team.departmentId ? departmentColors.get(ts.team.departmentId) : undefined}
               onMemberClick={setSelectedMemberId}
               readOnly={readOnly}
             />

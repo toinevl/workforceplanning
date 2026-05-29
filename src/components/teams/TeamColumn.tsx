@@ -8,11 +8,12 @@ import type { TeamSnapshot } from '@/lib/types/domain';
 
 interface TeamColumnProps {
   teamSnapshot: TeamSnapshot;
+  departmentColor?: string;
   onMemberClick?: (memberId: string) => void;
   readOnly?: boolean;
 }
 
-export function TeamColumn({ teamSnapshot, onMemberClick, readOnly }: TeamColumnProps) {
+export function TeamColumn({ teamSnapshot, departmentColor, onMemberClick, readOnly }: TeamColumnProps) {
   const { team, members, totalFte, headcount, driver, priorityScore } = teamSnapshot;
 
   const { setNodeRef, isOver } = useDroppable({ id: team.id, disabled: readOnly });
@@ -22,6 +23,7 @@ export function TeamColumn({ teamSnapshot, onMemberClick, readOnly }: TeamColumn
       <TeamHeader
         name={team.name}
         color={team.color}
+        departmentColor={departmentColor}
         headcount={headcount}
         totalFte={totalFte}
         driver={driver}

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import type { DepartmentWithStats } from '@/lib/types/domain';
 
 interface DepartmentCardProps {
@@ -8,10 +9,13 @@ interface DepartmentCardProps {
 
 export function DepartmentCard({ dept }: DepartmentCardProps) {
   const isUnassigned = dept.id === 'unassigned';
+  const totalFte = typeof dept.totalFte === 'number' && Number.isFinite(dept.totalFte)
+    ? dept.totalFte
+    : 0;
 
   const containerClasses = isUnassigned
     ? 'flex items-center gap-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4'
-    : 'flex items-center gap-4 rounded-lg border border-gray-200 bg-white p-4';
+    : 'flex items-center gap-4 rounded-lg border border-gray-200 bg-white p-4 transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500';
 
   const badgeClasses = isUnassigned
     ? 'h-4 w-4 flex-shrink-0 rounded-full border border-dashed border-gray-400 bg-gray-300'
@@ -19,8 +23,8 @@ export function DepartmentCard({ dept }: DepartmentCardProps) {
 
   const badgeStyle = isUnassigned ? undefined : { backgroundColor: dept.color };
 
-  return (
-    <div className={containerClasses}>
+  const content = (
+    <>
       {/* Color badge */}
       <span
         className={badgeClasses}
@@ -48,12 +52,22 @@ export function DepartmentCard({ dept }: DepartmentCardProps) {
           {dept.headcount} people
         </span>
         <span className="rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-700">
-          {dept.totalFte.toFixed(1)} FTE
+          {totalFte.toFixed(1)} FTE
         </span>
         <span className="rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-700">
           {dept.teamCount} {dept.teamCount === 1 ? 'team' : 'teams'}
         </span>
       </div>
-    </div>
+    </>
+  );
+
+  if (isUnassigned) {
+    return <div className={containerClasses}>{content}</div>;
+  }
+
+  return (
+    <Link href={`/departments/${dept.id}`} className={containerClasses}>
+      {content}
+    </Link>
   );
 }
