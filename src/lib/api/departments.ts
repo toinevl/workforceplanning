@@ -8,7 +8,7 @@ import {
   type TeamEntity,
   type StaffMemberEntity,
 } from '../db/tables';
-import type { Department, Team, StaffMember } from '../types/domain';
+import type { Department } from '../types/domain';
 import { entityToDepartment } from '../db/mappers';
 
 /**
@@ -214,6 +214,7 @@ export async function deleteDepartment(
   const client = getTableClient(TABLE_TEAMS);
   let assignedCount = 0;
   for await (const entity of client.listEntities<TeamEntity>({ queryOptions: { filter: `departmentId eq '${id}'` } })) {
+    void entity;
     assignedCount++;
   }
 

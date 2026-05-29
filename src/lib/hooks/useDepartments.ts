@@ -52,7 +52,12 @@ export function useDeleteDepartment() {
       fetch(`/api/departments/${id}`, { method: 'DELETE' }).then(async (r) => {
         const json = await r.json().catch(() => ({}));
         if (!r.ok) {
-          throw new Error(JSON.stringify({ error: json.error, assignedTeamCount: json.assignedTeamCount }));
+          const teamCount = typeof json.assignedTeamCount === 'number' ? json.assignedTeamCount : 0;
+          throw new Error(
+            teamCount > 0
+              ? `Cannot delete department with assigned teams (${teamCount} ${teamCount === 1 ? 'team' : 'teams'})`
+              : json.error ?? 'Failed to delete department'
+          );
         }
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['departments'] }),

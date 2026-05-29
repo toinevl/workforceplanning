@@ -38,7 +38,7 @@ export default function DepartmentsPage() {
             {(listQuery.data ?? []).map((dept) => (
               <DepartmentCard key={dept.id} dept={dept} />
             ))}
-            {listQuery.data?.length === 0 && (
+            {(listQuery.data?.length ?? 0) === 0 && (
               <p className="mt-6 text-sm text-gray-500">
                 No departments yet. Go to Settings to create the first one.
               </p>
