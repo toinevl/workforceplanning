@@ -79,7 +79,7 @@ export function TopNav({ board }: TopNavProps) {
             <div className="flex items-center gap-2">
               <span className="font-semibold text-gray-900 truncate">{board.scenario.name}</span>
               <span className="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-700 rounded">
-                {TYPE_LABELS[board.scenario.type]}
+                {TYPE_LABELS[board.scenario.type] ?? 'Unknown'}
               </span>
             </div>
           </div>
