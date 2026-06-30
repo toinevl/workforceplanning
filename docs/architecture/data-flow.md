@@ -3,6 +3,10 @@
 How data moves through Workforce Planning — read paths, write paths, and the
 scenario engine that transforms baseline staff data into modeled states.
 
+## Diagram
+
+**[data-flow.excalidraw](./data-flow.excalidraw)** — editable at [excalidraw.com](https://excalidraw.com)
+
 ## Baseline Data (the source of truth)
 
 Three tables hold immutable baseline data — they represent the real-world org:

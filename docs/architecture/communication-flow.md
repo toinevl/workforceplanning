@@ -3,6 +3,10 @@
 How the components of Workforce Planning communicate — protocols, directions,
 and the boundaries between layers.
 
+## Diagram
+
+**[communication-flow.excalidraw](./communication-flow.excalidraw)** — editable at [excalidraw.com](https://excalidraw.com)
+
 ## Layer Overview
 
 ```

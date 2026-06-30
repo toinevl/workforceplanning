@@ -3,6 +3,10 @@
 Threat model, authentication posture, input validation, and accepted risks for
 Workforce Planning.
 
+## Diagram
+
+**[security-identity.excalidraw](./security-identity.excalidraw)** — editable at [excalidraw.com](https://excalidraw.com)
+
 ## Authentication Posture
 
 **There is no authentication.** This is an accepted architectural decision
