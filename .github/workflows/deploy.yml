@@ -52,71 +52,22 @@ jobs:
           cp -r public .next/standalone/
           cp -r .next/static .next/standalone/.next/
 
-      - name: Deploy via blob storage (Run-From-Package)
+      - name: Deploy via zip publish (Run-From-Package)
         env:
           APP_NAME: ${{ secrets.AZURE_APP_NAME }}
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
-          CONN_STR: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
         run: |
-          # Extract account name and key from connection string
-          STORAGE_ACCOUNT=$(echo "$CONN_STR" | grep -oP '(?<=AccountName=)[^;]+')
-          ACCOUNT_KEY=$(echo "$CONN_STR" | grep -oP '(?<=AccountKey=)[^;]+')
-
-          # Create deployment ZIP from standalone output
           cd .next/standalone
           zip -r ../../deploy.zip . -q
           cd ../..
 
-          # Create deployments container if it doesn't exist
-          az storage container create \
-            --name deployments \
-            --account-name "$STORAGE_ACCOUNT" \
-            --account-key "$ACCOUNT_KEY" \
-            --output none 2>/dev/null || true
-
-          # Upload deployment package (always overwrite)
-          az storage blob upload \
-            --account-name "$STORAGE_ACCOUNT" \
-            --account-key "$ACCOUNT_KEY" \
-            --container-name deployments \
-            --name deploy-latest.zip \
-            --file deploy.zip \
-            --overwrite \
-            --output none
-
-          # Generate SAS token valid for 10 years
-          EXPIRY=$(date -u -d "+10 years" +%Y-%m-%dT%H:%MZ)
-          SAS=$(az storage blob generate-sas \
-            --account-name "$STORAGE_ACCOUNT" \
-            --account-key "$ACCOUNT_KEY" \
-            --container-name deployments \
-            --name deploy-latest.zip \
-            --permissions r \
-            --expiry "$EXPIRY" \
-            -o tsv)
-
-          BLOB_URL="https://${STORAGE_ACCOUNT}.blob.core.windows.net/deployments/deploy-latest.zip?${SAS}"
-
-          # Ensure startup command is set (standalone Next.js needs node server.js)
-          az webapp config set \
-            --name "$APP_NAME" \
+          az webapp deploy \
             --resource-group "$RESOURCE_GROUP" \
-            --startup-file "node server.js" \
-            --output none
-
-          # Set all app settings including the blob package URL
-          az webapp config appsettings set \
             --name "$APP_NAME" \
-            --resource-group "$RESOURCE_GROUP" \
-            --settings \
-              "AZURE_STORAGE_CONNECTION_STRING=$CONN_STR" \
-              NODE_ENV=production \
-              NEXT_TELEMETRY_DISABLED=1 \
-              PORT=8080 \
-              "WEBSITE_RUN_FROM_PACKAGE=$BLOB_URL" \
+            --type zip \
+            --src-path deploy.zip \
             --output none
 
-          # Restart to pick up new package from blob
           az webapp restart \
-            --name "$APP_NAME" \
-            --resource-group "$RESOURCE_GROUP"
+            --resource-group "$RESOURCE_GROUP" \
+            --name "$APP_NAME"

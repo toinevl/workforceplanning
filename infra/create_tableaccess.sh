@@ -1,7 +1,7 @@
 SUBSCRIPTION_ID="2dbeb3f1-e45d-4207-a7e9-185330aad74b"
-RESOURCE_GROUP="rgWorkforcePlan"
+RESOURCE_GROUP="wfp-rg-workforceplan"
 APP_NAME="alicante"
-STORAGE_ACCOUNT="saworkforceplan"
+STORAGE_ACCOUNT="wfpsaplanning"
 
 az account set --subscription "$SUBSCRIPTION_ID"
 

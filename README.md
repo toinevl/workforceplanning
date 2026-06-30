@@ -77,14 +77,17 @@ Outputs include the App Service URL and Storage account name.
 Set the following GitHub Actions secrets in the repo:
 
 - `AZURE_APP_NAME` — the App Service name (`alicante`).
-- `AZURE_RESOURCE_GROUP` — the resource group containing the App Service (e.g. `rgWorkforcePlan`).
-- `AZURE_CLIENT_ID` — client ID of the Azure AD app registration used for OIDC login.
-- `AZURE_TENANT_ID` — Azure AD tenant ID.
-- `AZURE_SUBSCRIPTION_ID` — Azure subscription ID.
-- `AZURE_PUBLISH_PROFILE` — download from the App Service in the Azure portal (Get publish profile) and paste the full XML.
-- `AZURE_STORAGE_CONNECTION_STRING` — the production storage connection string; set as both a build-time env var and a runtime App Service application setting.
+- `AZURE_RESOURCE_GROUP` — the resource group containing the App Service (e.g. `wfp-rg-workforceplan`).
+- `AZURE_TENANT_ID` — tenant ID for OIDC federated credentials.
+- `AZURE_SUBSCRIPTION_ID` — target Azure subscription ID.
+- `AZURE_CLIENT_ID` — service principal/app registration client ID.
 
-To set up OIDC (federated credentials) for the `AZURE_CLIENT_ID` / `AZURE_TENANT_ID` / `AZURE_SUBSCRIPTION_ID` secrets:
+### Provisioning flow
+
+1. Create a resource group for workforce planning resources, e.g. `wfp-rg-workforceplan`.
+2. Deploy the Bicep templates under `infra/` to create the App Service and Table Storage setup.
+3. Set GitHub Actions secrets for Azure OIDC login and the existing App Service name/values used above.
+4. For local development, set `AZURE_STORAGE_CONNECTION_STRING=UseDevelopmentStorage=true` and run `npm run dev`.
 
 ```bash
 # Create a service principal and configure federated credentials for GitHub Actions
