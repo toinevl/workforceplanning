@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils/cn';
 import { CloseButton } from '@/components/ui/CloseButton';
 import { SectionLabel } from '@/components/ui/SectionLabel';
 import { useParameters, useUpdateParameters, useApplyLogic } from '@/lib/hooks/useParameters';
+import { ImpactPreview } from '@/components/scenarios/ImpactPreview';
 import type { BoardState, BusinessDriver } from '@/lib/types/domain';
 import type { SquadRemovalParams, RetirementWaveParams, BusinessDriverParams } from '@/lib/types/params';
 
@@ -73,6 +74,7 @@ export function ParametersPanel({ board, onClose }: ParametersPanelProps) {
       </div>
 
       <div className="p-4 border-t space-y-2">
+        {params && <ImpactPreview board={board} params={params} />}
         <button
           onClick={handleApply}
           disabled={applyLogic.isPending}
