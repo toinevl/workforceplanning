@@ -1,0 +1,13 @@
+{
+  "updated_at": "2026-06-28T00:00:00Z",
+  "live": {
+    "resource_group": "rgWorkforcePlan",
+    "app_service": "alicante",
+    "storage_account": "saworkforceplan"
+  },
+  "planned": {
+    "app_service": "wfp-app-alicante",
+    "storage_account": "wfpsaplanning",
+    "resource_group": "wfp-rg-workforceplan"
+  }
+}
