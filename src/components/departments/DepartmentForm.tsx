@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import type { Department } from '@/lib/types/domain';
 import { ColorPicker } from './ColorPicker';
 import { SectionLabel } from '@/components/ui/SectionLabel';
+import type { Department } from '@/lib/types/domain';
+
+const HEX_COLOR_REGEX = /^#[0-9A-Fa-f]{6}$/;
 
 interface DepartmentFormProps {
   mode: 'create' | 'edit';
@@ -29,13 +31,21 @@ export function DepartmentForm({
   const [description, setDescription] = useState(initialData?.description ?? '');
   const [deptHead, setDeptHead] = useState(initialData?.deptHead ?? '');
 
+  function isValidColor(value: string) {
+    return HEX_COLOR_REGEX.test(value.trim());
+  }
+
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!name.trim() || isLoading) return;
+    const trimmedColor = color.trim();
+
+    if (!name.trim() || !isValidColor(trimmedColor) || isLoading) {
+      return;
+    }
 
     const data: { name: string; color: string; description?: string; deptHead?: string } = {
       name: name.trim(),
-      color,
+      color: trimmedColor,
     };
     if (description.trim()) data.description = description.trim();
     if (deptHead.trim()) data.deptHead = deptHead.trim();
@@ -43,7 +53,7 @@ export function DepartmentForm({
     onSubmit(data);
   }
 
-  const isSubmitDisabled = isLoading || !name.trim();
+  const isSubmitDisabled = isLoading || !name.trim() || !isValidColor(color);
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">

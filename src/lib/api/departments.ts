@@ -11,6 +11,14 @@ import {
 import type { Department } from '../types/domain';
 import { entityToDepartment } from '../db/mappers';
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function assertValidId(id: string) {
+  if (!UUID_RE.test(id)) {
+    throw new Error(`Invalid id: ${id}`);
+  }
+}
+
 /**
  * Get all departments sorted by sortOrder
  */
@@ -27,6 +35,7 @@ export async function getDepartments(): Promise<Department[]> {
  * Get a single department by ID
  */
 export async function getDepartmentById(id: string): Promise<Department | null> {
+  assertValidId(id);
   try {
     const client = getTableClient(TABLE_DEPARTMENTS);
     const entity = await client.getEntity<DepartmentEntity>('department', id);
@@ -186,6 +195,7 @@ export async function updateDepartment(
     deptHead?: string;
   }>
 ): Promise<Department> {
+  assertValidId(id);
   const existing = await getDepartmentById(id);
   if (!existing) {
     throw new Error(`Department ${id} not found`);
@@ -211,15 +221,15 @@ export async function updateDepartment(
 export async function deleteDepartment(
   id: string
 ): Promise<{ deleted: boolean; assignedTeamCount: number }> {
+  assertValidId(id);
   const client = getTableClient(TABLE_TEAMS);
-  let assignedCount = 0;
+  const assignedTeams: TeamEntity[] = [];
   for await (const entity of client.listEntities<TeamEntity>({ queryOptions: { filter: `departmentId eq '${id}'` } })) {
-    void entity;
-    assignedCount++;
+    assignedTeams.push(entity as TeamEntity);
   }
 
-  if (assignedCount > 0) {
-    return { deleted: false, assignedTeamCount: assignedCount };
+  if (assignedTeams.length > 0) {
+    return { deleted: false, assignedTeamCount: assignedTeams.length };
   }
 
   const deptClient = getTableClient(TABLE_DEPARTMENTS);

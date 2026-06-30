@@ -22,11 +22,6 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   return NextResponse.json({ data: department });
 }
 
-/**
- * PATCH /api/departments/[id]
- * Updates a department with partial updates
- * Body: { name?: string, color?: string, description?: string, deptHead?: string }
- */
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   if (!UUID_RE.test(id)) {
