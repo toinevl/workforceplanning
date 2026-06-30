@@ -5,7 +5,9 @@ scenario engine that transforms baseline staff data into modeled states.
 
 ## Diagram
 
-**[data-flow.excalidraw](./data-flow.excalidraw)** — editable at [excalidraw.com](https://excalidraw.com)
+![Data Flow](./data-flow.png)
+
+**[Edit in Excalidraw](./data-flow.excalidraw)** — open at [excalidraw.com](https://excalidraw.com)
 
 ## Baseline Data (the source of truth)
 

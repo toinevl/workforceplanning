@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="40 -10 825 660" width="825" height="660">
+<defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto" markerUnits="strokeWidth"><polygon points="0 0, 10 3.5, 0 7" fill="currentColor"/></marker></defs>
+<text x="360" y="38" font-size="28" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#1e1e1e">Security &amp; Identity</text>
+<text x="360" y="61" font-size="14" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#868e96">Threat model, validation &amp; posture</text>
+<rect x="60" y="80" width="780" height="70" stroke="#c92a2a" stroke-width="2" rx="8" ry="8" fill="#ffe3e3"/>
+<text x="450" y="104" font-size="18" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#c92a2a">Authentication Posture</text>
+<text x="74" y="124" font-size="14" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">No authentication (accepted risk AR-01).  Single-tenant internal tool.</text>
+<text x="74" y="141" font-size="14" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">All API routes anonymous.  Auth deferred to future milestone.</text>
+<rect x="60" y="170" width="780" height="180" stroke="#2f9e44" stroke-width="2" rx="8" ry="8" fill="#d3f9d8"/>
+<text x="450" y="194" font-size="18" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#2b8a3e">Input Validation</text>
+<rect x="75" y="204" width="185" height="130" stroke="#2f9e44" stroke-width="2" rx="8" ry="8" fill="#b2f2bb"/>
+<text x="168" y="222" font-size="14" font-family="Cascadia, Consolas, monospace" text-anchor="middle" fill="#1e1e1e">Entity ID</text>
+<text x="85" y="245" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Rule:</text>
+<text x="85" y="260" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">UUID v4 regex</text>
+<text x="85" y="288" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Enforced at:</text>
+<text x="85" y="302" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">API route +</text>
+<text x="85" y="318" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">data layer</text>
+<rect x="270" y="204" width="185" height="130" stroke="#2f9e44" stroke-width="2" rx="8" ry="8" fill="#b2f2bb"/>
+<text x="362" y="222" font-size="14" font-family="Cascadia, Consolas, monospace" text-anchor="middle" fill="#1e1e1e">Color</text>
+<text x="280" y="245" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Rule:</text>
+<text x="280" y="260" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Hex #RRGGBB</text>
+<text x="280" y="288" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Enforced at:</text>
+<text x="280" y="302" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">POST + PATCH</text>
+<text x="280" y="318" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">+ client form</text>
+<rect x="465" y="204" width="185" height="130" stroke="#2f9e44" stroke-width="2" rx="8" ry="8" fill="#b2f2bb"/>
+<text x="558" y="222" font-size="14" font-family="Cascadia, Consolas, monospace" text-anchor="middle" fill="#1e1e1e">Name</text>
+<text x="475" y="238" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Rule:</text>
+<text x="475" y="252" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Non-empty</text>
+<text x="475" y="268" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">trimmed string</text>
+<text x="475" y="295" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Enforced at:</text>
+<text x="475" y="310" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">POST + PATCH</text>
+<rect x="660" y="204" width="185" height="130" stroke="#2f9e44" stroke-width="2" rx="8" ry="8" fill="#b2f2bb"/>
+<text x="752" y="222" font-size="14" font-family="Cascadia, Consolas, monospace" text-anchor="middle" fill="#1e1e1e">Params</text>
+<text x="670" y="238" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Rule:</text>
+<text x="670" y="252" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">ScenarioParams</text>
+<text x="670" y="268" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">type</text>
+<text x="670" y="288" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Enforced at:</text>
+<text x="670" y="302" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Data layer</text>
+<text x="670" y="318" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">(before apply)</text>
+<rect x="60" y="370" width="780" height="130" stroke="#1971c2" stroke-width="2" rx="8" ry="8" fill="#e7f5ff"/>
+<text x="450" y="394" font-size="18" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#1971c2">Closed Threats (by hardening)</text>
+<rect x="75" y="404" width="240" height="84" stroke="#1971c2" stroke-width="2" rx="8" ry="8" fill="#d0ebff"/>
+<text x="195" y="422" font-size="14" font-family="Cascadia, Consolas, monospace" text-anchor="middle" fill="#1971c2">P5-T03</text>
+<text x="85" y="439" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">OData Filter</text>
+<text x="85" y="454" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Injection</text>
+<text x="85" y="460" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#868e96">UUID validation in</text>
+<text x="85" y="474" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#868e96">data layer before</text>
+<text x="85" y="488" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#868e96">OData interpolation</text>
+<rect x="330" y="404" width="240" height="84" stroke="#1971c2" stroke-width="2" rx="8" ry="8" fill="#d0ebff"/>
+<text x="450" y="422" font-size="14" font-family="Cascadia, Consolas, monospace" text-anchor="middle" fill="#1971c2">P5-E01</text>
+<text x="340" y="439" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Unvalidated</text>
+<text x="340" y="454" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Color in CSS</text>
+<text x="340" y="460" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#868e96">Hex format enforced</text>
+<text x="340" y="474" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#868e96">at API routes +</text>
+<text x="340" y="488" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#868e96">client form</text>
+<rect x="585" y="404" width="240" height="84" stroke="#1971c2" stroke-width="2" rx="8" ry="8" fill="#d0ebff"/>
+<text x="705" y="422" font-size="14" font-family="Cascadia, Consolas, monospace" text-anchor="middle" fill="#1971c2">P5-I02</text>
+<text x="595" y="439" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Error → UI</text>
+<text x="595" y="454" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Leakage</text>
+<text x="595" y="460" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#868e96">fetchJSON extracts</text>
+<text x="595" y="474" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#868e96">only json.error string</text>
+<text x="595" y="488" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#868e96">No stack traces</text>
+<rect x="60" y="520" width="780" height="110" stroke="#862e9c" stroke-width="2" rx="8" ry="8" fill="#f3d9fa"/>
+<text x="450" y="544" font-size="18" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#7048e8">Secret Management</text>
+<text x="74" y="574" font-size="13" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Storage connection string → App Service app setting (not logged, not shell-exported)</text>
+<text x="74" y="590" font-size="13" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">GitHub Actions → OIDC federated identity (no long-lived secrets)</text>
+<text x="74" y="606" font-size="13" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">10-year SAS token → REMOVED (blob Run-From-Package path eliminated, wishlist #8)</text>
+</svg>

@@ -5,7 +5,9 @@ and the boundaries between layers.
 
 ## Diagram
 
-**[communication-flow.excalidraw](./communication-flow.excalidraw)** — editable at [excalidraw.com](https://excalidraw.com)
+![Communication Flow](./communication-flow.png)
+
+**[Edit in Excalidraw](./communication-flow.excalidraw)** — open at [excalidraw.com](https://excalidraw.com)
 
 ## Layer Overview
 

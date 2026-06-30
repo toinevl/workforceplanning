@@ -5,7 +5,9 @@ Workforce Planning.
 
 ## Diagram
 
-**[security-identity.excalidraw](./security-identity.excalidraw)** — editable at [excalidraw.com](https://excalidraw.com)
+![Security & Identity](./security-identity.png)
+
+**[Edit in Excalidraw](./security-identity.excalidraw)** — open at [excalidraw.com](https://excalidraw.com)
 
 ## Authentication Posture
 

@@ -4,7 +4,9 @@ Cloud resource inventory, topology, and configuration for Workforce Planning.
 
 ## Diagram
 
-**[azure-resources.excalidraw](./azure-resources.excalidraw)** — editable at [excalidraw.com](https://excalidraw.com)
+![Azure Resources](./azure-resources.png)
+
+**[Edit in Excalidraw](./azure-resources.excalidraw)** — open at [excalidraw.com](https://excalidraw.com)
 
 ## Current Topology
 

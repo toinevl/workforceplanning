@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="40 -10 940 640" width="940" height="640">
+<defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto" markerUnits="strokeWidth"><polygon points="0 0, 10 3.5, 0 7" fill="currentColor"/></marker></defs>
+<text x="360" y="38" font-size="28" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#1e1e1e">Azure Resources</text>
+<text x="360" y="61" font-size="14" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#868e96">Resource topology &amp; configuration</text>
+<rect x="60" y="80" width="700" height="380" stroke="#862e9c" stroke-width="2" rx="8" ry="8" fill="#f3d9fa"/>
+<text x="410" y="104" font-size="16" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#7048e8">Resource Group: rgWorkforcePlan (northeurope)</text>
+<rect x="80" y="120" width="340" height="120" stroke="#1971c2" stroke-width="2" rx="8" ry="8" fill="#e7f5ff"/>
+<text x="250" y="142" font-size="16" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#1971c2">App Service (alicante)</text>
+<text x="94" y="162" font-size="13" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Tier: F1 Free</text>
+<text x="94" y="179" font-size="13" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Runtime: Node 22 Linux</text>
+<text x="94" y="195" font-size="13" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Startup: node server.js</text>
+<text x="94" y="211" font-size="13" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Deploy: zip publish</text>
+<text x="94" y="227" font-size="13" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">WEBSITE_RUN_FROM_PACKAGE</text>
+<rect x="80" y="255" width="340" height="60" stroke="#495057" stroke-width="2" rx="8" ry="8" fill="#f8f9fa"/>
+<text x="84" y="281" font-size="13" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">App Service Plan</text>
+<text x="84" y="297" font-size="13" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">SKU: F1 Free · Auto-created server farm</text>
+<rect x="450" y="120" width="300" height="195" stroke="#2f9e44" stroke-width="2" rx="8" ry="8" fill="#d3f9d8"/>
+<text x="600" y="142" font-size="15" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#2b8a3e">Storage Account (wfpsaplanning)</text>
+<text x="600" y="166" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#868e96">Standard_LRS · StorageV2 · TLS 1.2</text>
+<rect x="462" y="178" width="128" height="24" stroke="#2f9e44" stroke-width="2" rx="8" ry="8" fill="#b2f2bb"/>
+<text x="526" y="194" font-size="11" font-family="Cascadia, Consolas, monospace" text-anchor="middle" fill="#1e1e1e">teams</text>
+<rect x="598" y="178" width="128" height="24" stroke="#2f9e44" stroke-width="2" rx="8" ry="8" fill="#b2f2bb"/>
+<text x="662" y="194" font-size="11" font-family="Cascadia, Consolas, monospace" text-anchor="middle" fill="#1e1e1e">staffMembers</text>
+<rect x="462" y="210" width="128" height="24" stroke="#2f9e44" stroke-width="2" rx="8" ry="8" fill="#b2f2bb"/>
+<text x="526" y="226" font-size="11" font-family="Cascadia, Consolas, monospace" text-anchor="middle" fill="#1e1e1e">departments</text>
+<rect x="598" y="210" width="128" height="24" stroke="#2f9e44" stroke-width="2" rx="8" ry="8" fill="#b2f2bb"/>
+<text x="662" y="226" font-size="11" font-family="Cascadia, Consolas, monospace" text-anchor="middle" fill="#1e1e1e">scenarios</text>
+<rect x="462" y="242" width="128" height="24" stroke="#2f9e44" stroke-width="2" rx="8" ry="8" fill="#b2f2bb"/>
+<text x="526" y="258" font-size="11" font-family="Cascadia, Consolas, monospace" text-anchor="middle" fill="#1e1e1e">scenarioMemberStates</text>
+<rect x="598" y="242" width="128" height="24" stroke="#2f9e44" stroke-width="2" rx="8" ry="8" fill="#b2f2bb"/>
+<text x="662" y="258" font-size="11" font-family="Cascadia, Consolas, monospace" text-anchor="middle" fill="#1e1e1e">scenarioTeamDrivers</text>
+<rect x="462" y="274" width="128" height="24" stroke="#2f9e44" stroke-width="2" rx="8" ry="8" fill="#b2f2bb"/>
+<text x="526" y="290" font-size="11" font-family="Cascadia, Consolas, monospace" text-anchor="middle" fill="#1e1e1e">scenarioSnapshots</text>
+<rect x="598" y="274" width="128" height="24" stroke="#2f9e44" stroke-width="2" rx="8" ry="8" fill="#b2f2bb"/>
+<text x="662" y="290" font-size="11" font-family="Cascadia, Consolas, monospace" text-anchor="middle" fill="#1e1e1e">scenarioAuditEvents</text>
+<g color="#1971c2"><polyline points="420,180 450,180" stroke="#1971c2" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/></g>
+<rect x="790" y="120" width="170" height="100" stroke="#495057" stroke-width="2" rx="8" ry="8" fill="#f8f9fa"/>
+<text x="875" y="142" font-size="15" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#495057">GitHub Actions</text>
+<text x="802" y="170" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">OIDC federated auth</text>
+<text x="802" y="186" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Build standalone zip</text>
+<text x="802" y="200" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">az webapp deploy</text>
+<g color="#495057"><polyline points="790,170 760,170" stroke="#495057" stroke-width="2" stroke-dasharray="8,4" fill="none" marker-end="url(#arrowhead)"/></g>
+<rect x="60" y="480" width="700" height="130" stroke="#c92a2a" stroke-width="2" stroke-dasharray="8,4" rx="8" ry="8" fill="#fff5f5"/>
+<text x="410" y="504" font-size="16" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#c92a2a">Planned (not yet deployed)</text>
+<rect x="75" y="514" width="160" height="40" stroke="#c92a2a" stroke-width="2" stroke-dasharray="8,4" rx="8" ry="8" fill="#ffe3e3"/>
+<text x="155" y="532" font-size="13" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#1e1e1e">Standard tier (S1)</text>
+<text x="155" y="548" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#868e96">wishlist #9</text>
+<rect x="245" y="514" width="160" height="40" stroke="#c92a2a" stroke-width="2" stroke-dasharray="8,4" rx="8" ry="8" fill="#ffe3e3"/>
+<text x="325" y="532" font-size="13" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#1e1e1e">Application Insights</text>
+<text x="325" y="548" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#868e96">wishlist #6</text>
+<rect x="415" y="514" width="160" height="40" stroke="#c92a2a" stroke-width="2" stroke-dasharray="8,4" rx="8" ry="8" fill="#ffe3e3"/>
+<text x="495" y="532" font-size="13" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#1e1e1e">Staging slot + swap</text>
+<text x="495" y="548" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#868e96">wishlist #7</text>
+<rect x="585" y="514" width="160" height="40" stroke="#c92a2a" stroke-width="2" stroke-dasharray="8,4" rx="8" ry="8" fill="#ffe3e3"/>
+<text x="665" y="532" font-size="13" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#1e1e1e">Key Vault + MI</text>
+<text x="665" y="548" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#868e96">wishlist #5</text>
+</svg>

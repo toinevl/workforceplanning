@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="40 -10 820 685" width="820" height="685">
+<defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto" markerUnits="strokeWidth"><polygon points="0 0, 10 3.5, 0 7" fill="currentColor"/></marker></defs>
+<text x="360" y="38" font-size="28" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#1e1e1e">Data Flow</text>
+<text x="360" y="61" font-size="14" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#868e96">Read &amp; write paths through the system</text>
+<rect x="60" y="80" width="780" height="100" stroke="#1971c2" stroke-width="2" rx="8" ry="8" fill="#e7f5ff"/>
+<text x="450" y="105" font-size="18" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#1971c2">Baseline Data (source of truth)</text>
+<rect x="75" y="114" width="230" height="56" stroke="#1971c2" stroke-width="2" rx="8" ry="8" fill="#d0ebff"/>
+<text x="190" y="133" font-size="15" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#1e1e1e">Department</text>
+<text x="190" y="148" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#868e96">partition: 'department'</text>
+<text x="190" y="163" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#868e96">id, name, color, deptHead</text>
+<g color="#1971c2"><polyline points="305,138 320,138" stroke="#1971c2" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/></g>
+<rect x="320" y="114" width="230" height="56" stroke="#1971c2" stroke-width="2" rx="8" ry="8" fill="#d0ebff"/>
+<text x="435" y="133" font-size="15" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#1e1e1e">Team</text>
+<text x="435" y="148" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#868e96">partition: 'team'</text>
+<text x="435" y="163" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#868e96">id, name, departmentId?</text>
+<g color="#1971c2"><polyline points="550,138 565,138" stroke="#1971c2" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/></g>
+<rect x="565" y="114" width="230" height="56" stroke="#1971c2" stroke-width="2" rx="8" ry="8" fill="#d0ebff"/>
+<text x="680" y="133" font-size="15" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#1e1e1e">StaffMember</text>
+<text x="680" y="148" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#868e96">partition: 'member'</text>
+<text x="680" y="163" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#868e96">id, name, baseTeamId (immutable)</text>
+<rect x="60" y="205" width="780" height="160" stroke="#2f9e44" stroke-width="2" rx="8" ry="8" fill="#d3f9d8"/>
+<text x="450" y="230" font-size="18" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#2b8a3e">Read Paths</text>
+<rect x="75" y="239" width="240" height="112" stroke="#2f9e44" stroke-width="2" rx="8" ry="8" fill="#b2f2bb"/>
+<text x="195" y="257" font-size="14" font-family="Cascadia, Consolas, monospace" text-anchor="middle" fill="#1e1e1e">GET /board</text>
+<text x="195" y="274" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#2b8a3e">Scenario board view</text>
+<text x="85" y="283" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">1. Load scenario entity</text>
+<text x="85" y="296" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">2. Load all teams + members</text>
+<text x="85" y="310" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">3. Load scenarioMemberStates</text>
+<text x="85" y="324" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">4. Load scenarioTeamDrivers</text>
+<text x="85" y="338" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">5. Merge: overlay states</text>
+<text x="85" y="352" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">6. Compute per-team FTE/HC</text>
+<rect x="325" y="239" width="240" height="112" stroke="#2f9e44" stroke-width="2" rx="8" ry="8" fill="#b2f2bb"/>
+<text x="445" y="257" font-size="14" font-family="Cascadia, Consolas, monospace" text-anchor="middle" fill="#1e1e1e">GET /departments</text>
+<text x="445" y="274" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#2b8a3e">Listing + rollup</text>
+<text x="335" y="290" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">3 parallel scans:</text>
+<text x="335" y="303" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">departments + teams + members</text>
+<text x="335" y="317" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Group in-memory</text>
+<text x="335" y="331" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Single-pass rollup</text>
+<text x="335" y="345" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Append Unassigned bucket</text>
+<rect x="575" y="239" width="240" height="112" stroke="#2f9e44" stroke-width="2" rx="8" ry="8" fill="#b2f2bb"/>
+<text x="695" y="257" font-size="14" font-family="Cascadia, Consolas, monospace" text-anchor="middle" fill="#1e1e1e">GET /teams?deptId</text>
+<text x="695" y="274" font-size="12" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#2b8a3e">Dept detail</text>
+<text x="585" y="303" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Filter teams by deptId</text>
+<text x="585" y="317" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Compute HC/FTE per team</text>
+<text x="585" y="331" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Return TeamWithStats[]</text>
+<rect x="60" y="390" width="780" height="200" stroke="#f59f00" stroke-width="2" rx="8" ry="8" fill="#fff9db"/>
+<text x="450" y="415" font-size="18" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#e67700">Write Paths</text>
+<rect x="75" y="424" width="240" height="152" stroke="#f59f00" stroke-width="2" rx="8" ry="8" fill="#fff0db"/>
+<text x="195" y="442" font-size="14" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#1e1e1e">Drag member</text>
+<text x="195" y="460" font-size="12" font-family="Cascadia, Consolas, monospace" text-anchor="middle" fill="#e67700">POST /board</text>
+<text x="85" y="475" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">User drags member A→B</text>
+<text x="85" y="489" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e"></text>
+<text x="85" y="502" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">→ upsert scenarioMemberState</text>
+<text x="85" y="516" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">   { scenarioId, memberId, teamId: B }</text>
+<text x="85" y="530" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">→ write auditEvent</text>
+<text x="85" y="544" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">→ invalidate boardState cache</text>
+<text x="85" y="558" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e"></text>
+<text x="85" y="571" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">baseTeamId never touched</text>
+<rect x="325" y="424" width="240" height="152" stroke="#f59f00" stroke-width="2" rx="8" ry="8" fill="#fff0db"/>
+<text x="445" y="442" font-size="14" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#1e1e1e">Apply logic</text>
+<text x="445" y="460" font-size="12" font-family="Cascadia, Consolas, monospace" text-anchor="middle" fill="#e67700">POST /apply</text>
+<text x="335" y="489" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Retirement wave / squad removal</text>
+<text x="335" y="502" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">/ business drivers</text>
+<text x="335" y="516" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e"></text>
+<text x="335" y="530" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">→ compute target states</text>
+<text x="335" y="544" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">→ batch upsert memberStates</text>
+<text x="335" y="558" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">→ audit: scenario_logic_applied</text>
+<rect x="575" y="424" width="240" height="152" stroke="#f59f00" stroke-width="2" rx="8" ry="8" fill="#fff0db"/>
+<text x="695" y="442" font-size="14" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#1e1e1e">Snapshot</text>
+<text x="695" y="460" font-size="12" font-family="Cascadia, Consolas, monospace" text-anchor="middle" fill="#e67700">POST /snapshots</text>
+<text x="585" y="489" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">Save current board state</text>
+<text x="585" y="502" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e"></text>
+<text x="585" y="516" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">→ serialize BoardState → JSON</text>
+<text x="585" y="530" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">→ store snapshot entity</text>
+<text x="585" y="544" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">   (partition: scenarioId)</text>
+<text x="585" y="558" font-size="11" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="start" fill="#1e1e1e">→ immutable once saved</text>
+<rect x="60" y="605" width="780" height="50" stroke="#495057" stroke-width="2" rx="8" ry="8" fill="#f8f9fa"/>
+<text x="450" y="635" font-size="13" font-family="Virgil, Comic Sans MS, cursive, sans-serif" text-anchor="middle" fill="#495057">No FK constraints — integrity enforced in app layer.  DELETE dept checks teams first (409).  Migration guarded by sentinel row.</text>
+</svg>
