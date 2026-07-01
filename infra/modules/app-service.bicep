@@ -35,7 +35,7 @@ resource webApp 'Microsoft.Web/sites@2023-01-01' = {
         }
       ]
       webSocketsEnabled: false
-      alwaysOn: false
+      alwaysOn: true  // Requires Basic+ plan; ignored on Free tier
     }
   }
   tags: {
