@@ -8,10 +8,10 @@ export default defineConfig({
   workers: 1,
   reporter: 'list',
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://127.0.0.1:3000',
     trace: 'on-first-retry',
     webServer: {
-      command: 'npm run azurite >/tmp/azurite.log 2>&1 & sleep 2 && npm run dev',
+      command: 'bash -c "npm run azurite & sleep 3 && npm run dev"',
       port: 3000,
       reuseExistingServer: true,
       stdout: 'pipe',

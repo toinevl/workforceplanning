@@ -11,7 +11,9 @@
     "type-check": "tsc --noEmit",
     "azurite": "npx azurite --silent --location ./azurite-data",
     "azurite:clean": "rm -rf ./azurite-data && mkdir ./azurite-data && npm run azurite",
-    "dev:full": "npm run azurite & sleep 2 && npm run dev"
+    "dev:full": "npm run azurite & sleep 2 && npm run dev",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@azure/data-tables": "^13.3.2",

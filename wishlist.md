@@ -26,3 +26,4 @@ tags: [wishlist]
 - [ ] (C) Bump Bicep API versions (2023-01-01 → 2025-03-01) for Web/sites, serverFarms, Storage +infra @me #15
 - [ ] (D) Run npm audit fix to resolve @babel/core advisory (1 high) +security @me #16
 - [ ] (D) Run npm update to pull 14 patch-level dependency updates +maintenance @me #17
+- [x] (D) Integrate Playwright E2E testing into CI +testing @me #18

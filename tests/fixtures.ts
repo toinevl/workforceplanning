@@ -1,0 +1,33 @@
+import { test as base, expect, type Page, type APIRequestContext } from '@playwright/test';
+
+/**
+ * Test fixture that ensures the app has seeded data before tests run.
+ * Uses Playwright's APIRequestContext which respects the webServer config.
+ */
+
+const SEED_TEAMS = [
+  { name: 'Alpha Squad', color: '#3b82f6', members: 8, retirees: 1, squad: 2 },
+  { name: 'Beta Team', color: '#ef4444', members: 6, retirees: 0, squad: 1 },
+  { name: 'Gamma Crew', color: '#10b981', members: 5, retirees: 2, squad: 0 },
+];
+
+type AppFixtures = {
+  seededPage: Page;
+};
+
+export const test = base.extend<AppFixtures>({
+  seededPage: async ({ page, request }, use) => {
+    // Seed data before navigating, using Playwright's request context
+    const res = await request.post('/api/seed', {
+      data: { teams: SEED_TEAMS, resetFirst: true },
+    });
+
+    if (!res.ok()) {
+      throw new Error(`Seed failed: ${res.status()} ${await res.text()}`);
+    }
+
+    await use(page);
+  },
+});
+
+export { expect };
