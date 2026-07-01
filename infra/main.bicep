@@ -42,8 +42,33 @@ module app 'modules/app-service.bicep' = {
     location: location
     serverFarmId: plan.outputs.id
     storageConnectionString: storage.outputs.connectionString
+    appInsightsConnectionString: insights.outputs.connectionString
+    appInsightsInstrumentationKey: insights.outputs.instrumentationKey
+  }
+}
+
+module insights 'modules/application-insights.bicep' = {
+  name: 'appInsights'
+  params: {
+    name: '${appName}-ai-${environment}'
+    location: location
+    environment: environment
+  }
+}
+
+module stagingSlot 'modules/app-service-slot.bicep' = {
+  name: 'stagingSlot'
+  params: {
+    name: appServiceName
+    location: location
+    serverFarmId: plan.outputs.id
+    storageConnectionString: storage.outputs.connectionString
+    appInsightsConnectionString: insights.outputs.connectionString
+    appInsightsInstrumentationKey: insights.outputs.instrumentationKey
   }
 }
 
 output appUrl string = 'https://${app.outputs.defaultHostname}'
+output stagingUrl string = 'https://${stagingSlot.outputs.defaultHostname}'
 output storageAccountName string = storage.outputs.name
+output appInsightsName string = insights.outputs.name

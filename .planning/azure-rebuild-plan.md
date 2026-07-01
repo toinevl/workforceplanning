@@ -127,8 +127,9 @@ Dependencies: Phase 1 complete; resource group/core infra unchanged
 - Downgrade app service plan SKU if cost/constraint issue arises
 
 ## Phase 3: Observability (Application Insights + alerts)
-Wishlist: `#16`
+Wishlist: `#16`→`#6`
 Complexity: medium
+Status: **DONE** (App Insights resource created + wired to live app 2026-07-01; Bicep module updated with instrumentationKey output; app logging enabled)
 Dependencies: Phase 2; new App Service app settings must reference Instrumentation Key or connection string securely
 
 ### Tasks
@@ -148,9 +149,15 @@ Dependencies: Phase 2; new App Service app settings must reference Instrumentati
 - Remove App Insights app settings; fall back to platform-only logging
 
 ## Phase 4: Deployment Safety + Promotion
-Wishlist: `#17`
+Wishlist: `#17`→`#7`
 Complexity: medium-high
+Status: **PARTIALLY DONE** (health-check gate added to deploy workflow 2026-07-01; staging slot IaC written; slot swap deferred — B1 Basic does not support deployment slots, requires Standard S1+)
 Dependencies: Phases 1-3; environment names and slots must exist before slot-swap logic
+
+### Note on slots
+Azure App Service deployment slots require Standard tier or higher. The live app is on B1 Basic.
+The slot module (app-service-slot.bicep) and main.bicep wiring are ready for when the plan upgrades to S1.
+Until then, the deploy workflow uses direct-to-prod with a post-deploy health-check gate (12 retries, 10s interval).
 
 ### Tasks
 - Add staging slot in IaC

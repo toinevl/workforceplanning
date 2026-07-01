@@ -103,9 +103,19 @@ export default function DepartmentDetailPage() {
                   ))}
                 </div>
               ) : (
-                <p className="mt-6 text-sm text-gray-500">
-                  No teams assigned to this department yet. Go to Settings to assign teams.
-                </p>
+                <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-6 text-center">
+                  <p className="text-sm text-gray-600">No teams assigned to this department yet.</p>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Go to{' '}
+                    <Link
+                      href="/settings"
+                      className="font-medium text-gray-900 underline underline-offset-2 hover:text-gray-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 rounded"
+                    >
+                      Settings
+                    </Link>{' '}
+                    to assign teams.
+                  </p>
+                </div>
               )}
             </div>
           </>

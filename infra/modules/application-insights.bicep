@@ -23,3 +23,4 @@ resource insights 'Microsoft.Insights/components@2020-02-02' = {
 output id string = insights.id
 output name string = insights.name
 output connectionString string = insights.properties.ConnectionString
+output instrumentationKey string = insights.properties.InstrumentationKey

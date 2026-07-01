@@ -5,8 +5,8 @@ param storageConnectionString string
 param appInsightsConnectionString string = ''
 param appInsightsInstrumentationKey string = ''
 
-resource webApp 'Microsoft.Web/sites@2023-01-01' = {
-  name: name
+resource stagingSlot 'Microsoft.Web/sites/slots@2023-01-01' = {
+  name: '${name}/staging'
   location: location
   properties: {
     serverFarmId: serverFarmId
@@ -45,14 +45,15 @@ resource webApp 'Microsoft.Web/sites@2023-01-01' = {
         }
       ]
       webSocketsEnabled: false
-      alwaysOn: true  // Requires Basic+ plan; ignored on Free tier
+      alwaysOn: true
     }
   }
   tags: {
     application: 'workforceplanning'
+    environment: 'staging'
   }
 }
 
-output defaultHostname string = webApp.properties.defaultHostName
-output id string = webApp.id
-output name string = webApp.name
+output defaultHostname string = stagingSlot.properties.defaultHostName
+output id string = stagingSlot.id
+output name string = stagingSlot.name
