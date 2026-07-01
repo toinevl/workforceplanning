@@ -5,7 +5,7 @@ param storageConnectionString string
 param appInsightsConnectionString string = ''
 param appInsightsInstrumentationKey string = ''
 
-resource stagingSlot 'Microsoft.Web/sites/slots@2023-01-01' = {
+resource stagingSlot 'Microsoft.Web/sites/slots@2025-03-01' = {
   name: '${name}/staging'
   location: location
   properties: {

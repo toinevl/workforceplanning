@@ -8,7 +8,7 @@ param skuName string = 'B1'
 var tier = skuName == 'B1' ? 'Basic' : 'Free'
 var family = skuName == 'B1' ? 'B' : 'F'
 
-resource appServicePlan 'Microsoft.Web/serverfarms@2023-01-01' = {
+resource appServicePlan 'Microsoft.Web/serverfarms@2025-03-01' = {
   name: name
   location: location
   sku: {
