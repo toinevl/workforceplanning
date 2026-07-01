@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  NODE_VERSION: '22'
+  AZURE_STORAGE_CONNECTION_STRING: UseDevelopmentStorage=true
+
 jobs:
   ci:
     runs-on: ubuntu-latest
@@ -34,6 +38,19 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
 
+    services:
+      azurite:
+        image: mcr.microsoft.com/azure-storage/azurite
+        ports:
+          - 10000:10000
+          - 10001:10001
+          - 10002:10002
+        options: >-
+          --health-cmd="curl -f http://localhost:10000 || exit 1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -42,6 +59,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'npm'
 
       - name: Install
         run: npm ci
@@ -51,6 +69,8 @@ jobs:
 
       - name: Run E2E tests
         run: npm run test:e2e
+        env:
+          AZURE_STORAGE_CONNECTION_STRING: UseDevelopmentStorage=true
 
       - name: Upload test results
         if: always()
