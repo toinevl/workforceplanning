@@ -1,4 +1,4 @@
-import { test as base, expect, type Page, type APIRequestContext } from '@playwright/test';
+import { test as base, expect, type Page } from '@playwright/test';
 
 /**
  * Test fixture that ensures the app has seeded data before tests run.
@@ -16,7 +16,7 @@ type AppFixtures = {
 };
 
 export const test = base.extend<AppFixtures>({
-  seededPage: async ({ page, request }, use) => {
+  seededPage: async ({ page, request }, usePage) => {
     // Seed data before navigating, using Playwright's request context
     const res = await request.post('/api/seed', {
       data: { teams: SEED_TEAMS, resetFirst: true },
@@ -26,7 +26,7 @@ export const test = base.extend<AppFixtures>({
       throw new Error(`Seed failed: ${res.status()} ${await res.text()}`);
     }
 
-    await use(page);
+    await usePage(page);
   },
 });
 

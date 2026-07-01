@@ -11,12 +11,12 @@ export default defineConfig({
     baseURL: 'http://127.0.0.1:3000',
     trace: 'on-first-retry',
     webServer: {
-      command: 'bash -c "npm run azurite & sleep 3 && npm run dev"',
+      command: 'bash -lc "npm run azurite:clean >/tmp/azurite.log 2>&1 & sleep 4 && npm run dev -- -p 3000"',
       port: 3000,
-      reuseExistingServer: true,
-      stdout: 'pipe',
-      stderr: 'pipe',
-      timeout: 120000,
+      reuseExistingServer: false,
+      stdout: 'ignore',
+      stderr: 'ignore',
+      timeout: 180000,
     },
   },
   projects: [
