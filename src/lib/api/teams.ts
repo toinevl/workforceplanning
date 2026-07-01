@@ -6,7 +6,9 @@ import { entityToTeam } from '../db/mappers';
 export async function getAllTeams(): Promise<Team[]> {
   const client = getTableClient(TABLE_TEAMS);
   const teams: Team[] = [];
-  for await (const entity of client.listEntities<TeamEntity>()) {
+  for await (const entity of client.listEntities<TeamEntity>({
+    queryOptions: { filter: "PartitionKey eq 'team'" },
+  })) {
     teams.push(entityToTeam(entity as TeamEntity));
   }
   return teams.sort((a, b) => a.sortOrder - b.sortOrder);

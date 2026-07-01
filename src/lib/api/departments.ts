@@ -13,6 +13,11 @@ import { entityToDepartment } from '../db/mappers';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+/** Escape single quotes for safe OData filter interpolation */
+function escapeSingleQuotes(value: string): string {
+  return value.replace(/'/g, "''");
+}
+
 function assertValidId(id: string) {
   if (!UUID_RE.test(id)) {
     throw new Error(`Invalid id: ${id}`);
@@ -25,7 +30,9 @@ function assertValidId(id: string) {
 export async function getDepartments(): Promise<Department[]> {
   const client = getTableClient(TABLE_DEPARTMENTS);
   const departments: Department[] = [];
-  for await (const entity of client.listEntities<DepartmentEntity>()) {
+  for await (const entity of client.listEntities<DepartmentEntity>({
+    queryOptions: { filter: "PartitionKey eq 'department'" },
+  })) {
     departments.push(entityToDepartment(entity as DepartmentEntity));
   }
   return departments.sort((a, b) => a.sortOrder - b.sortOrder);
@@ -224,7 +231,9 @@ export async function deleteDepartment(
   assertValidId(id);
   const client = getTableClient(TABLE_TEAMS);
   const assignedTeams: TeamEntity[] = [];
-  for await (const entity of client.listEntities<TeamEntity>({ queryOptions: { filter: `departmentId eq '${id}'` } })) {
+  for await (const entity of client.listEntities<TeamEntity>({
+    queryOptions: { filter: `PartitionKey eq 'team' and departmentId eq '${escapeSingleQuotes(id)}'` },
+  })) {
     assignedTeams.push(entity as TeamEntity);
   }
 

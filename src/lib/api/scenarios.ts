@@ -59,7 +59,9 @@ export async function getScenarioList(): Promise<ScenarioSummary[]> {
   const memberStateClient = getTableClient(TABLE_MEMBER_STATES);
 
   const scenarios: Scenario[] = [];
-  for await (const e of scenarioClient.listEntities<ScenarioEntity>()) {
+  for await (const e of scenarioClient.listEntities<ScenarioEntity>({
+    queryOptions: { filter: "PartitionKey eq 'scenario'" },
+  })) {
     scenarios.push(entityToScenario(e as ScenarioEntity));
   }
 

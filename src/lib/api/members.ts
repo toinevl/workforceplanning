@@ -21,7 +21,9 @@ function entityToMember(e: StaffMemberEntity): StaffMember {
 export async function getAllMembers(): Promise<StaffMember[]> {
   const client = getTableClient(TABLE_STAFF);
   const members: StaffMember[] = [];
-  for await (const entity of client.listEntities<StaffMemberEntity>()) {
+  for await (const entity of client.listEntities<StaffMemberEntity>({
+    queryOptions: { filter: "PartitionKey eq 'member'" },
+  })) {
     members.push(entityToMember(entity as StaffMemberEntity));
   }
   return members;
