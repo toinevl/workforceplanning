@@ -56,7 +56,7 @@ jobs:
 
       - name: Start Azurite
         run: |
-          npx azurite --silent --location ./.azurite-ci --port 10000 --queuePort 10001 --tablePort 10002 >/tmp/azurite.log 2>&1 &
+          npx azurite --silent --location ./.azurite-ci >/tmp/azurite.log 2>&1 &
           for i in $(seq 1 120); do
             if (echo > /dev/tcp/127.0.0.1/10002) >/dev/null 2>&1; then
               echo 'Azurite ready'
