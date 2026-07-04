@@ -23,6 +23,8 @@ Open http://localhost:3000. Seed sample data after first launch:
 npm run dev:seed
 ```
 
+For the full seed pipeline (CLI → API → logic, custom team configs, options reference), see [docs/seed-scripting.md](docs/seed-scripting.md).
+
 Copy `.env.local.example` to `.env.local` for local overrides (defaults work out of the box with Azurite).
 
 ## Key commands
