@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getTableClient } from '../db/client';
 import { REMOVED_SENTINEL, TABLE_AUDIT_EVENTS, type AuditEventEntity } from '../db/tables';
 import type { AuditEvent, AuditEventType } from '../types/domain';
+import { entityToAuditEvent } from '../db/mappers';
 
 interface CreateAuditEventInput {
   scenarioId: string;
@@ -17,26 +18,6 @@ interface CreateAuditEventInput {
 function normalizeTeamId(teamId?: string | null): string | undefined {
   if (teamId === null) return REMOVED_SENTINEL;
   return teamId;
-}
-
-function denormalizeTeamId(teamId?: string): string | null | undefined {
-  if (teamId === REMOVED_SENTINEL) return null;
-  return teamId;
-}
-
-function entityToAuditEvent(e: AuditEventEntity): AuditEvent {
-  return {
-    id: e.rowKey,
-    scenarioId: e.partitionKey,
-    eventType: e.eventType as AuditEventType,
-    createdAt: e.createdAt,
-    actor: e.actor,
-    note: e.note,
-    memberId: e.memberId,
-    fromTeamId: denormalizeTeamId(e.fromTeamId),
-    toTeamId: denormalizeTeamId(e.toTeamId),
-    payload: e.payloadJson ? JSON.parse(e.payloadJson) : undefined,
-  };
 }
 
 export async function createAuditEvent(input: CreateAuditEventInput): Promise<AuditEvent> {

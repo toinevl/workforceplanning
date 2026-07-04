@@ -6,6 +6,10 @@ import { getScenarioBoardState, getScenario, updateScenario } from './scenarios'
 import { createAuditEvent } from './audit';
 import type { ScenarioParams } from '../types/params';
 
+// SnapshotEntity → SnapshotSummary is a clean 1:1 projection, but SnapshotEntity
+// → ScenarioSnapshot requires parsing JSON blobs into a composite BoardState.
+// Both are kept inline here; SnapshotEntity is registered as `null` (composite)
+// in the EntityMapperRegistry exhaustiveness guard in src/lib/db/mappers.ts.
 function entityToSummary(e: SnapshotEntity): SnapshotSummary {
   return {
     id: e.rowKey,

@@ -10,48 +10,7 @@ import type { Scenario, StaffMember, Team, ScenarioMemberState, BoardState, Team
 import type { ScenarioParams } from '../types/params';
 import { defaultParams } from '../types/params';
 import { createAuditEvent, deleteAuditEvents } from './audit';
-import { entityToTeam } from '../db/mappers';
-
-function entityToScenario(e: ScenarioEntity): Scenario {
-  return {
-    id: e.rowKey,
-    type: e.type as Scenario['type'],
-    name: e.name,
-    description: e.description,
-    status: e.status as Scenario['status'],
-    parameters: e.parameters,
-    createdAt: e.createdAt,
-    updatedAt: e.updatedAt,
-  };
-}
-
-function entityToMember(e: StaffMemberEntity): StaffMember {
-  return {
-    id: e.rowKey,
-    name: e.name,
-    role: e.role,
-    fte: e.fte,
-    isSquad: e.isSquad,
-    startDate: e.startDate,
-    birthYear: e.birthYear,
-    retirementEligibleYear: e.retirementEligibleYear,
-    baseTeamId: e.baseTeamId,
-    tags: JSON.parse(e.tags || '[]'),
-    notes: e.notes,
-  };
-}
-
-function entityToScenarioMemberState(state: MemberStateEntity): ScenarioMemberState {
-  return {
-    scenarioId: state.partitionKey,
-    memberId: state.rowKey,
-    teamId: state.teamId === REMOVED_SENTINEL ? null : state.teamId,
-    status: state.status as ScenarioMemberState['status'],
-    overrideRole: state.overrideRole,
-    businessDriver: state.businessDriver as ScenarioMemberState['businessDriver'],
-    updatedAt: state.updatedAt,
-  };
-}
+import { entityToTeam, entityToStaffMember, entityToScenario, entityToScenarioMemberState } from '../db/mappers';
 
 export async function getScenarioList(): Promise<ScenarioSummary[]> {
   const scenarioClient = getTableClient(TABLE_SCENARIOS);
@@ -135,7 +94,7 @@ export async function getScenarioBoardState(scenarioId: string): Promise<BoardSt
       const client = getTableClient(TABLE_STAFF);
       const members: StaffMember[] = [];
       for await (const e of client.listEntities<StaffMemberEntity>()) {
-        members.push(entityToMember(e as StaffMemberEntity));
+        members.push(entityToStaffMember(e as StaffMemberEntity));
       }
       return members;
     })(),

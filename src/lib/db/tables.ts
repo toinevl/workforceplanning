@@ -107,3 +107,19 @@ export interface AuditEventEntity extends TableEntity {
 
 // Sentinel value for "member removed from all teams"
 export const REMOVED_SENTINEL = 'REMOVED';
+
+// Registry of every entity type. Adding a new entity interface above requires
+// adding it here, which in turn forces mappers.ts to register a mapper
+// (see EntityMapperRegistry exhaustiveness guard).
+export interface EntityMap {
+  Team: TeamEntity;
+  StaffMember: StaffMemberEntity;
+  Department: DepartmentEntity;
+  Scenario: ScenarioEntity;
+  MemberState: MemberStateEntity;
+  TeamDriver: TeamDriverEntity;
+  Snapshot: SnapshotEntity;
+  AuditEvent: AuditEventEntity;
+}
+
+export type EntityTypeName = keyof EntityMap;
