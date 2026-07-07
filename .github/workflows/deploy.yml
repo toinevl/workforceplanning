@@ -54,21 +54,56 @@ jobs:
           cp -r public .next/standalone/
           cp -r .next/static .next/standalone/.next/
 
-      - name: Deploy via zip publish (Run-From-Package)
+      - name: Deploy via blob storage (Run-From-Package)
         env:
           APP_NAME: ${{ secrets.AZURE_APP_NAME }}
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+          CONN_STR: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
         run: |
+          STORAGE_ACCOUNT=$(echo "$CONN_STR" | grep -oP '(?<=AccountName=)[^;]+')
+          ACCOUNT_KEY=$(echo "$CONN_STR" | grep -oP '(?<=AccountKey=)[^;]+')
+
           cd .next/standalone
           zip -r ../../deploy.zip . -q
           cd ../..
 
-          az webapp deploy \
-            --resource-group "$RESOURCE_GROUP" \
-            --name "$APP_NAME" \
-            --type zip \
-            --src-path deploy.zip \
+          az storage container create \
+            --name deployments \
+            --account-name "$STORAGE_ACCOUNT" \
+            --account-key "$ACCOUNT_KEY" \
+            --output none 2>/dev/null || true
+
+          az storage blob upload \
+            --account-name "$STORAGE_ACCOUNT" \
+            --account-key "$ACCOUNT_KEY" \
+            --container-name deployments \
+            --name deploy-latest.zip \
+            --file deploy.zip \
+            --overwrite \
             --output none
+
+          EXPIRY=$(date -u -d "+10 years" +%Y-%m-%dT%H:%MZ)
+          SAS=$(az storage blob generate-sas \
+            --account-name "$STORAGE_ACCOUNT" \
+            --account-key "$ACCOUNT_KEY" \
+            --container-name deployments \
+            --name deploy-latest.zip \
+            --permissions r \
+            --expiry "$EXPIRY" \
+            --https-only \
+            -o tsv)
+
+          BLOB_URL="https://${STORAGE_ACCOUNT}.blob.core.windows.net/deployments/deploy-latest.zip?${SAS}"
+
+          az webapp config appsettings set \
+            --name "$APP_NAME" \
+            --resource-group "$RESOURCE_GROUP" \
+            --settings "WEBSITE_RUN_FROM_PACKAGE=$BLOB_URL" \
+            --output none
+
+          az webapp restart \
+            --name "$APP_NAME" \
+            --resource-group "$RESOURCE_GROUP"
 
       - name: Health check production
         env:
