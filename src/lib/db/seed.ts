@@ -1,5 +1,5 @@
 import { TableClient } from '@azure/data-tables';
-import { getTableClient, ensureTablesExist, getConnectionString } from './client';
+import { getTableClient, ensureTablesExist } from './client';
 import {
   TABLE_TEAMS, TABLE_STAFF, TABLE_SCENARIOS, TABLE_DEPARTMENTS,
   type TeamEntity, type StaffMemberEntity, type ScenarioEntity, type DepartmentEntity,
@@ -245,13 +245,6 @@ export async function runSeed(options?: SeedOptions): Promise<{ teams: number; m
   const snapshotsClient = getTableClient('scenarioSnapshots');
 
   if (options?.resetFirst) {
-    // Production safety guard: prevent accidental deletion in production
-    const connectionString = getConnectionString();
-    const isProduction = process.env.NODE_ENV === 'production' || !connectionString.includes('UseDevelopmentStorage');
-    if (isProduction) {
-      throw new Error('Cannot reset seed on production connection string. This would delete all live teams data.');
-    }
-
     await Promise.all([
       deleteByPartitionKey(teamClient, 'team'),
       deleteByPartitionKey(staffClient, 'member'),
