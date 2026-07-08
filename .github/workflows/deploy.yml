@@ -53,6 +53,9 @@ jobs:
         run: |
           cp -r public .next/standalone/
           cp -r .next/static .next/standalone/.next/
+          # Override start script: standalone bundle has no `next` binary;
+          # boots via the self-contained server.js
+          node -e "const p=require('./.next/standalone/package.json'); p.scripts.start='node server.js'; require('fs').writeFileSync('./.next/standalone/package.json', JSON.stringify(p,null,2))"
 
       - name: Deploy via blob storage (Run-From-Package) to staging slot
         env:
