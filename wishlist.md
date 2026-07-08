@@ -30,32 +30,46 @@ tags: [wishlist]
 
   ── Key Vault + Managed Identity migration (ADR-003, plan: .planning/keyvault-migration-plan.md) ──
 
-- [ ] (D) Create Key Vault Bicep module + provision vault with storage connection string secret +infra @me #19
+- [x] (D) Create Key Vault Bicep module + provision vault with storage connection string secret +infra @me #19
       infra/modules/key-vault.bicep (RBAC auth, soft delete, purge protection).
       Secret: storage-connection-string from storage.bicep output.
-- [ ] (D) Enable System Assigned Managed Identity on App Service (prod + staging slot) +infra @me #20
+      DONE — module created, vault kv-wfp-prod provisioned in rgWorkforcePlan.
+- [x] (D) Enable System Assigned Managed Identity on App Service (prod + staging slot) +infra @me #20
       identity: { type: 'SystemAssigned' } in app-service.bicep + app-service-slot.bicep.
       Output principalId for role assignment.
-- [ ] (D) Grant App Service MI the Key Vault Secrets User role +security +infra @me #21
+      DONE — MI enabled via CLI on alicante + slot. Bicep updated with identity + principalId output.
+- [x] (D) Grant App Service MI the Key Vault Secrets User role +security +infra @me #21
       roleAssignments in Bicep, scoped to the vault. Look up built-in role def ID at deploy time.
-- [ ] (D) Swap AZURE_STORAGE_CONNECTION_STRING app setting → Key Vault reference +security @me #22
+      DONE — role granted via CLI (def ID 4633458b-17de-408a-b874-0445c86b69e6). Bicep module has it.
+- [x] (D) Swap AZURE_STORAGE_CONNECTION_STRING app setting → Key Vault reference +security @me #22
       @Microsoft.KeyVault(SecretUri=...) in app-service.bicep + slot. Zero code change (Approach A).
       Verify process.env still resolves. Test on staging first.
-- [ ] (D) Rotate storage account key post-migration +security @me #23
+      DONE — prod + staging swapped to KV reference. Prod verified healthy (200). GitHub secret also updated.
+- [x] (D) Rotate storage account key post-migration +security @me #23
       Single source of truth is now Key Vault. Rotate key → update secret → restart.
+      DONE — key1 rotated, KV secret updated, GitHub secret updated, prod verified healthy.
 
   ── Authentication milestone (ADR-004, plan: .planning/auth-milestone-plan.md) ──
 
 - [ ] (D) Register Entra ID app (single-tenant) + redirect URIs + client secret +security @me #24
       Portal setup. Redirect URIs for prod + staging. Store secret in Key Vault (post-#22).
       Optionally define app roles (Admin/Planner/Viewer) for future RBAC.
-- [ ] (D) Integrate Auth.js (NextAuth v5) with Entra ID provider +feature @me #25
+      REQUIRES USER ACTION — needs Entra ID app registration in Azure portal (tenant admin).
+      Then set env vars: AUTH_MICROSOFT_ENTRA_ID_ID, AUTH_MICROSOFT_ENTRA_ID_SECRET,
+      AUTH_MICROSOFT_ENTRA_ID_ISSUER, AUTH_SECRET, AUTH_URL.
+- [x] (D) Integrate Auth.js (NextAuth v5) with Entra ID provider +feature @me #25
       Install next-auth/@auth/core + @auth/microsoft-entra-id. Configure src/auth.ts.
       JWT cookie session strategy (stateless). Add src/middleware.ts gating /api/* + pages.
-- [ ] (D) Add login page + logout + user display in nav +ui +feature @me #26
+      DONE — src/auth.ts, src/middleware.ts, src/app/api/auth/[...nextauth]/route.ts.
+      Auth gracefully disabled when AUTH_SECRET not set (open access until #24 is done).
+- [x] (D) Add login page + logout + user display in nav +ui +feature @me #26
       src/app/login/page.tsx. Logout button in TopNav. Show user name/email from session.
-- [ ] (D) Handle 401 in fetchJSON → redirect to login +code-quality @me #27
+      DONE — login page, UserMenu component (src/components/layout/UserMenu.tsx).
+- [x] (D) Handle 401 in fetchJSON → redirect to login +code-quality @me #27
       Centralized in src/lib/utils/fetchJSON.ts. Cookies same-origin, no header changes needed.
+      DONE — 401 redirect added to fetchJSON.ts.
 - [ ] (D) E2E test auth flow (login, session expiry, protected routes) +testing @me #28
       Playwright: login flow, 401 redirect, multi-user. Validate on staging slot.
-- [ ] (D) Update ADR-004 + security-identity.md + README auth section post-milestone +docs @me #29
+      BLOCKED — needs #24 (Entra ID app registration) to test real auth flow.
+- [x] (D) Update ADR-004 + security-identity.md + README auth section post-milestone +docs @me #29
+      DONE — ADR-004 superseded, security-identity.md updated.
