@@ -10,6 +10,7 @@ import {
 } from '@/lib/hooks/useDepartments';
 import { DepartmentForm } from './DepartmentForm';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { extractErrorMessage } from '@/lib/utils/extractErrorMessage';
 import type { Department } from '@/lib/types/domain';
 
 function parseDeleteError(error: unknown): { message: string; assignedTeamCount?: number } {
@@ -18,11 +19,13 @@ function parseDeleteError(error: unknown): { message: string; assignedTeamCount?
     const parsed = JSON.parse(error.message) as { error?: string; assignedTeamCount?: number };
     const count = parsed.assignedTeamCount ?? 0;
     return {
-      message: `Cannot delete: ${count} team${count === 1 ? '' : 's'} ${count === 1 ? 'is' : 'are'} assigned to this department.`,
+      message: count > 0
+        ? `Cannot delete: ${count} team${count === 1 ? '' : 's'} ${count === 1 ? 'is' : 'are'} assigned to this department.`
+        : parsed.error ?? 'Delete failed.',
       assignedTeamCount: count,
     };
   } catch {
-    return { message: error.message };
+    return { message: error.message || 'Delete failed.' };
   }
 }
 
@@ -208,10 +211,12 @@ export function DepartmentsSection() {
     deleteMutation.reset();
   }
 
-  const createErrorMsg =
-    createMutation.error instanceof Error ? createMutation.error.message : null;
-  const updateErrorMsg =
-    updateMutation.error instanceof Error ? updateMutation.error.message : null;
+  const createErrorMsg = createMutation.error
+    ? extractErrorMessage(createMutation.error, 'Failed to create department')
+    : null;
+  const updateErrorMsg = updateMutation.error
+    ? extractErrorMessage(updateMutation.error, 'Failed to update department')
+    : null;
 
   const deleteDialogDescription = deletePendingDept
     ? `"${deletePendingDept.name}" may have teams assigned. Deleting it cannot be undone. Are you sure?`
@@ -258,7 +263,7 @@ export function DepartmentsSection() {
           <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
             <p className="text-sm text-red-700">
               Failed to load departments.{' '}
-              {listQuery.error instanceof Error ? listQuery.error.message : ''}
+              {extractErrorMessage(listQuery.error)}
             </p>
           </div>
         )}

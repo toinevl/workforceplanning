@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useDepartmentList, useMigrateDepartments } from '@/lib/hooks/useDepartments';
+import { extractErrorMessage } from '@/lib/utils/extractErrorMessage';
 
 interface BulkMigrateButtonProps {
   unassignedTeamCount: number;
@@ -58,7 +59,7 @@ export function BulkMigrateButton({ unassignedTeamCount }: BulkMigrateButtonProp
         setDialogOpen(false);
       },
       onError: (err) => {
-        setMigrationError(err instanceof Error ? err.message : 'Migration failed');
+        setMigrationError(extractErrorMessage(err, 'Migration failed'));
       },
     });
   }

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useId, useState } from 'react';
 import { ScenarioCard } from '@/components/scenarios/ScenarioCard';
 import { useScenarioList, useCreateScenario, useDeleteScenario } from '@/lib/hooks/useScenario';
+import { extractErrorMessage } from '@/lib/utils/extractErrorMessage';
 import type { ScenarioType } from '@/lib/types/domain';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 
@@ -172,7 +173,7 @@ export function ScenarioDashboard() {
             </div>
 
             {createMutation.isError && (
-              <p className="text-xs text-red-500 mt-2">{(createMutation.error as Error).message}</p>
+              <p className="text-xs text-red-500 mt-2">{extractErrorMessage(createMutation.error, 'Failed to create scenario')}</p>
             )}
           </div>
         </div>
@@ -188,7 +189,7 @@ export function ScenarioDashboard() {
         }
         confirmLabel="Delete"
         pending={deleteMutation.isPending}
-        error={deleteMutation.isError ? (deleteMutation.error as Error).message : null}
+        error={deleteMutation.isError ? extractErrorMessage(deleteMutation.error, 'Failed to delete scenario') : null}
         onClose={() => setDeleteTarget(null)}
         onConfirm={() => {
           if (!deleteTarget) return;

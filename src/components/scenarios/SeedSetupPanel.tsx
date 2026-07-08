@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { SeedTeamConfig } from '@/lib/types/seed';
+import { extractErrorMessage } from '@/lib/utils/extractErrorMessage';
 
 const STORAGE_KEY = 'workforceplanning.seedSetup.v1';
 
@@ -168,7 +169,7 @@ export function SeedSetupPanel({ isPending, result, error, onSeed }: SeedSetupPa
       <div className="flex flex-col gap-3 border-t border-gray-300 bg-gray-50/80 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
         <div className="min-h-5 text-sm">
           {validationMessage && <span className="text-red-600">{validationMessage}</span>}
-          {!validationMessage && error && <span className="text-red-600">{error.message}</span>}
+          {!validationMessage && error && <span className="text-red-600">{extractErrorMessage(error)}</span>}
           {!validationMessage && !error && result && (
             <span className="text-emerald-700">
               Seeded {result.teams} teams, {result.members} members, and {result.scenarios} scenarios.

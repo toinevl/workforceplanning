@@ -6,6 +6,7 @@ import type { Team } from '@/lib/types/domain';
 import { useDepartmentList } from '@/lib/hooks/useDepartments';
 import { useUpdateTeam } from '@/lib/hooks/useTeams';
 import { SectionLabel } from '@/components/ui/SectionLabel';
+import { extractErrorMessage } from '@/lib/utils/extractErrorMessage';
 
 interface TeamFormModalProps {
   team: Team;
@@ -42,7 +43,7 @@ export function TeamFormModal({ team, onClose, onSuccess }: TeamFormModalProps) 
           onClose();
         },
         onError: (err) => {
-          setSubmitError(err instanceof Error ? err.message : 'Failed to update team');
+          setSubmitError(extractErrorMessage(err, 'Failed to update team'));
         },
       }
     );
@@ -114,7 +115,7 @@ export function TeamFormModal({ team, onClose, onSuccess }: TeamFormModalProps) 
             )}
             {deptError && (
               <p className="text-xs text-red-600">
-                {deptError instanceof Error ? deptError.message : 'Failed to load departments'}
+                {extractErrorMessage(deptError, 'Failed to load departments')}
               </p>
             )}
           </div>

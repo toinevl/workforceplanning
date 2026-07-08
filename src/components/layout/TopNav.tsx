@@ -7,6 +7,7 @@ import { useWorkforceStore } from '@/lib/store/workforceStore';
 import { ScenarioStats } from '@/components/scenarios/ScenarioStats';
 import { useResetScenario } from '@/lib/hooks/useTeamBoard';
 import { APP_NAME, APP_VERSION, BUILD_TIME, GIT_COMMIT } from '@/lib/appInfo';
+import { extractErrorMessage } from '@/lib/utils/extractErrorMessage';
 import type { BoardState } from '@/lib/types/domain';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 
@@ -15,6 +16,11 @@ const TYPE_LABELS = {
   retirement_wave: 'Retirement Wave',
   business_drivers: 'Business Drivers',
 };
+
+// Compute once at module load using deterministic formatting so server and
+// client produce identical markup (no locale/timezone-dependent toLocaleString).
+const VERSION_LABEL = `v${APP_VERSION}${GIT_COMMIT ? ` (${GIT_COMMIT})` : ''}`;
+const BUILD_TITLE = BUILD_TIME ? `Built ${new Date(BUILD_TIME).toISOString().slice(11, 19)} UTC` : undefined;
 
 interface TopNavProps {
   board?: BoardState;
@@ -39,11 +45,10 @@ export function TopNav({ board }: TopNavProps) {
           {APP_NAME}
         </Link>
         <span
-          suppressHydrationWarning
-          title={BUILD_TIME ? `Built ${new Date(BUILD_TIME).toLocaleTimeString()}` : undefined}
+          title={BUILD_TITLE}
           className="rounded border border-gray-300 bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-700 cursor-default"
         >
-          v{APP_VERSION}{GIT_COMMIT ? ` (${GIT_COMMIT})` : ''}
+          {VERSION_LABEL}
         </span>
       </div>
 
@@ -132,7 +137,7 @@ export function TopNav({ board }: TopNavProps) {
         description="This will discard the current scenario edits and restore the scenario to its saved state."
         confirmLabel="Reset"
         pending={resetMutation.isPending}
-        error={resetMutation.isError ? (resetMutation.error as Error).message : null}
+        error={resetMutation.isError ? extractErrorMessage(resetMutation.error, 'Reset failed') : null}
         onClose={() => setShowResetConfirm(false)}
         onConfirm={() => {
           resetMutation.mutate(undefined, {

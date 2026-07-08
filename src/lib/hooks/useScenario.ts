@@ -61,7 +61,10 @@ export function useSeed() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body ?? {}),
       }).then(async (r) => {
-        const json = await r.json().catch(() => ({}));
+        const json = await r.json().catch((e) => {
+          if (process.env.NODE_ENV !== 'production') console.warn('[useSeed] failed to parse response', e);
+          return {};
+        });
         if (!r.ok) throw new Error(json.error ?? 'Seed failed');
         return json.data as { teams: number; members: number; scenarios: number };
       }),

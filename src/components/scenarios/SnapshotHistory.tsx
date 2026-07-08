@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useSnapshots, useSaveSnapshot, useRestoreSnapshot, useDeleteSnapshot } from '@/lib/hooks/useSnapshots';
 import type { SnapshotSummary } from '@/lib/types/snapshot';
 import { CloseButton } from '@/components/ui/CloseButton';
+import { extractErrorMessage } from '@/lib/utils/extractErrorMessage';
 
 interface SnapshotHistoryProps {
   scenarioId: string;
@@ -51,7 +52,7 @@ export function SnapshotHistory({ scenarioId, onClose }: SnapshotHistoryProps) {
           </button>
         </div>
         {saveSnapshot.isError && (
-          <p className="text-xs text-red-500 mt-1">{(saveSnapshot.error as Error).message}</p>
+          <p className="text-xs text-red-500 mt-1">{extractErrorMessage(saveSnapshot.error, 'Failed to save snapshot')}</p>
         )}
       </div>
 

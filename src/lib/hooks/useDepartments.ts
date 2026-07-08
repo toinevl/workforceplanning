@@ -50,7 +50,10 @@ export function useDeleteDepartment() {
   return useMutation({
     mutationFn: (id: string) =>
       fetch(`/api/departments/${id}`, { method: 'DELETE' }).then(async (r) => {
-        const json = await r.json().catch(() => ({}));
+        const json = await r.json().catch((e) => {
+          if (process.env.NODE_ENV !== 'production') console.warn('[useDeleteDepartment] failed to parse error response', e);
+          return {};
+        });
         if (!r.ok) {
           const teamCount = typeof json.assignedTeamCount === 'number' ? json.assignedTeamCount : 0;
           throw new Error(
@@ -73,7 +76,10 @@ export function useMigrateDepartments() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ defaultDepartmentId: departmentId }),
       }).then(async (r) => {
-        const json = await r.json().catch(() => ({}));
+        const json = await r.json().catch((e) => {
+          if (process.env.NODE_ENV !== 'production') console.warn('[useMigrateDepartments] failed to parse response', e);
+          return {};
+        });
         if (!r.ok) throw new Error(json.error ?? 'Migration failed');
         return json.data;
       }),

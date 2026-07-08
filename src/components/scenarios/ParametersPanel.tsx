@@ -6,6 +6,7 @@ import { CloseButton } from '@/components/ui/CloseButton';
 import { SectionLabel } from '@/components/ui/SectionLabel';
 import { useParameters, useUpdateParameters, useApplyLogic } from '@/lib/hooks/useParameters';
 import { ImpactPreview } from '@/components/scenarios/ImpactPreview';
+import { extractErrorMessage } from '@/lib/utils/extractErrorMessage';
 import type { BoardState, BusinessDriver } from '@/lib/types/domain';
 import type { SquadRemovalParams, RetirementWaveParams, BusinessDriverParams } from '@/lib/types/params';
 
@@ -83,7 +84,7 @@ export function ParametersPanel({ board, onClose }: ParametersPanelProps) {
           {applyLogic.isPending ? 'Applying…' : 'Apply Logic'}
         </button>
         {applyLogic.isError && (
-          <p className="text-xs text-red-500">{(applyLogic.error as Error).message}</p>
+          <p className="text-xs text-red-500">{extractErrorMessage(applyLogic.error, 'Failed to apply logic')}</p>
         )}
       </div>
     </aside>
