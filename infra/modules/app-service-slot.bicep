@@ -2,12 +2,16 @@ param name string
 param location string
 param serverFarmId string
 param storageConnectionString string
+param keyVaultStorageSecretUri string = ''
 param appInsightsConnectionString string = ''
 param appInsightsInstrumentationKey string = ''
 
 resource stagingSlot 'Microsoft.Web/sites/slots@2025-03-01' = {
   name: '${name}/staging'
   location: location
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
     serverFarmId: serverFarmId
     httpsOnly: true
@@ -17,7 +21,7 @@ resource stagingSlot 'Microsoft.Web/sites/slots@2025-03-01' = {
       appSettings: [
         {
           name: 'AZURE_STORAGE_CONNECTION_STRING'
-          value: storageConnectionString
+          value: empty(keyVaultStorageSecretUri) ? storageConnectionString : '@Microsoft.KeyVault(SecretUri=${keyVaultStorageSecretUri})'
         }
         {
           name: 'NODE_ENV'
@@ -57,3 +61,4 @@ resource stagingSlot 'Microsoft.Web/sites/slots@2025-03-01' = {
 output defaultHostname string = stagingSlot.properties.defaultHostName
 output id string = stagingSlot.id
 output name string = stagingSlot.name
+output principalId string = stagingSlot.identity.principalId

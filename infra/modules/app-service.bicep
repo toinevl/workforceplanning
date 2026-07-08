@@ -2,12 +2,16 @@ param name string
 param location string
 param serverFarmId string
 param storageConnectionString string
+param keyVaultStorageSecretUri string = ''
 param appInsightsConnectionString string = ''
 param appInsightsInstrumentationKey string = ''
 
 resource webApp 'Microsoft.Web/sites@2025-03-01' = {
   name: name
   location: location
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
     serverFarmId: serverFarmId
     httpsOnly: true
@@ -17,7 +21,7 @@ resource webApp 'Microsoft.Web/sites@2025-03-01' = {
       appSettings: [
         {
           name: 'AZURE_STORAGE_CONNECTION_STRING'
-          value: storageConnectionString
+          value: empty(keyVaultStorageSecretUri) ? storageConnectionString : '@Microsoft.KeyVault(SecretUri=${keyVaultStorageSecretUri})'
         }
         {
           name: 'NODE_ENV'
@@ -45,7 +49,7 @@ resource webApp 'Microsoft.Web/sites@2025-03-01' = {
         }
       ]
       webSocketsEnabled: false
-      alwaysOn: true  // Requires Basic+ plan; ignored on Free tier
+      alwaysOn: true
     }
   }
   tags: {
@@ -56,3 +60,4 @@ resource webApp 'Microsoft.Web/sites@2025-03-01' = {
 output defaultHostname string = webApp.properties.defaultHostName
 output id string = webApp.id
 output name string = webApp.name
+output principalId string = webApp.identity.principalId

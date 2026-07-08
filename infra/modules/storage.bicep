@@ -6,7 +6,7 @@ param name string
 param location string
 param environmentName string
 
-resource storageAccount 'Microsoft.Storage/storageAccounts@2025-03-01' = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   name: take(replace(name, '-', ''), 24)
   location: location
   sku: {

@@ -6,7 +6,6 @@
     "appServiceName": { "value": "alicante" },
     "environment": { "value": "prod" },
     "location": { "value": "polandcentral" },
-    "storageAccountName": { "value": "saworkforceplan" },
-    "skuName": { "value": "S1" }
+    "storageAccountName": { "value": "saworkforceplan" }
   }
 }
