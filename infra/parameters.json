@@ -7,6 +7,6 @@
     "environment": { "value": "prod" },
     "location": { "value": "polandcentral" },
     "storageAccountName": { "value": "saworkforceplan" },
-    "skuName": { "value": "B1" }
+    "skuName": { "value": "S1" }
   }
 }

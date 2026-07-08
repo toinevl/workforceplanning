@@ -12,7 +12,7 @@ resource stagingSlot 'Microsoft.Web/sites/slots@2025-03-01' = {
     serverFarmId: serverFarmId
     httpsOnly: true
     siteConfig: {
-      nodeVersion: '~22'
+      nodeVersion: '22.22.2'
       appCommandLine: 'node server.js'
       appSettings: [
         {

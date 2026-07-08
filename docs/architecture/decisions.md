@@ -29,7 +29,9 @@ scaling.
 - `output: 'standalone'` stays in `next.config.js`
 - Deploy via zip publish (`az webapp deploy`), not SWA build pipeline
 - No `api_location` / `output_location` config needed
-- Standard tier (#9) will resolve cold-start and Always On limitations
+- Standard tier (#9, now S1) resolves cold-start and Always On limitations,
+  and enables deployment slots (#7 — staging slot now provisioned and wired
+  into deploy.yml with a health-gated swap)
 - If SWA Hybrid is revisited later, the app would need migration to managed
   Functions and the SWA build pipeline
 
