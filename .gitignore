@@ -57,6 +57,12 @@ __azurite_db_*.json
 scripts/output/
 .superpowers/
 
+# Deploy artifacts
+deploy.zip
+
+# Remote Playwright config (local-only)
+playwright.remote.config.ts
+
 # Git worktrees
 .worktrees/
 .claude/worktrees/
