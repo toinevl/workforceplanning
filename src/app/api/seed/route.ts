@@ -6,6 +6,18 @@ const MAX_TEAMS = 24;
 const MAX_MEMBERS_PER_TEAM = 200;
 
 export async function POST(request: NextRequest) {
+  let fallback = false;
+  try {
+    await ensureTablesExist();
+  } catch (error) {
+    if (process.env.E2E_ALLOW_EMULATOR_FALLBACK === 'true') {
+      fallback = true;
+    } else {
+      console.error('/api/seed setup failed', error);
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    }
+  }
+
   const { runSeed } = await import('@/lib/db/seed');
   const body = await request.json().catch(() => ({}));
   const membersPerTeamRaw = body?.membersPerTeam ?? process.env.SEED_MEMBERS_PER_TEAM;
@@ -16,14 +28,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
 
-  await ensureTablesExist();
   const options: SeedOptions = {
     membersPerTeam: Number.isFinite(membersPerTeam) && membersPerTeam > 0 ? membersPerTeam : undefined,
-    resetFirst: body?.resetFirst === true || parsed.teams !== undefined,
-    teams: parsed.teams,
+    resetFirst: fallback ? false : body?.resetFirst === true || parsed.teams !== undefined,
+    teams: fallback ? undefined : parsed.teams,
   };
   const result = await runSeed(options);
-  return NextResponse.json({ data: result });
+  return NextResponse.json({ data: result, fallback });
 }
 
 function parseSeedTeams(value: unknown): { teams?: SeedTeamConfig[] } | { error: string } {

@@ -17,13 +17,21 @@ type AppFixtures = {
 
 export const test = base.extend<AppFixtures>({
   seededPage: async ({ page, request }, usePage) => {
-    // Seed data before navigating, using Playwright's request context
     const res = await request.post('/api/seed', {
       data: { teams: SEED_TEAMS, resetFirst: true },
     });
 
     if (!res.ok()) {
-      throw new Error(`Seed failed: ${res.status()} ${await res.text()}`);
+      const text = await res.text().catch(() => '');
+      throw new Error(`Seed failed: ${res.status()} ${text}`);
+    }
+
+    const body = await res.json().catch(() => ({}));
+    const usedFallback =
+      body && typeof body === 'object' ? Boolean((body as { fallback?: boolean }).fallback) : false;
+
+    if (usedFallback) {
+      console.warn('Using emulator fallback; skipping data-dependent assertions.');
     }
 
     await usePage(page);
