@@ -10,6 +10,7 @@ import { APP_NAME, APP_VERSION, BUILD_TIME, GIT_COMMIT } from '@/lib/appInfo';
 import { extractErrorMessage } from '@/lib/utils/extractErrorMessage';
 import type { BoardState } from '@/lib/types/domain';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { UserMenu } from './UserMenu';
 
 const TYPE_LABELS = {
   squad_removal: 'Squad Removal',
@@ -76,6 +77,11 @@ export function TopNav({ board }: TopNavProps) {
         </Link>
       </div>
 
+      {/* User menu — always visible on the far right when authenticated */}
+      <div className="ml-auto">
+        <UserMenu />
+      </div>
+
       {board && (
         <>
           <div className="h-4 w-px bg-gray-200" />
@@ -89,11 +95,11 @@ export function TopNav({ board }: TopNavProps) {
             </div>
           </div>
 
-          <div className="ml-4 hidden md:block">
+          <div className="hidden md:block">
             <ScenarioStats board={board} />
           </div>
 
-          <div className="ml-auto flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={toggleSnapshotHistory}
               className="text-sm px-3 py-2.5 border border-gray-400 text-gray-800 rounded-lg hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"

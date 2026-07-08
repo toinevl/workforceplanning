@@ -95,7 +95,7 @@ an app setting.
 ## ADR-004: No authentication (single-tenant internal tool)
 
 **Date:** 2026-06-29
-**Status:** Accepted (deferred to future milestone)
+**Status:** Superseded — auth implemented via Entra ID + Auth.js (2026-07-08)
 
 ### Context
 The best-practices doc recommends Azure AD auth for production apps. The
@@ -103,16 +103,31 @@ project is a single-tenant internal tool used by trusted employees. Adding
 auth is a scope expansion that would touch every API route and the UI.
 
 ### Decision
-Defer authentication. All API routes are anonymous. This is documented as
-accepted risk AR-01 with review date 2026-Q4. Input validation (UUID, hex
-color) is enforced as defense-in-depth even without auth.
+~~Defer authentication. All API routes are anonymous.~~
 
-### Consequences
+**Superseded:** Authentication was implemented in wishlist items #25–#29
+using Auth.js (NextAuth v5) with the Microsoft Entra ID (single-tenant)
+OIDC provider. The session strategy is JWT — the signed session cookie is
+stateless (no database session store). Auth.js middleware protects all
+routes except `/login`, `/api/auth/*`, and static assets.
+
+### Original consequences (pre-auth)
 - No auth headers sent or validated
 - No per-department access control (AR-02)
 - All input validation happens at API route + data layer
 - Auth will require a coordinated milestone when added (Entra ID/OIDC is the
   most likely path, consistent with the best-practices doc's recommendation)
+
+### Current state (post-auth)
+- `src/auth.ts` — Auth.js config with Entra ID provider, JWT callbacks
+- `src/middleware.ts` — route protection (redirects to `/login` when
+  unauthenticated)
+- `src/app/login/page.tsx` — "Sign in with Microsoft" page
+- `src/components/layout/UserMenu.tsx` — user display + sign-out in TopNav
+- `src/lib/auth/session.ts` — `getSession()` helper for server components
+- `src/lib/utils/fetchJSON.ts` — redirects to `/login` on 401 responses
+- `.env.local.example` — documents all required auth env vars
+- CSP updated to allow the Entra ID OIDC flow
 
 ---
 
@@ -194,7 +209,7 @@ string is set as an App Setting separately, not through CI shell.
 | Table Storage with HTTPS, TLS 1.2, no public blob | ✅ Enforced in Bicep | ADR-002 |
 | Retry/backoff on data-tables calls | ✅ Configured in `db/client.ts` | ADR-002 |
 | Key Vault + Managed Identity | Planned (#5) | ADR-003 |
-| Azure AD auth | Deferred (AR-01) | ADR-004 |
+| Azure AD auth | ✅ Implemented (Entra ID + Auth.js) | ADR-004 |
 | `output: 'standalone'` | ✅ Active | ADR-005 |
 | Exact Node LTS pinning | Follow-up needed | ADR-006 |
 | OIDC for CI/CD | ✅ Done (#8) | ADR-007 |

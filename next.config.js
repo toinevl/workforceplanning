@@ -34,6 +34,8 @@ const nextConfig = {
   // NOTE on style-src 'unsafe-inline': REQUIRED for Tailwind CSS v4 (which
   // injects generated styles inline) and Next.js styled-jsx/runtime. This is
   // the accepted minimum for this app.
+  // NOTE on connect-src / form-action: login.microsoftonline.com is required
+  // for the Auth.js Microsoft Entra ID (OIDC) sign-in flow.
   async headers() {
     const contentSecurityPolicy = [
       "default-src 'self'",
@@ -41,10 +43,10 @@ const nextConfig = {
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob:",
       "font-src 'self' data:",
-      "connect-src 'self'",
+      "connect-src 'self' https://login.microsoftonline.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
-      "form-action 'self'",
+      "form-action 'self' https://login.microsoftonline.com",
     ].join('; ');
     return [
       {
