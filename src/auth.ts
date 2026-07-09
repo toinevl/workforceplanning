@@ -22,6 +22,8 @@ import { NextResponse } from "next/server";
  */
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  // Trust the Host header on non-Vercel hosting (App Service, containers, etc.)
+  trustHost: true,
   providers: [
     MicrosoftEntraID({
       clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_ID,
