@@ -70,12 +70,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 /**
  * Middleware-level authorization callback.
  *
- * When AUTH_SECRET is not set (or AUTH_DISABLED=true), auth is treated as
- * disabled — all requests pass through. This lets the app run without auth
- * until the Entra ID app registration (#24) and env vars are configured.
+ * Auth is now always enabled (Entra ID app registration complete, #24).
+ * AUTH_DISABLED=true can still be set as an app setting to temporarily
+ * bypass auth (e.g. for debugging).
  *
- * Once AUTH_SECRET is set, the callback enforces sessions: authenticated
- * users proceed; unauthenticated users are redirected to /login.
+ * Authenticated users proceed; unauthenticated users are redirected to
+ * /login. The /login page itself is always accessible.
+ *
+ * NOTE: Do NOT gate on process.env.AUTH_SECRET here — Next.js can inline
+ * env var reads at build time during static prerendering, which causes
+ * the check to be baked in as "true" (auth disabled) when the secret
+ * isn't present at build time. AUTH_SECRET is still used internally by
+ * NextAuth for JWT signing; it just shouldn't be part of the access
+ * control decision.
  */
 export async function authorized({
   request,
@@ -84,7 +91,7 @@ export async function authorized({
   request: import("next/server").NextRequest;
   auth: import("@auth/core/types").Session | null;
 }) {
-  if (process.env.AUTH_DISABLED === "true" || !process.env.AUTH_SECRET) {
+  if (process.env.AUTH_DISABLED === "true") {
     return true;
   }
   const isLoggedIn = !!auth?.user;
