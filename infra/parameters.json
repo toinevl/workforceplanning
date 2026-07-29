@@ -2,10 +2,44 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "appName": { "value": "workforceplanning" },
-    "appServiceName": { "value": "alicante" },
-    "environment": { "value": "prod" },
-    "location": { "value": "polandcentral" },
-    "storageAccountName": { "value": "saworkforceplan" }
+    "appName": {
+      "value": "workforceplanning"
+    },
+    "appServiceName": {
+      "value": "alicante"
+    },
+    "environment": {
+      "value": "prod"
+    },
+    "location": {
+      "value": "polandcentral"
+    },
+    "storageAccountName": {
+      "value": "saworkforceplan"
+    },
+    "storageLocation": {
+      "value": "northeurope"
+    },
+    "planResourceGroup": {
+      "value": "rgWebsite"
+    },
+    "planName": {
+      "value": "wfp-plan-free"
+    },
+    "authEntraClientId": {
+      "value": "e1342f44-f371-4e46-b203-bca098fd9e77"
+    },
+    "authEntraIssuer": {
+      "value": "https://login.microsoftonline.com/3aa156f9-14fb-4ca1-913d-06f6534f327f/v2.0"
+    },
+    "authEntraClientSecretUri": {
+      "value": "https://kv-wfp-prod.vault.azure.net/secrets/auth-entra-client-secret/4d0195c5abde49af9ea375f2f403369e"
+    },
+    "authSecretUri": {
+      "value": "https://kv-wfp-prod.vault.azure.net/secrets/auth-secret/11a22e5400bd4b2da6853700d3cf01b9"
+    },
+    "authUrl": {
+      "value": "https://alicante-eghjf7b0aadefpey.polandcentral-01.azurewebsites.net"
+    }
   }
 }
