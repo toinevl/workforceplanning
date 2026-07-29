@@ -153,6 +153,23 @@ tags: [wishlist]
       is followed to an HTML 200, so its redirect handling never fires.
       Worth keeping from #15: the auth-enforcement E2E suite that runs with auth ON.
 
+- [ ] (B) Role profile system + skill radar for team ambition vs current coverage +feature @me #36
+      Predefined role profiles with hard/soft skill targets. Teams page shows
+      spider/radar diagram comparing current member skills vs ambition. Drives
+      discussion in strategic workforce planning sessions. Foundation for AI-assisted
+      FTE allocation and skill gap prediction.
+
+- [ ] (B) Live session workspace: drag-and-drop org board + decision capture +feature @me #37
+      Interactive board where HR/product leads move staff between teams during
+      planning sessions. Instant FTE and skill impact updates. Captures decisions
+      (right-sizing, hiring, moves, attrition) directly into the plan.
+
+- [ ] (C) AI-assisted scenario generation and skill-gap predictions +ai +feature @me #38
+      Use internet/intranet context and existing plan data to suggest FTE allocation
+      scenarios. Predict skill gaps based on role profiles and ambition. Note:
+      current data lives in PowerPoint/Excel tribal knowledge; structured data must
+      exist first (#36, #37) before predictions are meaningful.
+
 - [ ] (C) Recreate alicante in the rgWorkforcePlan webspace so Bicep can own it +infra @me #35
       infra/main.bicep creates its plan in rgWorkforcePlan, but the live site's
       webspace is bound to rgWebsite, so that plan can never host it (Conflict
