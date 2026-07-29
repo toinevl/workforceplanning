@@ -66,6 +66,7 @@ jobs:
         run: npm run test:e2e
         env:
           AZURE_STORAGE_CONNECTION_STRING: UseDevelopmentStorage=true
+          AUTH_DISABLED: "true"
 
       - name: Upload test results
         if: always()

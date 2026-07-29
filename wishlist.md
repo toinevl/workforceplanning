@@ -51,12 +51,15 @@ tags: [wishlist]
 
   ── Authentication milestone (ADR-004, plan: .planning/auth-milestone-plan.md) ──
 
-- [ ] (D) Register Entra ID app (single-tenant) + redirect URIs + client secret +security @me #24
-      Portal setup. Redirect URIs for prod + staging. Store secret in Key Vault (post-#22).
-      Optionally define app roles (Admin/Planner/Viewer) for future RBAC.
-      REQUIRES USER ACTION — needs Entra ID app registration in Azure portal (tenant admin).
-      Then set env vars: AUTH_MICROSOFT_ENTRA_ID_ID, AUTH_MICROSOFT_ENTRA_ID_SECRET,
-      AUTH_MICROSOFT_ENTRA_ID_ISSUER, AUTH_SECRET, AUTH_URL.
+- [x] (D) Register Entra ID app (single-tenant) + redirect URIs + client secret +security @me #24
+     DONE — app "WorkforcePlanning" (appId: e1342f44-f371-4e46-b203-bca098fd9e77)
+     already existed. Added prod + staging redirect URIs,
+     created client secret (expires 2028-07-29) stored in Key Vault
+     as `auth-entra-client-secret` (kv-wfp-prod).
+     Env vars set on prod + staging via Key Vault references:
+       AUTH_MICROSOFT_ENTRA_ID_ID, _SECRET, _ISSUER, AUTH_SECRET, AUTH_URL.
+     Auth.ts and middleware.ts patched to enforce auth. App runs live
+     on https://alicante-eghjf7b0aadefpey.polandcentral-01.azurewebsites.net
 - [x] (D) Integrate Auth.js (NextAuth v5) with Entra ID provider +feature @me #25
       Install next-auth/@auth/core + @auth/microsoft-entra-id. Configure src/auth.ts.
       JWT cookie session strategy (stateless). Add src/middleware.ts gating /api/* + pages.
