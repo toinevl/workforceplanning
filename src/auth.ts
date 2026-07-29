@@ -35,6 +35,37 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" },
   callbacks: {
     /**
+     * Middleware-level authorization.
+     *
+     * MUST live inside `callbacks` — the `auth` middleware export enforces
+     * access control solely through this callback. Declaring it as a
+     * standalone export does nothing and lets every request through.
+     *
+     * AUTH_DISABLED=true bypasses auth entirely (debugging escape hatch).
+     *
+     * API routes get 401 JSON rather than a redirect: a 307 to /login
+     * returns an HTML page to a fetch() caller, which surfaces as a JSON
+     * parse error instead of an auth failure.
+     *
+     * NOTE: Do NOT gate on process.env.AUTH_SECRET here — Next.js can inline
+     * env var reads at build time during static prerendering, which bakes the
+     * check in as "true" (auth disabled) when the secret isn't present at
+     * build time. AUTH_SECRET is still used internally by NextAuth for JWT
+     * signing; it just must not be part of the access control decision.
+     */
+    authorized({ request, auth }) {
+      if (process.env.AUTH_DISABLED === "true") return true;
+
+      const { pathname } = request.nextUrl;
+      if (pathname.startsWith("/login")) return true;
+      if (auth?.user) return true;
+
+      if (pathname.startsWith("/api/")) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+      return NextResponse.redirect(new URL("/login", request.url));
+    },
+    /**
      * Persist the user's name and email into the JWT so they are
      * available in the session on every request without an extra
      * network round-trip to the provider.
@@ -67,36 +98,3 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
 });
 
-/**
- * Middleware-level authorization callback.
- *
- * Auth is now always enabled (Entra ID app registration complete, #24).
- * AUTH_DISABLED=true can still be set as an app setting to temporarily
- * bypass auth (e.g. for debugging).
- *
- * Authenticated users proceed; unauthenticated users are redirected to
- * /login. The /login page itself is always accessible.
- *
- * NOTE: Do NOT gate on process.env.AUTH_SECRET here — Next.js can inline
- * env var reads at build time during static prerendering, which causes
- * the check to be baked in as "true" (auth disabled) when the secret
- * isn't present at build time. AUTH_SECRET is still used internally by
- * NextAuth for JWT signing; it just shouldn't be part of the access
- * control decision.
- */
-export async function authorized({
-  request,
-  auth,
-}: {
-  request: import("next/server").NextRequest;
-  auth: import("@auth/core/types").Session | null;
-}) {
-  if (process.env.AUTH_DISABLED === "true") {
-    return true;
-  }
-  const isLoggedIn = !!auth?.user;
-  const isLoginPage = request.nextUrl.pathname.startsWith("/login");
-  if (isLoginPage) return true;
-  if (isLoggedIn) return true;
-  return NextResponse.redirect(new URL("/login", request.url));
-}

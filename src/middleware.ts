@@ -12,7 +12,10 @@
  *
  * Note: other /api/* routes (e.g. /api/scenarios) ARE protected — the
  * middleware runs before the route handler, and unauthenticated requests
- * receive a redirect to /login.
+ * receive 401 JSON (pages get a redirect to /login).
+ *
+ * Enforcement lives in `callbacks.authorized` in `@/auth`. It must stay
+ * inside `callbacks`; as a standalone export it silently does nothing.
  */
 export { auth as middleware } from "@/auth";
 

@@ -67,6 +67,14 @@ jobs:
         env:
           AZURE_STORAGE_CONNECTION_STRING: UseDevelopmentStorage=true
 
+      # Runs the app with auth ON. The suite above bypasses auth via
+      # AUTH_DISABLED so it can exercise the app, which means it cannot catch
+      # an auth regression — this step is what covers that.
+      - name: Run auth enforcement tests
+        run: npm run test:e2e:auth
+        env:
+          AZURE_STORAGE_CONNECTION_STRING: UseDevelopmentStorage=true
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4

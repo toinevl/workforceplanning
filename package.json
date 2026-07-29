@@ -16,6 +16,7 @@
     "azurite:clean": "rm -rf ./azurite-data && mkdir ./azurite-data && npm run azurite",
     "dev:full": "npm run azurite & sleep 2 && npm run dev",
     "test:e2e": "playwright test",
+    "test:e2e:auth": "playwright test --config playwright.auth.config.ts",
     "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
