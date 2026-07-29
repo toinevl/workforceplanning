@@ -135,11 +135,16 @@ tags: [wishlist]
            is unusable by this site. Resolved by creating wfp-plan-free in
            **rgWebsite**; the rgWorkforcePlan copy was deleted.
 
-- [ ] (C) Decide fate of ASP-rgWebsite-9e1a after alicante moves off +infra +cost @me #34
+- [x] (C) Decide fate of ASP-rgWebsite-9e1a after alicante moves off +infra +cost @me #34
       EUR 28.32/mo. Once alicante leaves, its only remaining site is `invoicesnap`
       (rgWebsite, currently Stopped) — a different project, so this is not mine to
       delete. Options: downgrade the plan to F1 (keeps invoicesnap, most of the
       saving), move invoicesnap to wfp-plan-free, or delete if invoicesnap is dead.
+      DONE 2026-07-29 — owner confirmed invoicesnap was disposable. Pre-delete check
+      found it Stopped since 2026-07-21, no deployment source, no app settings, no
+      slots, default hostname only, so nothing recoverable was lost. Deleting the
+      last app on a plan deletes the plan too, so ASP-rgWebsite-9e1a went with it.
+      alicante verified afterwards: Free sku, Running, /login 200, /api/teams 307.
 
 - [ ] (C) Reconcile PR #15 with the middleware approach on main +security +testing @me #33
       PR #15 fixed the same bug via callbacks.authorized; main fixed it via a custom
