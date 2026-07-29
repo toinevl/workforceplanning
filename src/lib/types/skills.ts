@@ -6,19 +6,16 @@ export const SKILL_DICTIONARY = [
 
 export type SkillName = (typeof SKILL_DICTIONARY)[number];
 
-export type SkillTargets = Partial<Record<SkillName, number>>;
-
 export interface RoleProfile {
   id: string;
   roleKey: string;
   roleName: string;
-  skillTargets: SkillTargets;
+  skillTargets: Record<string, number>;
   isSquad?: boolean;
 }
 
 export interface MemberSkillAssignment {
   teamId: string;
   memberId: string;
-  skills: SkillName[];
+  skills: string[];
 }
-

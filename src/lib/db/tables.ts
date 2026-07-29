@@ -1,6 +1,5 @@
 import type { TableEntity } from '@azure/data-tables';
 
-// Table name constants
 export const TABLE_TEAMS = 'teams';
 export const TABLE_STAFF = 'staffMembers';
 export const TABLE_SCENARIOS = 'scenarios';
@@ -9,14 +8,10 @@ export const TABLE_TEAM_DRIVERS = 'scenarioTeamDrivers';
 export const TABLE_SNAPSHOTS = 'scenarioSnapshots';
 export const TABLE_AUDIT_EVENTS = 'scenarioAuditEvents';
 export const TABLE_DEPARTMENTS = 'departments';
-export const TABLE_ROLE_PROFILES = 'roleProfiles';
-export const TABLE_MEMBER_SKILLS = 'memberSkillAssignments';
-
-// ── Entity types (Azure Table entities extend TableEntity with partitionKey + rowKey) ──
 
 export interface TeamEntity extends TableEntity {
   partitionKey: 'team';
-  rowKey: string; // teamId
+  rowKey: string;
   name: string;
   description?: string;
   color: string;
@@ -26,7 +21,7 @@ export interface TeamEntity extends TableEntity {
 
 export interface StaffMemberEntity extends TableEntity {
   partitionKey: 'member';
-  rowKey: string; // memberId
+  rowKey: string;
   name: string;
   role: string;
   fte: number;
@@ -35,13 +30,13 @@ export interface StaffMemberEntity extends TableEntity {
   birthYear?: number;
   retirementEligibleYear?: number;
   baseTeamId: string;
-  tags: string; // JSON array string
+  tags: string;
   notes?: string;
 }
 
 export interface DepartmentEntity extends TableEntity {
   partitionKey: 'department';
-  rowKey: string; // departmentId
+  rowKey: string;
   name: string;
   description?: string;
   color: string;
@@ -53,20 +48,20 @@ export interface DepartmentEntity extends TableEntity {
 
 export interface ScenarioEntity extends TableEntity {
   partitionKey: 'scenario';
-  rowKey: string; // scenarioId
+  rowKey: string;
   type: string;
   name: string;
   description?: string;
   status: string;
-  parameters: string; // JSON string
+  parameters: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface MemberStateEntity extends TableEntity {
-  partitionKey: string; // scenarioId
-  rowKey: string; // memberId
-  teamId: string; // 'REMOVED' sentinel for null
+  partitionKey: string;
+  rowKey: string;
+  teamId: string;
   status: string;
   overrideRole?: string;
   businessDriver?: string;
@@ -74,8 +69,8 @@ export interface MemberStateEntity extends TableEntity {
 }
 
 export interface TeamDriverEntity extends TableEntity {
-  partitionKey: string; // scenarioId
-  rowKey: string; // teamId
+  partitionKey: string;
+  rowKey: string;
   driver: string;
   priorityScore?: number;
   targetFteDelta?: number;
@@ -83,11 +78,11 @@ export interface TeamDriverEntity extends TableEntity {
 }
 
 export interface SnapshotEntity extends TableEntity {
-  partitionKey: string; // scenarioId
-  rowKey: string; // snapshotId
+  partitionKey: string;
+  rowKey: string;
   label: string;
-  parametersJson: string; // JSON string of ScenarioParams
-  boardStateJson: string; // JSON string of BoardState
+  parametersJson: string;
+  boardStateJson: string;
   headcount: number;
   totalFte: number;
   removedCount: number;
@@ -95,8 +90,8 @@ export interface SnapshotEntity extends TableEntity {
 }
 
 export interface AuditEventEntity extends TableEntity {
-  partitionKey: string; // scenarioId
-  rowKey: string; // timestamp-sortable eventId
+  partitionKey: string;
+  rowKey: string;
   eventType: string;
   createdAt: string;
   actor?: string;
@@ -107,27 +102,8 @@ export interface AuditEventEntity extends TableEntity {
   payloadJson?: string;
 }
 
-export interface RoleProfileEntity extends TableEntity {
-  partitionKey: 'roleProfile';
-  rowKey: string; // role profile id
-  roleKey: string; // normalised role key
-  roleName: string;
-  skillTargets: string; // JSON map skillName -> target number
-  isSquad?: boolean;
-}
-
-export interface MemberSkillAssignmentEntity extends TableEntity {
-  partitionKey: string; // teamId
-  rowKey: string; // memberId
-  skills: string; // JSON array of skill names
-}
-
-// Sentinel value for "member removed from all teams"
 export const REMOVED_SENTINEL = 'REMOVED';
 
-// Registry of every entity type. Adding a new entity interface above requires
-// adding it here, which in turn forces mappers.ts to register a mapper
-// (see EntityMapperRegistry exhaustiveness guard).
 export interface EntityMap {
   Team: TeamEntity;
   StaffMember: StaffMemberEntity;
@@ -137,8 +113,6 @@ export interface EntityMap {
   TeamDriver: TeamDriverEntity;
   Snapshot: SnapshotEntity;
   AuditEvent: AuditEventEntity;
-  RoleProfile: RoleProfileEntity;
-  MemberSkillAssignment: MemberSkillAssignmentEntity;
 }
 
 export type EntityTypeName = keyof EntityMap;

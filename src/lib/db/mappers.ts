@@ -8,8 +8,6 @@ import type {
   StaffMemberEntity,
   TeamDriverEntity,
   TeamEntity,
-  RoleProfileEntity,
-  MemberSkillAssignmentEntity,
 } from './tables';
 import { REMOVED_SENTINEL } from './tables';
 import type {
@@ -26,8 +24,6 @@ import type {
   StaffMember,
   Team,
 } from '../types/domain';
-import type { RoleProfile } from '../types/skills';
-import type { SkillName } from '../types/skills';
 
 export function entityToTeam(e: TeamEntity): Team {
   return {
@@ -118,33 +114,6 @@ export function entityToAuditEvent(e: AuditEventEntity): AuditEvent {
   };
 }
 
-export function entityToRoleProfile(e: RoleProfileEntity): RoleProfile {
-  return {
-    id: e.rowKey,
-    roleKey: e.roleKey,
-    roleName: e.roleName,
-    skillTargets: JSON.parse(e.skillTargets || '{}') as RoleProfile['skillTargets'],
-    isSquad: e.isSquad,
-  };
-}
-
-export function entityToMemberSkillAssignment(e: MemberSkillAssignmentEntity) {
-  return {
-    teamId: e.partitionKey,
-    memberId: e.rowKey,
-    skills: JSON.parse(e.skills || '[]') as SkillName[],
-  };
-}
-
-// SnapshotEntity maps to a composite BoardState (parsed JSON blobs + scenario
-// lookup); there is no clean 1:1 entity→domain mapping. SnapshotEntity is
-// therefore intentionally represented by a null entry in the registry below.
-// Inline mapping in src/lib/api/snapshots.ts handles the composite transform.
-
-// Compile-time exhaustiveness guard: every EntityTypeName must have an entry.
-// Adding a new entity to EntityMap (tables.ts) adds a key to the union, which
-// breaks this `satisfies` until a key is added here, forcing an explicit
-// mapper decision (function, or null for composite/inline-only entities).
 type EntityMapperRegistry = {
   [K in EntityTypeName]: ((e: EntityMap[K]) => unknown) | null;
 };
@@ -156,11 +125,8 @@ const entityMappers = {
   Scenario: entityToScenario,
   MemberState: entityToScenarioMemberState,
   TeamDriver: entityToScenarioTeamDriver,
-  Snapshot: null, // composite mapping — see note above
+  Snapshot: null,
   AuditEvent: entityToAuditEvent,
-  RoleProfile: entityToRoleProfile,
-  MemberSkillAssignment: entityToMemberSkillAssignment,
 } satisfies EntityMapperRegistry;
 
-// Reference the registry so dead-code elimination doesn't drop it.
 void entityMappers;

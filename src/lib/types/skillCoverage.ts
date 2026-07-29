@@ -1,17 +1,17 @@
 import type { StaffMember } from './domain';
-import type { RoleProfile, SkillName, SkillTargets } from './skills';
+import type { RoleProfile } from './skills';
 
 export interface StaffMemberWithSkills extends StaffMember {
-  skills: SkillName[];
+  skills: string[];
   roleProfile?: RoleProfile;
 }
 
 export interface TeamSkillCoverage {
   teamId: string;
   teamName: string;
-  currentSkills: Record<SkillName, number>;
-  ambitionSkills: Record<SkillName, number>;
-  gapSkills: Record<SkillName, number>;
+  currentSkills: Record<string, number>;
+  ambitionSkills: Record<string, number>;
+  gapSkills: Record<string, number>;
 }
 
 export interface SkillSummary {
