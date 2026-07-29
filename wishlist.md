@@ -95,10 +95,15 @@ tags: [wishlist]
       (CI can run), without it /api/* and pages 307 to /login while /login stays
       200 (security fix intact).
 
-- [ ] (A) Level 0: delete empty S1 plan workforceplanning-plan-prod +infra +cost @me #31
+- [x] (A) Level 0: delete empty S1 plan workforceplanning-plan-prod +infra +cost @me #31
       0 sites, EUR 24.66/mo, entire spend of rgWorkforcePlan. alicante does not run
       on it — it runs on ASP-rgWebsite-9e1a in rgWebsite. Deleting is zero-impact.
       infra/main.bicep recreates it on next deployment, so the Bicep must change too.
+      DONE — plan deleted 2026-07-29 after confirming 0 hosted sites. alicante
+      verified Running and /login 200 immediately after. Bicep changed in the same
+      branch (F1 default + reserved:true + no slot) so it cannot be recreated as S1.
+      rgWorkforcePlan now holds only toine_asp_1775 (F1, 0 sites, Canada Central —
+      wrong region to reuse) and ASP-rgWorkforcePlan-846d (FC1, the dead Function App).
 
 - [ ] (B) Level 1: move alicante to F1 Free and retire both S1 plans +infra +cost @me #32
       F1 Linux confirmed available in Poland Central; app is app,linux NODE|22-lts.

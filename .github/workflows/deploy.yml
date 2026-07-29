@@ -57,118 +57,87 @@ jobs:
           # boots via the self-contained server.js
           node -e "const p=require('./.next/standalone/package.json'); p.scripts.start='node server.js'; require('fs').writeFileSync('./.next/standalone/package.json', JSON.stringify(p,null,2))"
 
-      - name: Deploy via blob storage (Run-From-Package) to staging slot
+      - name: Deploy to production (Run-From-Package), with rollback
         env:
           APP_NAME: ${{ secrets.AZURE_APP_NAME }}
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
           CONN_STR: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
         run: |
+          set -euo pipefail
+
           STORAGE_ACCOUNT=$(echo "$CONN_STR" | grep -oP '(?<=AccountName=)[^;]+')
           ACCOUNT_KEY=$(echo "$CONN_STR" | grep -oP '(?<=AccountKey=)[^;]+')
+
+          # Remember what production is serving now. This is the rollback target,
+          # which is why the package below is versioned per commit rather than
+          # overwriting a single deploy-latest.zip — overwriting would destroy
+          # the artifact we need to roll back to.
+          PREVIOUS=$(az webapp config appsettings list \
+            --name "$APP_NAME" --resource-group "$RESOURCE_GROUP" \
+            --query "[?name=='WEBSITE_RUN_FROM_PACKAGE'].value | [0]" -o tsv)
+          echo "Current package: ${PREVIOUS:-<none>}"
 
           cd .next/standalone
           zip -r ../../deploy.zip . -q
           cd ../..
 
           az storage container create \
-            --name deployments \
-            --account-name "$STORAGE_ACCOUNT" \
-            --account-key "$ACCOUNT_KEY" \
-            --output none 2>/dev/null || true
+            --name deployments --account-name "$STORAGE_ACCOUNT" \
+            --account-key "$ACCOUNT_KEY" --output none 2>/dev/null || true
 
+          BLOB="deploy-${GITHUB_SHA}.zip"
           az storage blob upload \
-            --account-name "$STORAGE_ACCOUNT" \
-            --account-key "$ACCOUNT_KEY" \
-            --container-name deployments \
-            --name deploy-latest.zip \
-            --file deploy.zip \
-            --overwrite \
-            --output none
+            --account-name "$STORAGE_ACCOUNT" --account-key "$ACCOUNT_KEY" \
+            --container-name deployments --name "$BLOB" \
+            --file deploy.zip --overwrite --output none
 
+          # The SAS must outlive the deployment: App Service re-reads the package
+          # on every restart, so a short-lived token would break the app later,
+          # not at deploy time. Tracked as wishlist #8 (still open).
           EXPIRY=$(date -u -d "+10 years" +%Y-%m-%dT%H:%MZ)
           SAS=$(az storage blob generate-sas \
-            --account-name "$STORAGE_ACCOUNT" \
-            --account-key "$ACCOUNT_KEY" \
-            --container-name deployments \
-            --name deploy-latest.zip \
-            --permissions r \
-            --expiry "$EXPIRY" \
-            --https-only \
-            -o tsv)
+            --account-name "$STORAGE_ACCOUNT" --account-key "$ACCOUNT_KEY" \
+            --container-name deployments --name "$BLOB" \
+            --permissions r --expiry "$EXPIRY" --https-only -o tsv)
 
-          BLOB_URL="https://${STORAGE_ACCOUNT}.blob.core.windows.net/deployments/deploy-latest.zip?${SAS}"
+          NEW_URL="https://${STORAGE_ACCOUNT}.blob.core.windows.net/deployments/${BLOB}?${SAS}"
 
-          az webapp config appsettings set \
-            --name "$APP_NAME" \
-            --resource-group "$RESOURCE_GROUP" \
-            --slot staging \
-            --settings "WEBSITE_RUN_FROM_PACKAGE=$BLOB_URL" \
-            --output none
+          apply() {
+            az webapp config appsettings set \
+              --name "$APP_NAME" --resource-group "$RESOURCE_GROUP" \
+              --settings "WEBSITE_RUN_FROM_PACKAGE=$1" --output none
+            az webapp restart --name "$APP_NAME" --resource-group "$RESOURCE_GROUP"
+          }
 
-          az webapp restart \
-            --name "$APP_NAME" \
-            --resource-group "$RESOURCE_GROUP" \
-            --slot staging
+          # /login is unauthenticated and always 200; / redirects to it.
+          healthy() {
+            local url="https://$(az webapp show --name "$APP_NAME" \
+              --resource-group "$RESOURCE_GROUP" --query defaultHostName -o tsv)"
+            for i in $(seq 1 18); do
+              STATUS=$(curl -sS -o /dev/null -w "%{http_code}" "$url/login" || echo 000)
+              [ "$STATUS" = "200" ] && { echo "Healthy (/login 200)"; return 0; }
+              echo "Attempt $i: /login HTTP $STATUS, waiting..."
+              sleep 10
+            done
+            return 1
+          }
 
-      - name: Health check staging slot
-        env:
-          APP_NAME: ${{ secrets.AZURE_APP_NAME }}
-          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
-        run: |
-          STAGING_URL="https://$(az webapp show \
-            --resource-group "$RESOURCE_GROUP" \
-            --name "$APP_NAME" \
-            --slot staging \
-            --query "defaultHostName" -o tsv)"
+          echo "Deploying $BLOB ..."
+          apply "$NEW_URL"
 
-          echo "Health-checking staging slot at $STAGING_URL ..."
-          # /login is always reachable (200); / redirects (307) when auth enforces
-          for i in $(seq 1 12); do
-            STATUS=$(curl -sS -o /dev/null -w "%{http_code}" "$STAGING_URL/login" || echo "000")
-            if [ "$STATUS" = "200" ]; then
-              echo "Staging healthy (/login HTTP 200)"
-              exit 0
+          # No staging slot to verify against: the app runs on F1 Free, which does
+          # not support slots (wishlist #32). Production is validated after the
+          # fact and reverted if the check fails.
+          if healthy; then
+            echo "Deployment succeeded."
+          else
+            echo "::error::Health check failed - rolling back"
+            if [ -n "${PREVIOUS:-}" ]; then
+              apply "$PREVIOUS"
+              healthy && echo "::warning::Rolled back to previous package" \
+                       || echo "::error::Rollback did not become healthy"
+            else
+              echo "::error::No previous package recorded - cannot roll back"
             fi
-            echo "Attempt $i: /login HTTP $STATUS, waiting..."
-            sleep 10
-          done
-          echo "::error::Staging health check failed after 12 attempts — aborting before swap"
-          exit 1
-
-      - name: Swap staging → production
-        env:
-          APP_NAME: ${{ secrets.AZURE_APP_NAME }}
-          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
-        run: |
-          echo "Swapping staging → production ..."
-          az webapp deployment slot swap \
-            --name "$APP_NAME" \
-            --resource-group "$RESOURCE_GROUP" \
-            --slot staging \
-            --target-slot production \
-            --output none
-          echo "Swap complete."
-
-      - name: Health check production
-        env:
-          APP_NAME: ${{ secrets.AZURE_APP_NAME }}
-          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
-        run: |
-          PROD_URL="https://$(az webapp show \
-            --resource-group "$RESOURCE_GROUP" \
-            --name "$APP_NAME" \
-            --query "defaultHostName" -o tsv)"
-
-          echo "Health-checking $PROD_URL ..."
-          # /login is always reachable (200); / redirects (307) when auth enforces
-          for i in $(seq 1 12); do
-            STATUS=$(curl -sS -o /dev/null -w "%{http_code}" "$PROD_URL/login" || echo "000")
-            if [ "$STATUS" = "200" ]; then
-              echo "Production healthy (/login HTTP 200)"
-              exit 0
-            fi
-            echo "Attempt $i: /login HTTP $STATUS, waiting..."
-            sleep 10
-          done
-          echo "::error::Production health check failed after 12 attempts"
-          exit 1
+            exit 1
+          fi
