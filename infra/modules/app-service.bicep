@@ -49,7 +49,10 @@ resource webApp 'Microsoft.Web/sites@2025-03-01' = {
         }
       ]
       webSocketsEnabled: false
-      alwaysOn: true
+      // F1 Free does not support Always On. Setting it true on a Free plan
+      // fails the deployment. Cost of leaving it off: the app idles out after
+      // ~20 min, so the first request afterwards pays a cold start.
+      alwaysOn: false
     }
   }
   tags: {
