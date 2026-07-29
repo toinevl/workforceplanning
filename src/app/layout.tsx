@@ -4,6 +4,13 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { Toaster } from "sonner";
 
+// Force dynamic rendering on all pages under this layout.
+// In Next.js standalone mode, prerendered (static) pages are served
+// directly from disk by server.js, bypassing the middleware pipeline.
+// With auth enabled, every request must go through the middleware to
+// check the session cookie — so no page can be statically cached.
+export const dynamic = "force-dynamic";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],

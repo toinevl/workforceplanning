@@ -122,13 +122,14 @@ jobs:
             --query "defaultHostName" -o tsv)"
 
           echo "Health-checking staging slot at $STAGING_URL ..."
+          # /login is always reachable (200); / redirects (307) when auth enforces
           for i in $(seq 1 12); do
-            STATUS=$(curl -sS -o /dev/null -w "%{http_code}" "$STAGING_URL/" || echo "000")
+            STATUS=$(curl -sS -o /dev/null -w "%{http_code}" "$STAGING_URL/login" || echo "000")
             if [ "$STATUS" = "200" ]; then
-              echo "Staging healthy (HTTP 200)"
+              echo "Staging healthy (/login HTTP 200)"
               exit 0
             fi
-            echo "Attempt $i: HTTP $STATUS, waiting..."
+            echo "Attempt $i: /login HTTP $STATUS, waiting..."
             sleep 10
           done
           echo "::error::Staging health check failed after 12 attempts — aborting before swap"
@@ -159,13 +160,14 @@ jobs:
             --query "defaultHostName" -o tsv)"
 
           echo "Health-checking $PROD_URL ..."
+          # /login is always reachable (200); / redirects (307) when auth enforces
           for i in $(seq 1 12); do
-            STATUS=$(curl -sS -o /dev/null -w "%{http_code}" "$PROD_URL/" || echo "000")
+            STATUS=$(curl -sS -o /dev/null -w "%{http_code}" "$PROD_URL/login" || echo "000")
             if [ "$STATUS" = "200" ]; then
-              echo "Production healthy (HTTP 200)"
+              echo "Production healthy (/login HTTP 200)"
               exit 0
             fi
-            echo "Attempt $i: HTTP $STATUS, waiting..."
+            echo "Attempt $i: /login HTTP $STATUS, waiting..."
             sleep 10
           done
           echo "::error::Production health check failed after 12 attempts"
