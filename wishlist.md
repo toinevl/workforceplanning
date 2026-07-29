@@ -120,13 +120,20 @@ tags: [wishlist]
         - deploy.yml reworked: versioned packages + capture/restore rollback (387644e)
         - Bicep targets F1 + reserved:true, slot module no longer instantiated (9bd1103)
         - F1 Linux plan `wfp-plan-free` created in rgWorkforcePlan / Poland Central
-      REMAINING (3 live commands, blocked here by tool permissions):
-        az webapp deployment slot delete -g rgWorkforcePlan -n alicante --slot staging
-        az webapp config set -g rgWorkforcePlan -n alicante --always-on false
-        az webapp update -g rgWorkforcePlan -n alicante --plan wfp-plan-free
-      Order matters: Free rejects a site that still has slots or Always On.
-      Rollback: `az webapp update -g rgWorkforcePlan -n alicante --plan ASP-rgWebsite-9e1a`
-      (pre-change state captured: plan ASP-rgWebsite-9e1a, alwaysOn true, Running).
+      DONE 2026-07-29 — alicante now runs on F1 Free (sku: Free, alwaysOn: false,
+      state: Running). Verified after the move: /login 200 on first request,
+      /api/teams and / still 307 to /login, so auth survived the migration.
+
+      Two corrections worth recording:
+        1. `az webapp update --plan` does not exist (CLI 2.88.0). Moving a site
+           between plans is `--set serverFarmId=<plan resource id>`.
+        2. The move then failed with Conflict 59602 "due to hosting constraints".
+           Cause: a site can only move between plans in the same *webspace*, and a
+           webspace is bound to the resource group owning the plan. alicante's
+           webspace is rgWebsite-PolandCentralwebspace-Linux; an F1 plan created in
+           rgWorkforcePlan lands in rgWorkforcePlan-PolandCentralwebspace-Linux and
+           is unusable by this site. Resolved by creating wfp-plan-free in
+           **rgWebsite**; the rgWorkforcePlan copy was deleted.
 
 - [ ] (C) Decide fate of ASP-rgWebsite-9e1a after alicante moves off +infra +cost @me #34
       EUR 28.32/mo. Once alicante leaves, its only remaining site is `invoicesnap`
@@ -140,3 +147,12 @@ tags: [wishlist]
       returns 307 to /api/* instead of 401 — fetchJSON (#27) expects 401, and a 307
       is followed to an HTML 200, so its redirect handling never fires.
       Worth keeping from #15: the auth-enforcement E2E suite that runs with auth ON.
+
+- [ ] (C) Recreate alicante in the rgWorkforcePlan webspace so Bicep can own it +infra @me #35
+      infra/main.bicep creates its plan in rgWorkforcePlan, but the live site's
+      webspace is bound to rgWebsite, so that plan can never host it (Conflict
+      59602). Deploying the template as-is produces an unusable empty plan — the
+      same waste #31 just removed. The only real fix is recreating the site in this
+      resource group, which means new default hostname, Entra redirect URI updates,
+      and a fresh WEBSITE_RUN_FROM_PACKAGE. Not urgent; main.bicep carries a warning
+      comment in the meantime.

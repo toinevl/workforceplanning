@@ -31,6 +31,19 @@ module storage 'modules/storage.bicep' = {
   }
 }
 
+// WARNING — this module cannot currently host `alicante`.
+//
+// A site can only be moved between App Service plans in the same *webspace*,
+// and a webspace is bound to the resource group that owns the plan. The live
+// site sits in webspace `rgWebsite-PolandCentralwebspace-Linux` because its
+// plan has always lived in rgWebsite. A plan created here lands in
+// `rgWorkforcePlan-PolandCentralwebspace-Linux`, and assigning the site to it
+// fails with Conflict 59602 "due to hosting constraints".
+//
+// The live F1 plan is therefore `wfp-plan-free` in rgWebsite, not this one.
+// Deploying this template as-is produces an unusable empty plan — exactly the
+// waste wishlist #31 removed. Reconciling it means recreating the site in this
+// resource group's webspace (wishlist #35), not editing this file.
 module plan 'modules/app-service-plan.bicep' = {
   name: 'appServicePlan'
   params: {
