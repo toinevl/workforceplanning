@@ -94,6 +94,9 @@ tags: [wishlist]
       actually runs. Verified locally both ways: with the flag /api/* returns 200
       (CI can run), without it /api/* and pages 307 to /login while /login stays
       200 (security fix intact).
+      SHIPPED 2026-07-29 — PR #16 merged, CI + E2E green, deploy succeeded.
+      Production verified anonymous: /api/{teams,members,scenarios,assignments,seed}
+      all 307 -> /login; /login 200. The exposure is closed.
 
 - [x] (A) Level 0: delete empty S1 plan workforceplanning-plan-prod +infra +cost @me #31
       0 sites, EUR 24.66/mo, entire spend of rgWorkforcePlan. alicante does not run
