@@ -19,6 +19,14 @@ import type { NextRequest } from "next/server";
 const LOGIN_PAGE = "/login";
 
 export default async function middleware(request: NextRequest) {
+  // Debugging/CI escape hatch. Must be checked HERE: enforcement lives in this
+  // function, so a check in auth.ts's `authorized` export never runs. Without
+  // it the E2E suite 307s on every request, CI fails, and deploy.yml — which
+  // triggers on CI success — is skipped, so nothing reaches production.
+  if (process.env.AUTH_DISABLED === "true") {
+    return NextResponse.next();
+  }
+
   // Get the session; auth() returns the parsed session object directly.
   const session = await auth();
 

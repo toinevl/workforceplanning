@@ -1,7 +1,7 @@
 ---
 project: Workforce Planning
 owner: toine
-updated: 2026-07-08
+updated: 2026-07-29
 tags: [wishlist]
 ---
 
@@ -76,3 +76,41 @@ tags: [wishlist]
       BLOCKED — needs #24 (Entra ID app registration) to test real auth flow.
 - [x] (D) Update ADR-004 + security-identity.md + README auth section post-milestone +docs @me #29
       DONE — ADR-004 superseded, security-identity.md updated.
+
+  ── Azure cost elimination (analysis: 2026-07-29, two S1 plans found for one app) ──
+
+  Finding: EUR 52.98/month across two Standard plans for a single running app.
+    workforceplanning-plan-prod  S1  EUR 24.66/mo  0 sites (empty, created by Bicep)
+    ASP-rgWebsite-9e1a           S1  EUR 28.32/mo  alicante + invoicesnap (Stopped)
+  Standard tier is required only by deployment slots. Nothing else needs it.
+
+- [x] (A) BLOCKER: restore AUTH_DISABLED so CI passes and deploys unblock +infra +ci @me #30
+      Auth enforcement moved into a custom middleware body (a6153f8) that does not
+      check AUTH_DISABLED — only the now-unused `authorized` export in auth.ts does.
+      CI E2E therefore 307s on every request, CI fails, and deploy.yml (workflow_run
+      on CI success) is SKIPPED. Production is still serving /api/* to anonymous
+      callers because the fix cannot reach it. Must land before #31/#32.
+      DONE — AUTH_DISABLED check moved into src/middleware.ts where enforcement
+      actually runs. Verified locally both ways: with the flag /api/* returns 200
+      (CI can run), without it /api/* and pages 307 to /login while /login stays
+      200 (security fix intact).
+
+- [ ] (A) Level 0: delete empty S1 plan workforceplanning-plan-prod +infra +cost @me #31
+      0 sites, EUR 24.66/mo, entire spend of rgWorkforcePlan. alicante does not run
+      on it — it runs on ASP-rgWebsite-9e1a in rgWebsite. Deleting is zero-impact.
+      infra/main.bicep recreates it on next deployment, so the Bicep must change too.
+
+- [ ] (B) Level 1: move alicante to F1 Free and retire both S1 plans +infra +cost @me #32
+      F1 Linux confirmed available in Poland Central; app is app,linux NODE|22-lts.
+      Costs: loses deployment slots (Free/Basic support none), loses Always On
+      (cold start after ~20 min idle), 60 CPU-min/day quota.
+      Requires deploy.yml rework: staging-deploy -> health-check -> swap becomes
+      deploy-direct + health-check + rollback-on-failure.
+      Ends at EUR 0/mo for hosting.
+
+- [ ] (C) Reconcile PR #15 with the middleware approach on main +security +testing @me #33
+      PR #15 fixed the same bug via callbacks.authorized; main fixed it via a custom
+      middleware body. Main's version closes the hole but drops AUTH_DISABLED and
+      returns 307 to /api/* instead of 401 — fetchJSON (#27) expects 401, and a 307
+      is followed to an HTML 200, so its redirect handling never fires.
+      Worth keeping from #15: the auth-enforcement E2E suite that runs with auth ON.
