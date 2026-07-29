@@ -153,7 +153,7 @@ tags: [wishlist]
       is followed to an HTML 200, so its redirect handling never fires.
       Worth keeping from #15: the auth-enforcement E2E suite that runs with auth ON.
 
-- [ ] (C) Recreate alicante in the rgWorkforcePlan webspace so Bicep can own it +infra @me #35
+- [x] (C) Make infra/main.bicep deployable again +infra @me #35
       infra/main.bicep creates its plan in rgWorkforcePlan, but the live site's
       webspace is bound to rgWebsite, so that plan can never host it (Conflict
       59602). Deploying the template as-is produces an unusable empty plan — the
@@ -161,3 +161,39 @@ tags: [wishlist]
       resource group, which means new default hostname, Entra redirect URI updates,
       and a fresh WEBSITE_RUN_FROM_PACKAGE. Not urgent; main.bicep carries a warning
       comment in the meantime.
+
+      DONE 2026-07-29 — solved by referencing the existing plan instead of creating
+      one (cross-RG `existing` resource), rather than recreating the site. Zero
+      downtime, no hostname change. Full RG consolidation deferred to #37.
+
+      `az deployment group what-if` then exposed TWO further reasons the template
+      could never have been deployed, both now fixed:
+        1. InvalidResourceLocation — saworkforceplan is in northeurope but
+           parameters.json says polandcentral, so the storage module tried to
+           recreate it in the wrong region. Added a `storageLocation` param.
+        2. siteConfig.appSettings replaces the whole collection. The module wrote
+           7 settings while the live app has 14, so deploying would have deleted
+           all five AUTH_* values — breaking sign-in and reopening the anonymous
+           access hole — and dropped WEBSITE_RUN_FROM_PACKAGE, leaving the app
+           with no code to boot. All are now modelled as params (Key Vault
+           reference URIs, not secrets) and appended only when supplied.
+      what-if now succeeds: 1 NoChange, 8 Ignore, 2 benign Modify. No plan created,
+      nothing deleted, no app settings lost.
+
+- [x] (A) Fix AUTH_URL pointing at the deleted staging slot +security +infra @me #36
+      Found while collecting parameter values. Production AUTH_URL was
+      https://alicante-staging-a3a5aah7h8ezbbcc... — the staging slot, deleted
+      during the F1 migration (#32). A slot swap had carried staging's value into
+      production because AUTH_URL was not marked slot-sticky, so Auth.js was
+      building sign-in callbacks against a host that no longer resolves.
+      DONE — AUTH_URL set to the production hostname; the dead staging redirect URI
+      removed from the Entra app registration, leaving localhost + prod.
+      NOT VERIFIED END-TO-END: completing an Entra sign-in needs a browser.
+      Someone should sign in once to confirm.
+
+- [ ] (C) Consolidate alicante into the rgWorkforcePlan webspace +infra @me #37
+      The plan now lives in rgWebsite and is referenced, not created, which is
+      truthful but organizationally odd. Real consolidation means recreating the
+      site in rgWorkforcePlan: new default hostname, Entra redirect URI update,
+      AUTH_URL change, AZURE_APP_NAME secret change, and a switchover window.
+      Deferred deliberately — the hazard #35 existed to prevent is now gone.
