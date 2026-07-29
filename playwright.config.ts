@@ -8,7 +8,7 @@ export default defineConfig({
   workers: 1,
   reporter: 'list',
   webServer: {
-    command: 'next dev -p 3000',
+    command: 'AUTH_DISABLED=true next dev -p 3000',
     port: 3000,
     reuseExistingServer: false,
     stdout: 'ignore',
