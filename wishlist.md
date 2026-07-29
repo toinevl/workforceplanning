@@ -105,13 +105,31 @@ tags: [wishlist]
       rgWorkforcePlan now holds only toine_asp_1775 (F1, 0 sites, Canada Central —
       wrong region to reuse) and ASP-rgWorkforcePlan-846d (FC1, the dead Function App).
 
-- [ ] (B) Level 1: move alicante to F1 Free and retire both S1 plans +infra +cost @me #32
+- [~] (B) Level 1: move alicante to F1 Free and retire both S1 plans +infra +cost @me #32
       F1 Linux confirmed available in Poland Central; app is app,linux NODE|22-lts.
       Costs: loses deployment slots (Free/Basic support none), loses Always On
       (cold start after ~20 min idle), 60 CPU-min/day quota.
       Requires deploy.yml rework: staging-deploy -> health-check -> swap becomes
       deploy-direct + health-check + rollback-on-failure.
       Ends at EUR 0/mo for hosting.
+
+      DONE:
+        - deploy.yml reworked: versioned packages + capture/restore rollback (387644e)
+        - Bicep targets F1 + reserved:true, slot module no longer instantiated (9bd1103)
+        - F1 Linux plan `wfp-plan-free` created in rgWorkforcePlan / Poland Central
+      REMAINING (3 live commands, blocked here by tool permissions):
+        az webapp deployment slot delete -g rgWorkforcePlan -n alicante --slot staging
+        az webapp config set -g rgWorkforcePlan -n alicante --always-on false
+        az webapp update -g rgWorkforcePlan -n alicante --plan wfp-plan-free
+      Order matters: Free rejects a site that still has slots or Always On.
+      Rollback: `az webapp update -g rgWorkforcePlan -n alicante --plan ASP-rgWebsite-9e1a`
+      (pre-change state captured: plan ASP-rgWebsite-9e1a, alwaysOn true, Running).
+
+- [ ] (C) Decide fate of ASP-rgWebsite-9e1a after alicante moves off +infra +cost @me #34
+      EUR 28.32/mo. Once alicante leaves, its only remaining site is `invoicesnap`
+      (rgWebsite, currently Stopped) — a different project, so this is not mine to
+      delete. Options: downgrade the plan to F1 (keeps invoicesnap, most of the
+      saving), move invoicesnap to wfp-plan-free, or delete if invoicesnap is dead.
 
 - [ ] (C) Reconcile PR #15 with the middleware approach on main +security +testing @me #33
       PR #15 fixed the same bug via callbacks.authorized; main fixed it via a custom
