@@ -9,6 +9,8 @@ export const TABLE_TEAM_DRIVERS = 'scenarioTeamDrivers';
 export const TABLE_SNAPSHOTS = 'scenarioSnapshots';
 export const TABLE_AUDIT_EVENTS = 'scenarioAuditEvents';
 export const TABLE_DEPARTMENTS = 'departments';
+export const TABLE_ROLE_PROFILES = 'roleProfiles';
+export const TABLE_MEMBER_SKILLS = 'memberSkillAssignments';
 
 // ── Entity types (Azure Table entities extend TableEntity with partitionKey + rowKey) ──
 
@@ -105,6 +107,21 @@ export interface AuditEventEntity extends TableEntity {
   payloadJson?: string;
 }
 
+export interface RoleProfileEntity extends TableEntity {
+  partitionKey: 'roleProfile';
+  rowKey: string; // role profile id
+  roleKey: string; // normalised role key
+  roleName: string;
+  skillTargets: string; // JSON map skillName -> target number
+  isSquad?: boolean;
+}
+
+export interface MemberSkillAssignmentEntity extends TableEntity {
+  partitionKey: string; // teamId
+  rowKey: string; // memberId
+  skills: string; // JSON array of skill names
+}
+
 // Sentinel value for "member removed from all teams"
 export const REMOVED_SENTINEL = 'REMOVED';
 
@@ -120,6 +137,8 @@ export interface EntityMap {
   TeamDriver: TeamDriverEntity;
   Snapshot: SnapshotEntity;
   AuditEvent: AuditEventEntity;
+  RoleProfile: RoleProfileEntity;
+  MemberSkillAssignment: MemberSkillAssignmentEntity;
 }
 
 export type EntityTypeName = keyof EntityMap;

@@ -16,8 +16,9 @@ export interface RoleProfile {
   isSquad?: boolean;
 }
 
-export interface SkillAssignment {
-  memberId: string;
+export interface MemberSkillAssignment {
   teamId: string;
+  memberId: string;
   skills: SkillName[];
 }
+

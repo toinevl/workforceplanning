@@ -8,6 +8,8 @@ import type {
   StaffMemberEntity,
   TeamDriverEntity,
   TeamEntity,
+  RoleProfileEntity,
+  MemberSkillAssignmentEntity,
 } from './tables';
 import { REMOVED_SENTINEL } from './tables';
 import type {
@@ -24,6 +26,8 @@ import type {
   StaffMember,
   Team,
 } from '../types/domain';
+import type { RoleProfile } from '../types/skills';
+import type { SkillName } from '../types/skills';
 
 export function entityToTeam(e: TeamEntity): Team {
   return {
@@ -114,6 +118,24 @@ export function entityToAuditEvent(e: AuditEventEntity): AuditEvent {
   };
 }
 
+export function entityToRoleProfile(e: RoleProfileEntity): RoleProfile {
+  return {
+    id: e.rowKey,
+    roleKey: e.roleKey,
+    roleName: e.roleName,
+    skillTargets: JSON.parse(e.skillTargets || '{}') as RoleProfile['skillTargets'],
+    isSquad: e.isSquad,
+  };
+}
+
+export function entityToMemberSkillAssignment(e: MemberSkillAssignmentEntity) {
+  return {
+    teamId: e.partitionKey,
+    memberId: e.rowKey,
+    skills: JSON.parse(e.skills || '[]') as SkillName[],
+  };
+}
+
 // SnapshotEntity maps to a composite BoardState (parsed JSON blobs + scenario
 // lookup); there is no clean 1:1 entity→domain mapping. SnapshotEntity is
 // therefore intentionally represented by a null entry in the registry below.
@@ -136,6 +158,8 @@ const entityMappers = {
   TeamDriver: entityToScenarioTeamDriver,
   Snapshot: null, // composite mapping — see note above
   AuditEvent: entityToAuditEvent,
+  RoleProfile: entityToRoleProfile,
+  MemberSkillAssignment: entityToMemberSkillAssignment,
 } satisfies EntityMapperRegistry;
 
 // Reference the registry so dead-code elimination doesn't drop it.
