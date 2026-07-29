@@ -18,10 +18,9 @@ param environment string = 'prod'
 @maxLength(24)
 param storageAccountName string = 'saworkforceplan'
 
-@description('Key Vault name (globally unique, 3-24 chars, alphanumeric + hyphen)')
-@minLength(3)
-@maxLength(24)
-param keyVaultName string = 'kv-wfp-${environment}'
+// Note: the Key Vault is not created here. It is provisioned by main-kv.bicep
+// as a second pass, because the vault's role assignments need the App Service
+// managed-identity principalIds that this template outputs.
 
 module storage 'modules/storage.bicep' = {
   name: 'storage'
@@ -65,23 +64,13 @@ module app 'modules/app-service.bicep' = {
   }
 }
 
-module stagingSlot 'modules/app-service-slot.bicep' = {
-  name: 'stagingSlot'
-  params: {
-    name: appServiceName
-    location: location
-    serverFarmId: plan.outputs.id
-    storageConnectionString: storage.outputs.connectionString
-    keyVaultStorageSecretUri: ''
-    appInsightsConnectionString: insights.outputs.connectionString
-    appInsightsInstrumentationKey: insights.outputs.instrumentationKey
-  }
-}
+// No staging slot: deployment slots require Standard tier or higher, and this
+// app runs on F1 Free (wishlist #32). modules/app-service-slot.bicep is kept
+// for reference but is intentionally not instantiated — reinstating it means
+// moving back to S1 and paying for it.
 
 output appUrl string = 'https://${app.outputs.defaultHostname}'
-output stagingUrl string = 'https://${stagingSlot.outputs.defaultHostname}'
 output storageAccountName string = storage.outputs.name
 output appInsightsName string = insights.outputs.name
 output appPrincipalId string = app.outputs.principalId
-output stagingPrincipalId string = stagingSlot.outputs.principalId
 output storageConnectionString string = storage.outputs.connectionString
