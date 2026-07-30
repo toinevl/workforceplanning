@@ -37,7 +37,7 @@ export function TopNav({ board }: TopNavProps) {
   const isDepartments = pathname.startsWith('/departments');
 
   return (
-    <nav className="bg-white border-b border-gray-200 px-4 py-2.5 flex flex-wrap items-center gap-3 shrink-0">
+    <nav className="bg-white border-b border-gray-200 px-4 py-2.5 flex items-center gap-3 shrink-0">
       <div className="flex min-w-0 items-center gap-2">
         <Link
           href="/"
@@ -53,7 +53,7 @@ export function TopNav({ board }: TopNavProps) {
         </span>
       </div>
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1 shrink-0">
         <Link
           href="/"
           aria-current={isHome ? 'page' : undefined}
@@ -78,10 +78,10 @@ export function TopNav({ board }: TopNavProps) {
       </div>
 
       {board && (
-        <>
-          <div className="h-4 w-px bg-gray-200" />
+        <div className="flex items-center gap-3 min-w-0 flex-1 overflow-x-auto">
+          <div className="h-4 w-px bg-gray-200 shrink-0" />
 
-          <div className="min-w-0">
+          <div className="min-w-0 shrink-0">
             <div className="flex items-center gap-2">
               <span className="font-semibold text-gray-900 truncate">{board.scenario.name}</span>
               <span className="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-700 rounded">
@@ -90,11 +90,11 @@ export function TopNav({ board }: TopNavProps) {
             </div>
           </div>
 
-          <div className="hidden md:block">
+          <div className="hidden md:block shrink-0">
             <ScenarioStats board={board} />
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={toggleSnapshotHistory}
               className="text-sm px-3 py-2.5 border border-gray-400 text-gray-800 rounded-lg hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
@@ -125,15 +125,13 @@ export function TopNav({ board }: TopNavProps) {
             >
               Parameters
             </button>
-            {board && (
-              <button
-                onClick={() => setShowResetConfirm(true)}
-                disabled={resetMutation.isPending}
-                className="text-sm px-3 py-2.5 border border-red-500 text-red-700 rounded-lg hover:bg-red-50 disabled:opacity-40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
-              >
-                Reset
-              </button>
-            )}
+            <button
+              onClick={() => setShowResetConfirm(true)}
+              disabled={resetMutation.isPending}
+              className="text-sm px-3 py-2.5 border border-red-500 text-red-700 rounded-lg hover:bg-red-50 disabled:opacity-40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+            >
+              Reset
+            </button>
             <Link
               href={`/scenarios/${board.scenario.id}/compare`}
               className="text-sm px-3 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-700 transition-colors"
@@ -141,11 +139,11 @@ export function TopNav({ board }: TopNavProps) {
               Compare
             </Link>
           </div>
-        </>
+        </div>
       )}
 
-      {/* User menu — always on the far right */}
-      <div className="ml-auto">
+      {/* User menu — always pinned to the far right */}
+      <div className="ml-auto shrink-0">
         <UserMenu />
       </div>
 
