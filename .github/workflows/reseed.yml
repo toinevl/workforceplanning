@@ -1,0 +1,69 @@
+name: Reseed Database
+
+on:
+  workflow_dispatch:
+    inputs:
+      members-per-team:
+        description: 'Max members per team (leave empty for all)'
+        required: false
+        type: string
+      reset-first:
+        description: 'Wipe existing data before seeding'
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  NODE_VERSION: '22.22.2'
+
+jobs:
+  reseed:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Resolve Key Vault secret
+        id: kv-secret
+        run: |
+          SECRET=$(az keyvault secret show \
+            --vault-name kv-wfp-prod \
+            --name storage-connection-string \
+            --query value -o tsv)
+          echo "::add-mask::$SECRET"
+          echo "value=$SECRET" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run seed script
+        env:
+          AZURE_STORAGE_CONNECTION_STRING: ${{ steps.kv-secret.outputs.value }}
+        run: |
+          ARGS=""
+          if [ -n "${{ inputs.members-per-team }}" ]; then
+            ARGS="$ARGS --members ${{ inputs.members-per-team }}"
+          fi
+          if [ "${{ inputs.reset-first }}" != "true" ]; then
+            ARGS="$ARGS --no-reset"
+          fi
+          npx tsx scripts/seed.ts $ARGS
