@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { CloseButton } from '@/components/ui/CloseButton';
+import { InfoHint } from '@/components/ui/InfoHint';
 import { coverageForTeam } from '@/lib/skills/roles';
 import { useAuditEvents } from '@/lib/hooks/useAudit';
 import type { BoardState } from '@/lib/types/domain';
@@ -64,7 +65,10 @@ export function DecisionSummary({ board, onClose }: DecisionSummaryProps) {
   return (
     <aside className="w-full sm:w-96 shrink-0 border-l border-gray-300 bg-white flex flex-col overflow-y-auto">
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-300">
-        <h2 className="font-semibold text-sm text-gray-900">Decision Summary</h2>
+        <div className="flex items-center gap-1">
+          <h2 className="font-semibold text-sm text-gray-900">Decision Summary</h2>
+          <InfoHint text="Live session overview. Tracks all moves and removals made during this planning session, with real-time FTE and skill impact per team." />
+        </div>
         <CloseButton
           onClick={onClose}
           className="flex items-center justify-center min-h-[44px] min-w-[44px] text-gray-600 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"

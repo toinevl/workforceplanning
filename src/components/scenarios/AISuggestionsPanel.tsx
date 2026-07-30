@@ -1,6 +1,7 @@
 'use client';
 
 import { CloseButton } from '@/components/ui/CloseButton';
+import { InfoHint } from '@/components/ui/InfoHint';
 import { useScenarioAnalysis } from '@/lib/hooks/useAnalysis';
 import { useMoveMembers } from '@/lib/hooks/useTeamBoard';
 import { toast } from 'sonner';
@@ -34,9 +35,14 @@ export function AISuggestionsPanel({ board, onClose }: AISuggestionsPanelProps) 
   return (
     <aside className="w-full sm:w-96 shrink-0 border-l border-gray-300 bg-white flex flex-col overflow-y-auto">
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-300">
-        <div>
-          <h2 className="font-semibold text-sm text-gray-900">AI Analysis</h2>
-          <p className="text-xs text-gray-500 mt-0.5">Skill-gap predictions & move suggestions</p>
+        <div className="flex items-center gap-1">
+          <div>
+            <div className="flex items-center gap-1">
+              <h2 className="font-semibold text-sm text-gray-900">AI Analysis</h2>
+              <InfoHint text="Automated analysis of the current board state. Identifies teams with skill surpluses and deficits, then suggests member moves that improve coverage. Click Apply Move to execute a suggestion." />
+            </div>
+            <p className="text-xs text-gray-500 mt-0.5">Skill-gap predictions & move suggestions</p>
+          </div>
         </div>
         <CloseButton
           onClick={onClose}

@@ -2,6 +2,7 @@
 
 import type { TeamWithStats } from '@/lib/types/domain';
 import { SkillRadarChart } from '@/components/skills/SkillRadarChart';
+import { InfoHint } from '@/components/ui/InfoHint';
 
 interface DepartmentTeamRowProps {
   team: TeamWithStats & {
@@ -47,7 +48,10 @@ export function DepartmentTeamRow({ team }: DepartmentTeamRowProps) {
           <div className="grid gap-4 md:grid-cols-[1fr_auto]">
             <SkillRadarChart data={data} size={220} />
             <div className="rounded-lg border border-gray-200 bg-white p-3 text-xs">
-              <h3 className="mb-2 font-semibold text-gray-900">Top skill gaps</h3>
+              <div className="mb-2 flex items-center gap-1">
+                <h3 className="font-semibold text-gray-900">Top skill gaps</h3>
+                <InfoHint text="Skills sorted by gap size (ambition minus current). Positive (+) means the team needs more coverage. Negative means surplus." />
+              </div>
               <ul className="space-y-1">
                 {Object.entries(skills.gap)
                   .sort((a, b) => b[1] - a[1])

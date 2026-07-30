@@ -4,6 +4,7 @@ import { useId } from 'react';
 import { cn } from '@/lib/utils/cn';
 import { CloseButton } from '@/components/ui/CloseButton';
 import { SectionLabel } from '@/components/ui/SectionLabel';
+import { InfoHint } from '@/components/ui/InfoHint';
 import { useParameters, useUpdateParameters, useApplyLogic } from '@/lib/hooks/useParameters';
 import { ImpactPreview } from '@/components/scenarios/ImpactPreview';
 import { extractErrorMessage } from '@/lib/utils/extractErrorMessage';
@@ -76,13 +77,16 @@ export function ParametersPanel({ board, onClose }: ParametersPanelProps) {
 
       <div className="p-4 border-t space-y-2">
         {params && <ImpactPreview board={board} params={params} />}
-        <button
-          onClick={handleApply}
-          disabled={applyLogic.isPending}
-          className="w-full py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
-        >
-          {applyLogic.isPending ? 'Applying…' : 'Apply Logic'}
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={handleApply}
+            disabled={applyLogic.isPending}
+            className="flex-1 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          >
+            {applyLogic.isPending ? 'Applying…' : 'Apply Logic'}
+          </button>
+          <InfoHint text="Runs the scenario engine with current parameters. For retirement wave: flags at-risk members. For squad removal: removes selected members. For business drivers: generates suggested moves." />
+        </div>
         {applyLogic.isError && (
           <p className="text-xs text-red-500">{extractErrorMessage(applyLogic.error, 'Failed to apply logic')}</p>
         )}
@@ -115,7 +119,10 @@ function SquadRemovalForm({
 
   return (
     <div className="space-y-3">
-      <p className="text-xs text-gray-500">Select SQUAD members to remove from teams.</p>
+      <div className="flex items-center gap-1">
+        <p className="text-xs text-gray-500">Select SQUAD members to remove from teams.</p>
+        <InfoHint text="SQUAD members hold special temporary positions. Removing them simulates the end of their SQUAD assignment. Selecting none removes all SQUAD members by default." />
+      </div>
       {all.length === 0 && <p className="text-sm text-gray-600 italic">No SQUAD members found.</p>}
       {all.map((m) => (
         <label key={m.id} className="flex items-center gap-2 cursor-pointer">
@@ -151,7 +158,7 @@ function RetirementWaveForm({
 
   return (
     <div className="space-y-4">
-      <Field label="Retirement Age" htmlFor={retirementAgeId}>
+      <Field label="Retirement Age" hint="Members eligible at this age OR when service years threshold is met, whichever comes first." htmlFor={retirementAgeId}>
         <input
           id={retirementAgeId}
           type="number"
@@ -163,7 +170,7 @@ function RetirementWaveForm({
         />
       </Field>
 
-      <Field label="Service Years Threshold" htmlFor={serviceYearsId}>
+      <Field label="Service Years Threshold" hint="Members who have served this many years are flagged regardless of age." htmlFor={serviceYearsId}>
         <input
           id={serviceYearsId}
           type="number"
@@ -175,7 +182,7 @@ function RetirementWaveForm({
         />
       </Field>
 
-      <Field label="Planning Horizon" htmlFor={horizonYearsId}>
+      <Field label="Planning Horizon" hint="How far ahead to look. Affects which members are shown as at-risk in the impact preview." htmlFor={horizonYearsId}>
         <select
           id={horizonYearsId}
           value={params.horizonYears}
@@ -237,7 +244,7 @@ function BusinessDriversForm({
   return (
     <div className="space-y-5">
       <div>
-        <SectionLabel>Team Drivers</SectionLabel>
+        <SectionLabel>Team Drivers <InfoHint text="Assign a strategic direction to each team. Grow teams receive transfers from slim teams. Contain stays as-is. Neutral is excluded from move suggestions." className="ml-1" /></SectionLabel>
         <div className="space-y-2">
           {board.teams.map((ts) => (
             <div key={ts.team.id} className="space-y-1">
@@ -277,6 +284,7 @@ function BusinessDriversForm({
                 <span className="text-xs text-gray-600 w-3">
                   {params.teamPriorityScore[ts.team.id] ?? 3}
                 </span>
+                <InfoHint text="1 = lowest priority, 5 = highest. Higher-priority grow teams receive transfers first." />
               </div>
             </div>
           ))}
@@ -285,7 +293,7 @@ function BusinessDriversForm({
 
       <div>
         <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
-          FTE Targets by Driver
+          FTE Targets by Driver <InfoHint text="Target FTE shift per driver category. Positive = add capacity, negative = reduce. Used by the impact preview to calculate suggested moves." className="ml-1" />
         </p>
         <div className="space-y-1.5">
           {(['grow', 'contain', 'slim'] as BusinessDriver[]).map((d) => (
@@ -307,13 +315,16 @@ function BusinessDriversForm({
   );
 }
 
-function Field({ label, children, htmlFor }: { label: string; children: React.ReactNode; htmlFor?: string }) {
+function Field({ label, hint, children, htmlFor }: { label: string; hint?: string; children: React.ReactNode; htmlFor?: string }) {
   const id = useId();
   const inputId = htmlFor || id;
 
   return (
     <div className="space-y-1">
-      <label htmlFor={inputId} className="text-xs font-medium text-gray-600">{label}</label>
+      <div className="flex items-center gap-1">
+        <label htmlFor={inputId} className="text-xs font-medium text-gray-600">{label}</label>
+        {hint && <InfoHint text={hint} />}
+      </div>
       {children}
     </div>
   );

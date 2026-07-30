@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { InfoHint } from '@/components/ui/InfoHint';
 import type { BoardState } from '@/lib/types/domain';
 import type { SquadRemovalParams, RetirementWaveParams, BusinessDriverParams } from '@/lib/types/params';
 import { computeSquadRemoval } from '@/lib/scenarios/squad-removal';
@@ -24,9 +25,12 @@ export function ImpactPreview({ board, params }: ImpactPreviewProps) {
 
   return (
     <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 space-y-2">
-      <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-        Impact Preview
-      </p>
+      <div className="flex items-center gap-1">
+        <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+          Impact Preview
+        </p>
+        <InfoHint text="Preview of what will happen when you click Apply Logic. Numbers are calculated from current parameters — no changes are made until you apply." />
+      </div>
       <div className="grid grid-cols-2 gap-2">
         {preview.metrics.map((m) => (
           <div key={m.label} className="flex flex-col">
