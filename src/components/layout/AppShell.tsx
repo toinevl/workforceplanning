@@ -5,6 +5,8 @@ import { TopNav } from './TopNav';
 import { ParametersPanel } from '@/components/scenarios/ParametersPanel';
 import { SnapshotHistory } from '@/components/scenarios/SnapshotHistory';
 import { PapertrailPanel } from '@/components/scenarios/PapertrailPanel';
+import { DecisionSummary } from '@/components/scenarios/DecisionSummary';
+import { AISuggestionsPanel } from '@/components/scenarios/AISuggestionsPanel';
 import type { BoardState } from '@/lib/types/domain';
 
 interface AppShellProps {
@@ -17,9 +19,13 @@ export function AppShell({ board, children }: AppShellProps) {
     isParametersPanelOpen,
     isSnapshotHistoryOpen,
     isPapertrailOpen,
+    isDecisionSummaryOpen,
+    isAISuggestionsOpen,
     setParametersPanelOpen,
     setSnapshotHistoryOpen,
     setPapertrailOpen,
+    setDecisionSummaryOpen,
+    setAISuggestionsOpen,
   } = useWorkforceStore();
 
   return (
@@ -49,6 +55,20 @@ export function AppShell({ board, children }: AppShellProps) {
           <PapertrailPanel
             board={board}
             onClose={() => setPapertrailOpen(false)}
+          />
+        )}
+
+        {board && isDecisionSummaryOpen && (
+          <DecisionSummary
+            board={board}
+            onClose={() => setDecisionSummaryOpen(false)}
+          />
+        )}
+
+        {board && isAISuggestionsOpen && (
+          <AISuggestionsPanel
+            board={board}
+            onClose={() => setAISuggestionsOpen(false)}
           />
         )}
       </div>

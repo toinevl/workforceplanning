@@ -3,6 +3,7 @@
 import { useDroppable } from '@dnd-kit/core';
 import { cn } from '@/lib/utils/cn';
 import { TeamHeader } from './TeamHeader';
+import { TeamSkillBars } from './TeamSkillBars';
 import { MemberCard } from '@/components/members/MemberCard';
 import type { TeamSnapshot } from '@/lib/types/domain';
 
@@ -29,6 +30,7 @@ export function TeamColumn({ teamSnapshot, departmentColor, onMemberClick, readO
         driver={driver}
         priorityScore={priorityScore}
       />
+      <TeamSkillBars members={members} />
 
       <div
         ref={setNodeRef}

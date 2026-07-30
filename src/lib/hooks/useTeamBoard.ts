@@ -16,6 +16,7 @@ export function useMoveMembers(scenarioId: string) {
     onSuccess: (data) => {
       qc.setQueryData(['board', scenarioId], data);
       qc.invalidateQueries({ queryKey: ['audit', scenarioId] });
+      qc.invalidateQueries({ queryKey: ['analysis', scenarioId] });
     },
   });
 }

@@ -29,7 +29,7 @@ interface TopNavProps {
 
 export function TopNav({ board }: TopNavProps) {
   const pathname = usePathname();
-  const { toggleParametersPanel, toggleSnapshotHistory, togglePapertrail } = useWorkforceStore();
+  const { toggleParametersPanel, toggleSnapshotHistory, togglePapertrail, toggleDecisionSummary, toggleAISuggestions } = useWorkforceStore();
   const resetMutation = useResetScenario(board?.scenario.id ?? '');
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const isHome = pathname === '/' || pathname === '/scenarios';
@@ -111,6 +111,18 @@ export function TopNav({ board }: TopNavProps) {
               className="text-sm px-3 py-2.5 border border-gray-400 text-gray-800 rounded-lg hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
             >
               Papertrail
+            </button>
+            <button
+              onClick={toggleDecisionSummary}
+              className="text-sm px-3 py-2.5 border border-gray-400 text-gray-800 rounded-lg hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
+            >
+              Decisions
+            </button>
+            <button
+              onClick={toggleAISuggestions}
+              className="text-sm px-3 py-2.5 border border-blue-500 text-blue-700 rounded-lg hover:bg-blue-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            >
+              AI Analysis
             </button>
             <button
               onClick={toggleParametersPanel}

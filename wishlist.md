@@ -172,16 +172,31 @@ tags: [wishlist]
       never wired), removed dead useTeamSkills hook (endpoint never existed).
       Fixed shape mismatch: API remaps coverageForTeam → {current,ambition,gap}.
 
-- [ ] (B) Live session workspace: drag-and-drop org board + decision capture +feature @me #37
+- [x] (B) Live session workspace: drag-and-drop org board + decision capture +feature @me #37
       Interactive board where HR/product leads move staff between teams during
       planning sessions. Instant FTE and skill impact updates. Captures decisions
       (right-sizing, hiring, moves, attrition) directly into the plan.
+      DONE:
+        - TeamSkillBars: compact top-3 skill gap visualization per team column,
+          updates live as members are dragged between teams
+        - DecisionSummary panel: accumulated session metrics (moves, removes,
+          FTE lost), per-team skill impact bars, decision log from audit trail
+        - Accessible via "Decisions" button in TopNav on scenario board
 
-- [ ] (C) AI-assisted scenario generation and skill-gap predictions +ai +feature @me #38
+- [x] (C) AI-assisted scenario generation and skill-gap predictions +ai +feature @me #38
       Use internet/intranet context and existing plan data to suggest FTE allocation
       scenarios. Predict skill gaps based on role profiles and ambition. Note:
       current data lives in PowerPoint/Excel tribal knowledge; structured data must
       exist first (#36, #37) before predictions are meaningful.
+      DONE:
+        - Analysis engine (src/lib/skills/analysis.ts): identifies surplus/deficit
+          teams, critical skill gaps with severity, generates move suggestions
+          matching members with surplus skills to deficit teams
+        - API endpoint: GET /api/scenarios/[id]/analysis returns full analysis
+        - AISuggestionsPanel: skill gap list with severity badges, suggested moves
+          with one-click "Apply Move" button, surplus/deficit team breakdown
+        - Auto-refreshes after each move (queryKey invalidation)
+        - Accessible via "AI Analysis" button in TopNav on scenario board
 
 - [ ] (C) Recreate alicante in the rgWorkforcePlan webspace so Bicep can own it +infra @me #35
       infra/main.bicep creates its plan in rgWorkforcePlan, but the live site's
