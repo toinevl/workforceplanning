@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { defaultParams } from '../types/params';
 import type { ScenarioType } from '../types/domain';
 import type { SeedOptions, SeedTeamConfig } from '../types/seed';
+import { getRoleProfile } from '../skills/roles';
 
 interface SeedMember {
   name: string;
@@ -218,6 +219,20 @@ const MEMBERS: SeedMember[] = [
   { name: 'Daan de Vries',       role: 'Postdoctoral Researcher', fte: 0.6, isSquad: false, baseTeamKey: 'me-materials',  birthYear: 1961, startDate: '1992-08-01', notes: 'Retirement-eligible' },
 ];
 
+/**
+ * Derive realistic skill tags for a member from their role profile.
+ * Each member gets 2-3 skills from their role's target skill set.
+ * SQUAD members also keep the 'SQUAD' tag.
+ */
+function deriveSkillsForRole(role: string, isSquad: boolean): string[] {
+  const targets = getRoleProfile(role);
+  const profileSkills = Object.keys(targets);
+  const skills = profileSkills.length > 0
+    ? profileSkills.slice(0, 3)
+    : [];
+  return isSquad ? ['SQUAD', ...skills] : skills;
+}
+
 function buildMembers(options?: SeedOptions): SeedMember[] {
   const requested = options?.membersPerTeam;
   if (!requested) return MEMBERS;
@@ -392,6 +407,9 @@ export async function runSeed(options?: SeedOptions): Promise<{ teams: number; m
   for (const member of membersToSeed) {
     const id = uuidv4();
     const retirementEligibleYear = computeRetirementEligibleYear(member);
+    const memberTags = (member.tags && member.tags.length > 0)
+      ? member.tags
+      : deriveSkillsForRole(member.role, member.isSquad);
     await staffClient.upsertEntity<StaffMemberEntity>({
       partitionKey: 'member',
       rowKey: id,
@@ -403,7 +421,7 @@ export async function runSeed(options?: SeedOptions): Promise<{ teams: number; m
       birthYear: member.birthYear,
       retirementEligibleYear,
       baseTeamId: teamIdMap[member.baseTeamKey],
-      tags: JSON.stringify(member.tags ?? []),
+      tags: JSON.stringify(memberTags),
       notes: member.notes,
     }, 'Replace');
   }

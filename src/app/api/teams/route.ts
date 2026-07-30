@@ -31,7 +31,11 @@ export async function GET(req: Request) {
         ...team,
         headcount: teamMembers.length,
         totalFte,
-        skills: coverage,
+        skills: {
+          current: coverage.currentSkills,
+          ambition: coverage.ambitionSkills,
+          gap: coverage.gapSkills,
+        },
       };
     });
     return NextResponse.json({ data: teamsWithStats });

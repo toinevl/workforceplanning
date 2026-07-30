@@ -1,7 +1,7 @@
 ---
 project: Workforce Planning
 owner: toine
-updated: 2026-07-29
+updated: 2026-07-30
 tags: [wishlist]
 ---
 
@@ -153,11 +153,24 @@ tags: [wishlist]
       is followed to an HTML 200, so its redirect handling never fires.
       Worth keeping from #15: the auth-enforcement E2E suite that runs with auth ON.
 
-- [ ] (B) Role profile system + skill radar for team ambition vs current coverage +feature @me #36
+- [x] (B) Role profile system + skill radar for team ambition vs current coverage +feature @me #36
       Predefined role profiles with hard/soft skill targets. Teams page shows
       spider/radar diagram comparing current member skills vs ambition. Drives
       discussion in strategic workforce planning sessions. Foundation for AI-assisted
       FTE allocation and skill gap prediction.
+      DONE:
+        - 10 academic role profiles with skill targets (roles.ts)
+        - SVG radar chart: current (green) vs ambition (blue), per-skill normalization,
+          axis labels, empty-state handling (SkillRadarChart.tsx)
+        - Department detail page: radar + top-skill-gap panel per team row
+          (DepartmentTeamRow.tsx)
+        - API: GET /api/teams?departmentId=X returns skills coverage per team
+          (route.ts → coverageForTeam)
+        - Seed data: skills auto-derived from role profiles (deriveSkillsForRole),
+          so the radar shows real data after re-seed
+      Cleanup: removed dead roleProfiles.ts (duplicate Bayesian-smoothing system,
+      never wired), removed dead useTeamSkills hook (endpoint never existed).
+      Fixed shape mismatch: API remaps coverageForTeam → {current,ambition,gap}.
 
 - [ ] (B) Live session workspace: drag-and-drop org board + decision capture +feature @me #37
       Interactive board where HR/product leads move staff between teams during
