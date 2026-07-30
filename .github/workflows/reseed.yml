@@ -14,7 +14,6 @@ on:
         default: true
 
 permissions:
-  id-token: write
   contents: read
 
 env:
@@ -29,23 +28,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Azure login (OIDC)
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Resolve Key Vault secret
-        id: kv-secret
-        run: |
-          SECRET=$(az keyvault secret show \
-            --vault-name kv-wfp-prod \
-            --name storage-connection-string \
-            --query value -o tsv)
-          echo "::add-mask::$SECRET"
-          echo "value=$SECRET" >> "$GITHUB_OUTPUT"
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -57,7 +39,7 @@ jobs:
 
       - name: Run seed script
         env:
-          AZURE_STORAGE_CONNECTION_STRING: ${{ steps.kv-secret.outputs.value }}
+          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
         run: |
           ARGS=""
           if [ -n "${{ inputs.members-per-team }}" ]; then
