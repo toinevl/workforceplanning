@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAllTeams } from '@/lib/api/teams';
 import { getAllMembers } from '@/lib/api/members';
+import { coverageForTeam } from '@/lib/skills/roles';
 
 export async function GET(req: Request) {
   const teams = await getAllTeams();
@@ -10,7 +11,6 @@ export async function GET(req: Request) {
   const departmentId = searchParams.get('departmentId');
 
   if (departmentId) {
-    // Filter teams by departmentId (teams with matching departmentId field)
     const filtered = teams.filter((t) => t.departmentId === departmentId);
     const members = await getAllMembers();
     const membersByTeam = new Map<string, typeof members>();
@@ -22,10 +22,16 @@ export async function GET(req: Request) {
     const teamsWithStats = filtered.map((team) => {
       const teamMembers = membersByTeam.get(team.id) ?? [];
       const totalFte = teamMembers.reduce((sum, member) => sum + member.fte, 0);
+      const coverage = coverageForTeam(
+        teamMembers.map((m) => ({ role: m.role, skills: m.tags })),
+        team.name,
+        team.id
+      );
       return {
         ...team,
         headcount: teamMembers.length,
         totalFte,
+        skills: coverage,
       };
     });
     return NextResponse.json({ data: teamsWithStats });
