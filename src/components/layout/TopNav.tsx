@@ -77,11 +77,6 @@ export function TopNav({ board }: TopNavProps) {
         </Link>
       </div>
 
-      {/* User menu — always visible on the far right when authenticated */}
-      <div className="ml-auto">
-        <UserMenu />
-      </div>
-
       {board && (
         <>
           <div className="h-4 w-px bg-gray-200" />
@@ -148,6 +143,11 @@ export function TopNav({ board }: TopNavProps) {
           </div>
         </>
       )}
+
+      {/* User menu — always on the far right */}
+      <div className="ml-auto">
+        <UserMenu />
+      </div>
 
       <ConfirmDialog
         open={showResetConfirm}
