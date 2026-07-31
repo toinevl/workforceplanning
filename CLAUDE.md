@@ -47,6 +47,20 @@ Copy `.env.local.example` to `.env.local` for local overrides (defaults work out
 - **TanStack Query** — server-state caching; **Zustand** for client-only UI state
 - **dnd-kit** — drag-and-drop for team member reordering
 
+## Azure Resource Hygiene
+
+When migrating, replacing, or changing Azure infrastructure (hosting model,
+storage, function apps, key vaults, plans), decommissioning the OLD resource
+is part of Done — in the same PR/session.
+
+- Before migration: `az resource list --resource-group <RG> -o table` (save it)
+- After migration: diff against pre-flight inventory. Anything unreferenced = orphan.
+- Delete orphans in dependency order (apps before plans, consumers before providers).
+- If multiple agents created resources, do a full RG audit before assuming clean.
+- "I'll clean it up later" = the root cause of every orphaned resource. Delete now.
+
+See skill: `tvv-azure-resource-hygiene`
+
 ## Conventions
 
 - Always use the `@/` import alias (e.g. `@/lib/types/domain`)
