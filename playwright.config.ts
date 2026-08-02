@@ -2,6 +2,9 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
+  // Exclude auth specs — they need their own server config (playwright.auth.config.ts)
+  testMatch: /.*\.spec\.ts/,
+  testIgnore: /auth\.spec\.ts|auth-fixtures\.ts/,
   fullyParallel: false,
   forbidOnly: false,
   retries: 1,

@@ -10,7 +10,7 @@ try {
 const nextConfig = {
   output: 'standalone',
   serverExternalPackages: [],
-  allowedDevOrigins: ['192.168.2.107'],
+  allowedDevOrigins: ['192.168.2.107', '127.0.0.1'],
   turbopack: {
     root: __dirname,
   },
@@ -36,10 +36,18 @@ const nextConfig = {
   // the accepted minimum for this app.
   // NOTE on connect-src / form-action: login.microsoftonline.com is required
   // for the Auth.js Microsoft Entra ID (OIDC) sign-in flow.
+  // NOTE on 'unsafe-eval' in dev: React dev mode requires eval() for
+  // stack-trace reconstruction. Only added in non-production builds.
   async headers() {
+    const scriptSrc = [
+      "'self'",
+      "'unsafe-inline'",
+      ...(process.env.NODE_ENV !== 'production' ? ["'unsafe-eval'"] : []),
+    ].join(' ');
+
     const contentSecurityPolicy = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline'",
+      `script-src ${scriptSrc}`,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob:",
       "font-src 'self' data:",

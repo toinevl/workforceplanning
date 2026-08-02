@@ -71,9 +71,20 @@ tags: [wishlist]
 - [x] (D) Handle 401 in fetchJSON → redirect to login +code-quality @me #27
       Centralized in src/lib/utils/fetchJSON.ts. Cookies same-origin, no header changes needed.
       DONE — 401 redirect added to fetchJSON.ts.
-- [ ] (D) E2E test auth flow (login, session expiry, protected routes) +testing @me #28
+- [x] (D) E2E test auth flow (login, session expiry, protected routes) +testing @me #28
       Playwright: login flow, 401 redirect, multi-user. Validate on staging slot.
-      BLOCKED — needs #24 (Entra ID app registration) to test real auth flow.
+      DONE — 15 auth E2E tests in tests/auth.spec.ts covering:
+        - Unauthenticated: protected routes (/, /settings, /departments,
+          /scenarios) redirect to /login; /api/* returns 307; /login accessible.
+        - Authenticated: protected routes return 200; session API returns user
+          info; user name/email/sign-out visible in nav.
+        - Session expiry: clearing cookie redirects to /login; tampered cookie
+          rejected.
+      JWT session cookies minted via @auth/core/jwt.encode without hitting the
+      real Entra ID IdP. Separate playwright.auth.config.ts runs a dev server
+      with auth enforcement ON (no AUTH_DISABLED). CI runs both suites.
+      Also fixed: CSP now allows 'unsafe-eval' in dev mode (React dev mode
+      requires it for stack reconstruction); 127.0.0.1 added to allowedDevOrigins.
 - [x] (D) Update ADR-004 + security-identity.md + README auth section post-milestone +docs @me #29
       DONE — ADR-004 superseded, security-identity.md updated.
 
