@@ -2,6 +2,7 @@
 
 import { useDraggable } from '@dnd-kit/core';
 import { cn } from '@/lib/utils/cn';
+import { InfoHint } from '@/components/ui/InfoHint';
 import { MemberBadges } from './MemberBadges';
 import type { StaffMember, ScenarioMemberState, BusinessDriver } from '@/lib/types/domain';
 
@@ -59,7 +60,10 @@ export function MemberCard({
           <p className="text-xs text-gray-600 truncate mt-0.5">{member.role}</p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
-          <span className="text-xs text-gray-600 font-mono mt-0.5">{member.fte}FTE</span>
+          <span className="flex items-center gap-0.5 text-xs text-gray-600 font-mono mt-0.5">
+            {member.fte}FTE
+            <InfoHint text="Full-time equivalent for this member. 1.0 = full-time, 0.8 = 80% of full-time hours." className="font-sans" />
+          </span>
           {statusLabel && (
             <span
               title={statusTitle}

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { InfoHint } from '@/components/ui/InfoHint';
 import type { DepartmentWithStats } from '@/lib/types/domain';
 
 interface DepartmentCardProps {
@@ -48,14 +49,17 @@ export function DepartmentCard({ dept }: DepartmentCardProps) {
 
       {/* Stat chips */}
       <div className="flex items-center gap-2 flex-shrink-0">
-        <span className="rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-700">
+        <span className="flex items-center gap-0.5 rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-700">
           {dept.headcount} people
+          <InfoHint text="Total number of staff members in this department." />
         </span>
-        <span className="rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-700">
+        <span className="flex items-center gap-0.5 rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-700">
           {totalFte.toFixed(1)} FTE
+          <InfoHint text="Sum of full-time equivalents. Part-time staff count proportionally (e.g., 0.8 FTE = 0.8)." />
         </span>
-        <span className="rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-700">
+        <span className="flex items-center gap-0.5 rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-700">
           {dept.teamCount} {dept.teamCount === 1 ? 'team' : 'teams'}
+          <InfoHint text="Number of teams within this department." />
         </span>
       </div>
     </>

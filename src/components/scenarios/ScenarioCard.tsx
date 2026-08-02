@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { cn } from '@/lib/utils/cn';
+import { InfoHint } from '@/components/ui/InfoHint';
 import type { ScenarioSummary } from '@/lib/types/domain';
 
 const TYPE_LABELS = {
@@ -14,6 +15,12 @@ const TYPE_COLORS = {
   squad_removal: 'bg-purple-100 text-purple-700',
   retirement_wave: 'bg-yellow-100 text-yellow-700',
   business_drivers: 'bg-blue-100 text-blue-700',
+};
+
+const TYPE_HINTS = {
+  squad_removal: 'Scenario that removes SQUAD members. SQUAD members are on temporary assignments that may end.',
+  retirement_wave: 'Scenario that plans for upcoming staff retirements.',
+  business_drivers: 'Scenario that aligns team composition with strategic goals (grow, contain, or slim).',
 };
 
 const STATUS_COLORS = {
@@ -48,20 +55,30 @@ export function ScenarioCard({ scenario, onDelete }: ScenarioCardProps) {
         <span className={cn('text-xs px-2 py-0.5 rounded font-medium', TYPE_COLORS[scenario.type])}>
           {TYPE_LABELS[scenario.type]}
         </span>
+        <InfoHint text={TYPE_HINTS[scenario.type]} />
       </div>
 
       <div className="grid grid-cols-3 gap-2 mb-4 text-center">
         <div className="bg-gray-50 rounded p-2">
           <p className="text-lg font-semibold text-gray-900">{scenario.headcount}</p>
-          <p className="text-xs text-gray-600">Members</p>
+          <p className="flex items-center justify-center gap-0.5 text-xs text-gray-600">
+            Members
+            <InfoHint text="Number of staff members in this scenario." />
+          </p>
         </div>
         <div className="bg-gray-50 rounded p-2">
           <p className="text-lg font-semibold text-gray-900">{scenario.totalFte.toFixed(1)}</p>
-          <p className="text-xs text-gray-600">FTE</p>
+          <p className="flex items-center justify-center gap-0.5 text-xs text-gray-600">
+            FTE
+            <InfoHint text="Sum of full-time equivalents. Part-time staff count proportionally (e.g., 0.8 FTE = 0.8)." />
+          </p>
         </div>
         <div className="bg-gray-50 rounded p-2">
           <p className="text-lg font-semibold text-gray-900">{scenario.removedCount}</p>
-          <p className="text-xs text-gray-600">Removed</p>
+          <p className="flex items-center justify-center gap-0.5 text-xs text-gray-600">
+            Removed
+            <InfoHint text="Members removed from the scenario. Simulates departures like retirements or SQUAD endings." />
+          </p>
         </div>
       </div>
 
@@ -88,8 +105,9 @@ export function ScenarioCard({ scenario, onDelete }: ScenarioCardProps) {
         )}
       </div>
 
-      <p className="text-xs text-gray-600 mt-2 text-right">
+      <p className="flex items-center justify-end gap-0.5 text-xs text-gray-600 mt-2 text-right">
         {scenario.snapshotCount} snapshot{scenario.snapshotCount !== 1 ? 's' : ''}
+        <InfoHint text="Saved versions of this scenario's board state. Use snapshots to compare different planning points." />
       </p>
     </div>
   );

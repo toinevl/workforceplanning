@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { Toaster } from "sonner";
+import { GuidedTour } from "@/components/onboarding/GuidedTour";
 
 // Force dynamic rendering on all pages under this layout.
 // In Next.js standalone mode, prerendered (static) pages are served
@@ -37,7 +38,10 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-gray-50 text-gray-900">
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <GuidedTour />
+        </Providers>
         <Toaster richColors position="bottom-right" />
       </body>
     </html>

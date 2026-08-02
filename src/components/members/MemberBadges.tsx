@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils/cn';
+import { InfoHint } from '@/components/ui/InfoHint';
 import type { BusinessDriver } from '@/lib/types/domain';
 
 const DRIVER_STYLES: Record<BusinessDriver, string> = {
@@ -32,21 +33,24 @@ export function MemberBadges({ isSquad, retirementEligibleYear, driver, classNam
   return (
     <div className={cn('flex flex-wrap gap-1', className)}>
       {isSquad && (
-        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-purple-100 text-purple-800">
+        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-semibold bg-purple-100 text-purple-800">
           SQUAD
+          <InfoHint text="Special temporary position. Removing SQUAD members simulates the end of their assignment." />
         </span>
       )}
       {retiringSoon && retirementEligibleYear !== undefined && (
-        <span
-          className={cn(
-            'inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold',
-            retirementEligibleYear <= currentYear
-              ? 'bg-red-100 text-red-800'
-              : 'bg-yellow-100 text-yellow-800'
-          )}
-          title={`Eligible ${retirementEligibleYear}`}
-        >
-          Ret {retirementEligibleYear}
+        <span className="inline-flex items-center gap-0.5">
+          <span
+            className={cn(
+              'inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold',
+              retirementEligibleYear <= currentYear
+                ? 'bg-red-100 text-red-800'
+                : 'bg-yellow-100 text-yellow-800'
+            )}
+          >
+            Ret {retirementEligibleYear}
+          </span>
+          <InfoHint text={`Eligible for retirement in ${retirementEligibleYear}. Used in retirement-wave planning scenarios.`} />
         </span>
       )}
       {driver && driver !== 'neutral' && (

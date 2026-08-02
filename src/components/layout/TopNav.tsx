@@ -142,8 +142,15 @@ export function TopNav({ board }: TopNavProps) {
         </div>
       )}
 
-      {/* Admin link + User menu — always pinned to the far right */}
+      {/* Help + Admin + User menu — always pinned to the far right */}
       <div className="ml-auto flex items-center gap-2 shrink-0">
+        <Link
+          href="/help"
+          className="rounded-md px-2 py-1.5 text-xs font-normal text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
+          title="Help: golden path walkthrough and FAQ"
+        >
+          Help
+        </Link>
         <Link
           href="/settings"
           aria-current={pathname === '/settings' ? 'page' : undefined}

@@ -5,6 +5,7 @@ import { useId, useState } from 'react';
 import { ScenarioCard } from '@/components/scenarios/ScenarioCard';
 import { useScenarioList, useCreateScenario, useDeleteScenario } from '@/lib/hooks/useScenario';
 import { extractErrorMessage } from '@/lib/utils/extractErrorMessage';
+import { InfoHint } from '@/components/ui/InfoHint';
 import type { ScenarioType } from '@/lib/types/domain';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 
@@ -38,7 +39,10 @@ export function ScenarioDashboard() {
     <div className="max-w-6xl mx-auto py-6 px-4">
       <div className="flex items-center justify-between mb-6 gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Scenarios</h1>
+          <h1 className="flex items-center gap-1.5 text-2xl font-bold text-gray-900">
+            Scenarios
+            <InfoHint text="Scenarios let you model workforce changes — retirements, SQUAD endings, restructuring — and compare their impact before making decisions." />
+          </h1>
           <p className="text-sm text-gray-600 mt-1">Create and explore workforce planning scenarios.</p>
         </div>
         <button

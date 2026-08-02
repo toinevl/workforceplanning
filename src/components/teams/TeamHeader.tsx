@@ -1,6 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils/cn';
+import { InfoHint } from '@/components/ui/InfoHint';
 import type { BusinessDriver } from '@/lib/types/domain';
 
 const DRIVER_COLORS: Record<BusinessDriver, string> = {
@@ -57,8 +58,14 @@ export function TeamHeader({
       </div>
 
       <div className="flex items-center gap-3 text-xs text-gray-600">
-        <span>{headcount} members</span>
-        <span>{totalFte.toFixed(1)} FTE</span>
+        <span className="flex items-center gap-0.5">
+          {headcount} members
+          <InfoHint text="Number of staff assigned to this team." />
+        </span>
+        <span className="flex items-center gap-0.5">
+          {totalFte.toFixed(1)} FTE
+          <InfoHint text="Total full-time equivalents in this team. Part-time staff count proportionally (e.g., 0.8 FTE = 0.8)." />
+        </span>
         {driver && (
           <span
             className={cn(
