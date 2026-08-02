@@ -12,6 +12,14 @@ export function useScenarioList() {
   });
 }
 
+export function useScenariosByDepartment(departmentId: string) {
+  return useQuery<ScenarioSummary[]>({
+    queryKey: ['scenarios', 'department', departmentId],
+    queryFn: () => fetchJSON(`/api/scenarios?departmentId=${encodeURIComponent(departmentId)}`),
+    enabled: !!departmentId,
+  });
+}
+
 export function useBoardState(scenarioId: string) {
   return useQuery<BoardState>({
     queryKey: ['board', scenarioId],
@@ -31,7 +39,7 @@ export function useScenario(scenarioId: string) {
 export function useCreateScenario() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: { type: ScenarioType; name: string; description?: string }) =>
+    mutationFn: (body: { type: ScenarioType; name: string; description?: string; departmentId?: string }) =>
       fetchJSON<Scenario>('/api/scenarios', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

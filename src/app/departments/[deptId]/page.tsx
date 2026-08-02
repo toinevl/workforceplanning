@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
 import { DepartmentTeamRow } from '@/components/departments/DepartmentTeamRow';
+import { DepartmentScenarios } from '@/components/departments/DepartmentScenarios';
+import { DepartmentTeamManager } from '@/components/departments/DepartmentTeamManager';
 import { useDepartment } from '@/lib/hooks/useDepartments';
 import { useDepartmentTeams } from '@/lib/hooks/useTeams';
 
@@ -95,7 +97,11 @@ export default function DepartmentDetailPage() {
             </div>
 
             <div className="mt-8">
-              <h2 className="text-lg font-bold text-gray-900">Teams</h2>
+              <DepartmentTeamManager departmentId={department.id} />
+            </div>
+
+            <div className="mt-8">
+              <h2 className="text-lg font-bold text-gray-900">Skill Coverage</h2>
               {(teamsQuery.data?.length ?? 0) > 0 ? (
                 <div className="mt-4 flex flex-col gap-2">
                   {(teamsQuery.data ?? []).map((team) => (
@@ -103,21 +109,11 @@ export default function DepartmentDetailPage() {
                   ))}
                 </div>
               ) : (
-                <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-6 text-center">
-                  <p className="text-sm text-gray-600">No teams assigned to this department yet.</p>
-                  <p className="mt-1 text-sm text-gray-500">
-                    Go to{' '}
-                    <Link
-                      href="/settings"
-                      className="font-medium text-gray-900 underline underline-offset-2 hover:text-gray-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 rounded"
-                    >
-                      Settings
-                    </Link>{' '}
-                    to assign teams.
-                  </p>
-                </div>
+                <p className="mt-4 text-sm text-gray-500">No skill data — assign teams to see coverage.</p>
               )}
             </div>
+
+            <DepartmentScenarios departmentId={department.id} />
           </>
         )}
       </div>
