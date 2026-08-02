@@ -234,3 +234,17 @@ tags: [wishlist]
           /login 200, /api/teams 401, / 307 (auth enforced)
         - Old wfp-plan-free in rgWebsite deleted (0 sites)
         - main.bicep warning comment removed, plan name corrected
+
+- [ ] (A) Golden Path restructure — org dashboard, department pivot, scoped scenarios +feature +ui @me #39
+      The site dumps users onto a flat scenario list with no org context. Settings is
+      a junk drawer. Pages are peers with no guided flow.
+      Plan: docs/superpowers/plans/2026-08-02-golden-path.md
+      Spec: docs/superpowers/specs/2026-08-02-golden-path-design.md
+      PARTS:
+        #39a — Add departmentId to Scenario entity + filter board state
+        #39b — New Org Dashboard landing page (replaces scenario list at /)
+        #39c — Nav restructure (Org, Departments, Scenarios — Settings demoted)
+        #39d — Department detail page: Plan Reorganization button, inline team
+               assignment, active scenarios panel
+        #39e — Move department CRUD from Settings to /departments page
+        #39f — Strip Settings to admin-only (seed + bulk migration)
