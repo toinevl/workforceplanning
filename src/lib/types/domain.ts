@@ -74,6 +74,7 @@ export interface Scenario {
   parameters: string; // JSON string of ScenarioParams
   createdAt: string;
   updatedAt: string;
+  departmentId?: string;
 }
 
 export interface TeamSnapshot {
@@ -106,6 +107,7 @@ export interface ScenarioSummary {
   snapshotCount: number;
   createdAt: string;
   updatedAt: string;
+  departmentId?: string;
 }
 
 export type AuditEventType =

@@ -73,6 +73,7 @@ export function entityToScenario(e: ScenarioEntity): Scenario {
     parameters: e.parameters,
     createdAt: e.createdAt,
     updatedAt: e.updatedAt,
+    departmentId: e.departmentId,
   };
 }
 

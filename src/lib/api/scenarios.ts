@@ -12,7 +12,7 @@ import { defaultParams } from '../types/params';
 import { createAuditEvent, deleteAuditEvents } from './audit';
 import { entityToTeam, entityToStaffMember, entityToScenario, entityToScenarioMemberState } from '../db/mappers';
 
-export async function getScenarioList(): Promise<ScenarioSummary[]> {
+export async function getScenarioList(departmentId?: string): Promise<ScenarioSummary[]> {
   const scenarioClient = getTableClient(TABLE_SCENARIOS);
   const snapshotClient = getTableClient(TABLE_SNAPSHOTS);
   const memberStateClient = getTableClient(TABLE_MEMBER_STATES);
@@ -24,8 +24,12 @@ export async function getScenarioList(): Promise<ScenarioSummary[]> {
     scenarios.push(entityToScenario(e as ScenarioEntity));
   }
 
+  const filteredScenarios = departmentId
+    ? scenarios.filter(s => s.departmentId === departmentId)
+    : scenarios;
+
   const summaries = await Promise.all(
-    scenarios.map(async (scenario) => {
+    filteredScenarios.map(async (scenario) => {
       // Count snapshots
       let snapshotCount = 0;
       for await (const ignored of snapshotClient.listEntities({ queryOptions: { filter: `PartitionKey eq '${scenario.id}'` } })) {
@@ -67,6 +71,7 @@ export async function getScenarioList(): Promise<ScenarioSummary[]> {
         snapshotCount,
         createdAt: scenario.createdAt,
         updatedAt: scenario.updatedAt,
+        departmentId: scenario.departmentId,
       } satisfies ScenarioSummary;
     })
   );
@@ -128,11 +133,16 @@ export async function getScenarioBoardState(scenarioId: string): Promise<BoardSt
   const stateByMemberId = new Map(memberStateEntities.map(s => [s.rowKey, s]));
   const driverByTeamId = new Map(teamDriverEntities.map(d => [d.rowKey, d]));
 
+  // Filter teams by scenario's department when applicable
+  const teams = scenario.departmentId
+    ? allTeams.filter(t => t.departmentId === scenario.departmentId)
+    : allTeams;
+
   // Resolve each member's effective team for this scenario
   const removedMembers: Array<StaffMember & { scenarioState?: ScenarioMemberState }> = [];
   const teamMemberMap = new Map<string, Array<StaffMember & { scenarioState?: ScenarioMemberState }>>();
 
-  allTeams.forEach(t => teamMemberMap.set(t.id, []));
+  teams.forEach(t => teamMemberMap.set(t.id, []));
 
   for (const member of allMembers) {
     const state = stateByMemberId.get(member.id);
@@ -154,7 +164,7 @@ export async function getScenarioBoardState(scenarioId: string): Promise<BoardSt
   }
 
   // Build team snapshots
-  const teams: TeamSnapshot[] = allTeams.map(team => {
+  const teamSnapshots: TeamSnapshot[] = teams.map(team => {
     const members = teamMemberMap.get(team.id) ?? [];
     const driver = driverByTeamId.get(team.id);
     return {
@@ -168,10 +178,10 @@ export async function getScenarioBoardState(scenarioId: string): Promise<BoardSt
     };
   });
 
-  const allActive = teams.flatMap(t => t.members);
+  const allActive = teamSnapshots.flatMap(t => t.members);
   return {
     scenario,
-    teams,
+    teams: teamSnapshots,
     removedMembers,
     totalFte: Math.round(allActive.reduce((sum, m) => sum + m.fte, 0) * 10) / 10,
     totalHeadcount: allActive.length,
@@ -182,7 +192,8 @@ export async function createScenario(
   type: Scenario['type'],
   name: string,
   description?: string,
-  params?: ScenarioParams
+  params?: ScenarioParams,
+  departmentId?: string
 ): Promise<Scenario> {
   const id = uuidv4();
   const now = new Date().toISOString();
@@ -199,9 +210,10 @@ export async function createScenario(
     parameters,
     createdAt: now,
     updatedAt: now,
+    departmentId,
   }, 'Replace');
 
-  return { id, type, name, description, status: 'draft', parameters, createdAt: now, updatedAt: now };
+  return { id, type, name, description, status: 'draft', parameters, createdAt: now, updatedAt: now, departmentId };
 }
 
 export async function updateScenario(

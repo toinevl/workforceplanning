@@ -56,6 +56,7 @@ export interface ScenarioEntity extends TableEntity {
   parameters: string;
   createdAt: string;
   updatedAt: string;
+  departmentId?: string;
 }
 
 export interface MemberStateEntity extends TableEntity {
