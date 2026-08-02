@@ -142,8 +142,16 @@ export function TopNav({ board }: TopNavProps) {
         </div>
       )}
 
-      {/* User menu — always pinned to the far right */}
-      <div className="ml-auto shrink-0">
+      {/* Admin link + User menu — always pinned to the far right */}
+      <div className="ml-auto flex items-center gap-2 shrink-0">
+        <Link
+          href="/settings"
+          aria-current={pathname === '/settings' ? 'page' : undefined}
+          className="rounded-md px-2 py-1.5 text-xs font-normal text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
+          title="Admin: data seeding and bulk operations"
+        >
+          Admin
+        </Link>
         <UserMenu />
       </div>
 
