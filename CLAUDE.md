@@ -91,3 +91,41 @@ for f in $(find src/components -name '*.tsx'); do
     --exclude="$(basename $f)" && echo "DEAD: $name ← $f"
 done
 ```
+
+## Subagent Delegation Safety
+
+Parallel subagents sharing the same working directory will collide on
+the git index and cross-contaminate commits. Two failure modes observed:
+
+1. **Race condition:** Subagent A commits while Subagent B is still
+   editing. B's working tree is now out of sync with HEAD. B either
+   commits unrelated files or fails silently.
+2. **`git add -A` sweep:** A subagent using `git add -A` picks up ALL
+   untracked/modified files — including work from other subagents or
+   the parent session — mixing unrelated changes into one commit.
+
+**Rules:**
+
+- **Never dispatch parallel subagents that write to the same files or
+  the same git index.** Parallel is for independent, non-overlapping
+  work. If tasks touch the same project, run them sequentially.
+- **Subagents must stage specific paths, not `git add -A`.** Use
+  `git add src/path/to/file.tsx` or `git add src/components/` — never
+  bare `git add -A` or `git add .` unless you are the only writer.
+- **The parent session should commit its own work before dispatching.**
+  Flush the working tree clean so subagents start from a known state.
+
+## Documentation Part of Done
+
+When a feature changes the user-facing experience (navigation, page
+structure, new pages, removed pages, renamed routes), updating the wiki
+and in-app documentation is part of Done — not a follow-up task.
+
+**Checklist before pushing a UX restructure:**
+
+- [ ] Wiki Manual page updated (page names, routes, user flow)
+- [ ] Wiki Home page updated (live URL, version, feature list)
+- [ ] In-app help text updated (if any references old structure)
+- [ ] Nav discovery: if a page is removed from nav, is it still
+      reachable? Add a link somewhere (footer, admin, help).
+- [ ] Empty states guide users to the next step
