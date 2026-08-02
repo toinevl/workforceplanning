@@ -6,6 +6,7 @@ import { SeedSetupPanel } from '@/components/scenarios/SeedSetupPanel';
 import { useSeed } from '@/lib/hooks/useScenario';
 import { DepartmentsSection } from '@/components/departments/DepartmentsSection';
 import { BulkMigrateButton } from '@/components/departments/BulkMigrateButton';
+import { TeamAssignmentSection } from '@/components/teams/TeamAssignmentSection';
 import { useTeamList } from '@/lib/hooks/useTeams';
 
 export default function SettingsPage() {
@@ -60,6 +61,10 @@ export default function SettingsPage() {
           <div className="mt-4">
             <DepartmentsSection />
           </div>
+        </div>
+
+        <div className="mt-8">
+          <TeamAssignmentSection />
         </div>
 
         <div className="mt-8">
