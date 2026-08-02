@@ -68,3 +68,26 @@ See skill: `tvv-azure-resource-hygiene`
 - Prefer server components; add `'use client'` only for event handlers, hooks, or browser APIs
 - API routes: `src/app/api/` — hooks: `src/lib/hooks/` — domain types: `src/lib/types/domain.ts`
 - No comments unless the WHY is non-obvious
+
+## No Dead Components
+
+A component that compiles, passes lint and type-check, but is never
+imported anywhere is dead code. It creates false confidence — "the feature
+exists, it just needs wiring up" — and the wiring never happens because
+nothing flags the gap.
+
+**Rule:** When creating or finishing a UI component, wire it into a page
+in the same commit. If it's not imported by any page or parent component,
+it's not done — it's dead. `eslint` with `no-unused-vars` won't catch
+this because the export IS used (by the export statement). The only way
+to catch it is to check: does any file import this?
+
+Quick check for dead exports:
+
+```bash
+for f in $(find src/components -name '*.tsx'); do
+  name=$(grep -oP 'export\s+(?:function|const)\s+\K\w+' "$f")
+  [ -n "$name" ] && ! grep -rq "import.*\b$name\b" src/ --include='*.tsx' --include='*.ts' \
+    --exclude="$(basename $f)" && echo "DEAD: $name ← $f"
+done
+```
