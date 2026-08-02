@@ -218,11 +218,19 @@ tags: [wishlist]
         - Auto-refreshes after each move (queryKey invalidation)
         - Accessible via "AI Analysis" button in TopNav on scenario board
 
-- [ ] (C) Recreate alicante in the rgWorkforcePlan webspace so Bicep can own it +infra @me #35
+- [x] (C) Recreate alicante in the rgWorkforcePlan webspace so Bicep can own it +infra @me #35
       infra/main.bicep creates its plan in rgWorkforcePlan, but the live site's
-      webspace is bound to rgWebsite, so that plan can never host it (Conflict
-      59602). Deploying the template as-is produces an unusable empty plan — the
-      same waste #31 just removed. The only real fix is recreating the site in this
-      resource group, which means new default hostname, Entra redirect URI updates,
-      and a fresh WEBSITE_RUN_FROM_PACKAGE. Not urgent; main.bicep carries a warning
-      comment in the meantime.
+      webspace was bound to rgWebsite, so that plan could never host it (Conflict
+      59602). Deploying the template as-is produced an unusable empty plan.
+      DONE 2026-08-02 — site recreated in rgWorkforcePlan:
+        - New F1 Linux plan `wfp-plan-free` created in rgWorkforcePlan
+        - Old alicante deleted, recreated on the new plan (same name, new RG)
+        - New default hostname: alicante.azurewebsites.net (cleaner — no
+          random suffix). Old: alicante-eghjf7b0aadefpey.polandcentral-01...
+        - Full config migrated: MI, Key Vault references (3 secrets), auth
+          env vars, App Insights, all app settings
+        - Entra ID redirect URI updated to new hostname
+        - Deployed latest package (49fd78d), health check green:
+          /login 200, /api/teams 401, / 307 (auth enforced)
+        - Old wfp-plan-free in rgWebsite deleted (0 sites)
+        - main.bicep warning comment removed, plan name corrected
