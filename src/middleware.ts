@@ -10,6 +10,11 @@
  * does invoke `config.callbacks.authorized` internally, but the
  * independant wrapper still ends up preventing easy control when auth
  * is not configured — a direct check here avoids ambiguity.
+ *
+ * API routes (/api/*) return 401 JSON instead of a redirect, so that
+ * client-side fetch() callers (fetchJSON) can detect the auth failure
+ * and redirect to /login themselves. A 307 to /login surfaces as a
+ * JSON parse error on the client, not an auth signal. (#33)
  */
 
 import { auth } from "@/auth";
@@ -44,6 +49,15 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Unauthenticated: API routes get 401 JSON (not a redirect) so that
+  // client-side fetch() callers like fetchJSON can detect the auth failure
+  // and redirect to /login themselves. A 307 to /login returns an HTML page
+  // to fetch(), which surfaces as a JSON parse error instead.
+  if (pathname.startsWith("/api/")) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Pages get a redirect to /login.
   return NextResponse.redirect(new URL(LOGIN_PAGE, request.url));
 }
 

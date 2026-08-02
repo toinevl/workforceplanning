@@ -1,6 +1,5 @@
 import NextAuth from "next-auth";
 import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
-import { NextResponse } from "next/server";
 
 /**
  * Auth.js (NextAuth v5) configuration.
@@ -66,37 +65,3 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: "/login",
   },
 });
-
-/**
- * Middleware-level authorization callback.
- *
- * Auth is now always enabled (Entra ID app registration complete, #24).
- * AUTH_DISABLED=true can still be set as an app setting to temporarily
- * bypass auth (e.g. for debugging).
- *
- * Authenticated users proceed; unauthenticated users are redirected to
- * /login. The /login page itself is always accessible.
- *
- * NOTE: Do NOT gate on process.env.AUTH_SECRET here — Next.js can inline
- * env var reads at build time during static prerendering, which causes
- * the check to be baked in as "true" (auth disabled) when the secret
- * isn't present at build time. AUTH_SECRET is still used internally by
- * NextAuth for JWT signing; it just shouldn't be part of the access
- * control decision.
- */
-export async function authorized({
-  request,
-  auth,
-}: {
-  request: import("next/server").NextRequest;
-  auth: import("@auth/core/types").Session | null;
-}) {
-  if (process.env.AUTH_DISABLED === "true") {
-    return true;
-  }
-  const isLoggedIn = !!auth?.user;
-  const isLoginPage = request.nextUrl.pathname.startsWith("/login");
-  if (isLoginPage) return true;
-  if (isLoggedIn) return true;
-  return NextResponse.redirect(new URL("/login", request.url));
-}

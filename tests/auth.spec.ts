@@ -38,11 +38,26 @@ test.describe('Unauthenticated access (no session cookie)', () => {
     await expect(page).toHaveURL(/\/login/);
   });
 
-  test('API endpoints return 307 redirect (not followed)', async ({ request }) => {
-    // maxRedirects: 0 so we see the raw 307 from middleware
-    const res = await request.get('/api/scenarios', { maxRedirects: 0 });
-    expect(res.status()).toBe(307);
-    expect(res.headers()['location']).toContain('/login');
+  test('API endpoints return 401 JSON (not redirect) for anonymous callers', async ({ request }) => {
+    // /api/* routes return 401 JSON so client-side fetchJSON can detect the
+    // auth failure and redirect to /login. A 307 would be followed to an
+    // HTML /login page, surfacing as a JSON parse error instead.
+    const routes = ['/api/scenarios', '/api/teams', '/api/members', '/api/departments'];
+    for (const route of routes) {
+      const res = await request.get(route, { maxRedirects: 0 });
+      expect(res.status()).toBe(401);
+      expect(res.headers()['content-type']).toContain('application/json');
+      const body = await res.json();
+      expect(body.error).toBe('Unauthorized');
+    }
+  });
+
+  test('seed endpoint is not writable anonymously (POST returns 401)', async ({ request }) => {
+    const res = await request.post('/api/seed', {
+      data: { teams: [], resetFirst: true },
+      maxRedirects: 0,
+    });
+    expect(res.status()).toBe(401);
   });
 
   test('scenarios board redirects to /login', async ({ page }) => {

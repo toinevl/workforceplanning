@@ -157,12 +157,21 @@ tags: [wishlist]
       last app on a plan deletes the plan too, so ASP-rgWebsite-9e1a went with it.
       alicante verified afterwards: Free sku, Running, /login 200, /api/teams 307.
 
-- [ ] (C) Reconcile PR #15 with the middleware approach on main +security +testing @me #33
+- [x] (C) Reconcile PR #15 with the middleware approach on main +security +testing @me #33
       PR #15 fixed the same bug via callbacks.authorized; main fixed it via a custom
       middleware body. Main's version closes the hole but drops AUTH_DISABLED and
       returns 307 to /api/* instead of 401 — fetchJSON (#27) expects 401, and a 307
       is followed to an HTML 200, so its redirect handling never fires.
       Worth keeping from #15: the auth-enforcement E2E suite that runs with auth ON.
+      DONE — reconciled both approaches:
+        - Middleware now returns 401 JSON for /api/* routes (from PR #15) so
+          fetchJSON's 401 check fires correctly and redirects to /login.
+        - Pages still get 307 redirect to /login (from main).
+        - Removed dead standalone `authorized` export from auth.ts (PR #15
+          identified it as a no-op — must be inside callbacks to work).
+        - Removed unused NextResponse import from auth.ts.
+        - E2E auth tests expanded: API routes now assert 401 JSON +
+          {error: "Unauthorized"} body; POST /api/seed also tested as 401.
 
 - [x] (B) Role profile system + skill radar for team ambition vs current coverage +feature @me #36
       Predefined role profiles with hard/soft skill targets. Teams page shows
