@@ -53,25 +53,25 @@ export function TopNav({ board }: TopNavProps) {
         </span>
       </div>
 
-      <div className="flex items-center gap-1 shrink-0">
+      <div className="flex items-center gap-0.5 shrink-0">
         <Link
           href="/"
           aria-current={isHome ? 'page' : undefined}
-          className="rounded px-2.5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 aria-[current=page]:bg-gray-100 aria-[current=page]:text-gray-950"
+          className="rounded-md px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 aria-[current=page]:text-gray-950 aria-[current=page]:font-semibold"
         >
           Home
         </Link>
         <Link
           href="/settings"
           aria-current={isSettings ? 'page' : undefined}
-          className="rounded px-2.5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 aria-[current=page]:bg-gray-100 aria-[current=page]:text-gray-950"
+          className="rounded-md px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 aria-[current=page]:text-gray-950 aria-[current=page]:font-semibold"
         >
           Settings
         </Link>
         <Link
           href="/departments"
           aria-current={isDepartments ? 'page' : undefined}
-          className="rounded px-2.5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 aria-[current=page]:bg-gray-100 aria-[current=page]:text-gray-950"
+          className="rounded-md px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 aria-[current=page]:text-gray-950 aria-[current=page]:font-semibold"
         >
           Departments
         </Link>
