@@ -1,5 +1,10 @@
-import { redirect } from 'next/navigation';
+import { AppShell } from '@/components/layout/AppShell';
+import { ScenarioDashboard } from '@/components/scenarios/ScenarioDashboard';
 
-export default function ScenariosRedirectPage() {
-  redirect('/');
+export default function ScenariosPage() {
+  return (
+    <AppShell>
+      <ScenarioDashboard />
+    </AppShell>
+  );
 }

@@ -1,9 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import { AppShell } from '@/components/layout/AppShell';
 import { useDepartmentList } from '@/lib/hooks/useDepartments';
 import { DepartmentCard } from '@/components/departments/DepartmentCard';
+import { DepartmentsSection } from '@/components/departments/DepartmentsSection';
 
 export default function DepartmentsPage() {
   const listQuery = useDepartmentList();
@@ -43,19 +43,16 @@ export default function DepartmentsPage() {
               <div className="mt-6 rounded-lg border border-gray-200 bg-gray-50 p-6 text-center">
                 <p className="text-sm text-gray-600">No departments yet.</p>
                 <p className="mt-1 text-sm text-gray-500">
-                  Go to{' '}
-                  <Link
-                    href="/settings"
-                    className="font-medium text-gray-900 underline underline-offset-2 hover:text-gray-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 rounded"
-                  >
-                    Settings
-                  </Link>{' '}
-                  to create the first one.
+                  Use the form below to create the first one.
                 </p>
               </div>
             )}
           </div>
         )}
+
+        <div className='mt-8'>
+          <DepartmentsSection />
+        </div>
       </div>
     </AppShell>
   );

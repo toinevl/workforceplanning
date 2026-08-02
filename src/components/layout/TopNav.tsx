@@ -33,7 +33,7 @@ export function TopNav({ board }: TopNavProps) {
   const resetMutation = useResetScenario(board?.scenario.id ?? '');
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const isHome = pathname === '/' || pathname === '/scenarios';
-  const isSettings = pathname === '/settings';
+  const isScenarios = pathname === '/scenarios' || pathname.startsWith('/scenarios/');
   const isDepartments = pathname.startsWith('/departments');
 
   return (
@@ -59,14 +59,14 @@ export function TopNav({ board }: TopNavProps) {
           aria-current={isHome ? 'page' : undefined}
           className="rounded-md px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 aria-[current=page]:text-gray-950 aria-[current=page]:font-semibold"
         >
-          Home
+          Org
         </Link>
         <Link
-          href="/settings"
-          aria-current={isSettings ? 'page' : undefined}
+          href="/scenarios"
+          aria-current={isScenarios ? 'page' : undefined}
           className="rounded-md px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 aria-[current=page]:text-gray-950 aria-[current=page]:font-semibold"
         >
-          Settings
+          Scenarios
         </Link>
         <Link
           href="/departments"

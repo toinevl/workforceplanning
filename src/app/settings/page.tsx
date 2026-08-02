@@ -4,9 +4,7 @@ import Link from 'next/link';
 import { AppShell } from '@/components/layout/AppShell';
 import { SeedSetupPanel } from '@/components/scenarios/SeedSetupPanel';
 import { useSeed } from '@/lib/hooks/useScenario';
-import { DepartmentsSection } from '@/components/departments/DepartmentsSection';
 import { BulkMigrateButton } from '@/components/departments/BulkMigrateButton';
-import { TeamAssignmentSection } from '@/components/teams/TeamAssignmentSection';
 import { useTeamList } from '@/lib/hooks/useTeams';
 
 export default function SettingsPage() {
@@ -19,9 +17,9 @@ export default function SettingsPage() {
       <div className="max-w-6xl mx-auto py-6 px-4">
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Admin</h1>
             <p className="mt-1 text-sm text-gray-600">
-              Configure team setup and generate sample workforce data.
+              Data management and bulk operations.
             </p>
           </div>
           <Link
@@ -52,20 +50,6 @@ export default function SettingsPage() {
             .
           </div>
         )}
-
-        <div className="mt-8">
-          <h2 className="text-lg font-semibold text-gray-900">Departments</h2>
-          <p className="mt-1 text-sm text-gray-600">
-            Create and manage departments to organise your teams by function or business unit.
-          </p>
-          <div className="mt-4">
-            <DepartmentsSection />
-          </div>
-        </div>
-
-        <div className="mt-8">
-          <TeamAssignmentSection />
-        </div>
 
         <div className="mt-8">
           <h2 className="text-lg font-semibold text-gray-900">Bulk Team Assignment</h2>
