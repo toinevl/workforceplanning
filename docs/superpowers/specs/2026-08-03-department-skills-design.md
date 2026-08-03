@@ -3,6 +3,33 @@
 Date: 2026-08-03
 Status: Approved
 
+## Amendments (2026-08-03)
+
+Three points below were superseded by decisions made during implementation.
+The rest of this spec is unchanged and still accurate; see
+`.superpowers/sdd/2026-08-03-department-skills/progress.md` for the full
+ledger of why.
+
+- **`ambitionForTeam`/old `coverageForTeam` were renamed, not removed.**
+  They live on as `roleProfileAmbitionForTeam` / `roleProfileCurrentForTeam`
+  / `roleProfileCoverageForTeam` in `src/lib/skills/roles.ts` and still power
+  the separate scenario-planning board (`TeamSkillBars.tsx`,
+  `DecisionSummary.tsx`, AI Analysis) by deliberate scope decision — that
+  board was not part of this feature and keeps its own role-profile-derived
+  skill model. `ROLE_PROFILES`/`skillTargets` weights are therefore still
+  used for ambition, just scoped to the scenario board rather than the
+  department page.
+- **Department skill management lives at `/departments`, not "Settings →
+  Departments."** An earlier, unrelated restructure moved department CRUD
+  off the Settings page before this feature was built; Settings/Admin now
+  only holds seed tooling and bulk migration.
+- **Orphaned team overrides dropped on save is now true.** It wasn't at
+  first — a final-review pass found nothing actually pruned stale
+  `skillOverrides` keys when a department's skill set changed, which
+  permanently broke inline editing for affected teams. `updateDepartment`
+  now prunes every child team's overrides down to the surviving skill ids
+  whenever `skills` changes, so this line's original claim now holds.
+
 ## Problem
 
 The skill radar chart on the department detail page derives its axes and
