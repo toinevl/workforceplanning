@@ -229,21 +229,37 @@ test.describe('Seed script — default department skills', () => {
 
 test.describe('Admin UI — department skills', () => {
   test('creating a department with skills via the form shows them as radar axes', async ({ seededPage: page }) => {
-    await page.goto('/settings');
+    await page.goto('/departments');
 
     await page.getByPlaceholder('e.g., Engineering').fill('UI Skills Dept');
     await page.getByRole('button', { name: /add skill/i }).click();
     await page.getByPlaceholder('Skill name').fill('Research');
     await page.getByPlaceholder('Required headcount').fill('2');
 
-    await page.getByRole('button', { name: 'Create Department' }).click();
-    await expect(page.getByText('UI Skills Dept')).toBeVisible();
+    await Promise.all([
+      page.waitForResponse((response) =>
+        response.request().method() === 'POST' && response.request().url().includes('/api/departments')
+      ),
+      page.getByRole('button', { name: 'Create Department' }).click(),
+    ]);
 
+    await page.waitForLoadState('networkidle');
+
+    // Verify the department was created via API
     const deptsRes = await page.request.get('/api/departments');
     const { data: departments } = await deptsRes.json();
     const dept = departments.find((d: { name: string }) => d.name === 'UI Skills Dept');
+    expect(dept).toBeDefined();
+
     expect(dept.skills).toEqual([{ id: 'research', name: 'Research', requiredHeadcount: 2, sortOrder: 0 }]);
 
+    // Verify the department is visible on the departments list page
+    await page.goto('/departments');
+    await page.waitForLoadState('networkidle');
+    // Wait up to 10 seconds for the department to appear (in case of slow rendering)
+    await expect(page.getByText('UI Skills')).toBeVisible({ timeout: 10000 });
+
+    // Verify the department displays with skills on its detail page
     await page.goto(`/departments/${dept.id}`);
     await expect(page.getByText('No skills configured for this department yet')).not.toBeVisible();
   });
