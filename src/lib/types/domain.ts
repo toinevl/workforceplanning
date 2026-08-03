@@ -52,6 +52,7 @@ export interface Team {
   color: string; // hex color
   sortOrder: number;
   departmentId?: string;
+  skillOverrides: Record<string, number>;
 }
 
 export interface TeamWithStats extends Team {

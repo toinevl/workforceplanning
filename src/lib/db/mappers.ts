@@ -33,6 +33,7 @@ export function entityToTeam(e: TeamEntity): Team {
     color: e.color,
     sortOrder: e.sortOrder,
     departmentId: e.departmentId,
+    skillOverrides: e.skillOverrides ? JSON.parse(e.skillOverrides) : {},
   };
 }
 

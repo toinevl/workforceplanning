@@ -24,7 +24,13 @@ export function useUpdateTeam() {
   return useMutation({
     mutationFn: (args: {
       id: string;
-      updates: Partial<{ name: string; color: string; description?: string; departmentId?: string }>;
+      updates: Partial<{
+        name: string;
+        color: string;
+        description?: string;
+        departmentId?: string;
+        skillOverrides: Record<string, number>;
+      }>;
     }) =>
       fetchJSON<Team>(`/api/teams/${args.id}`, {
         method: 'PATCH',

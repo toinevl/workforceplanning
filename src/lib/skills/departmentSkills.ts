@@ -54,3 +54,27 @@ export function parseDepartmentSkillsInput(
 
   return { skills };
 }
+
+export function parseSkillOverridesInput(
+  input: unknown,
+  validSkillIds: Set<string>
+): { skillOverrides: Record<string, number> } | { error: string } {
+  if (input === null) return { skillOverrides: {} };
+  if (typeof input !== 'object' || Array.isArray(input)) {
+    return { error: 'skillOverrides must be an object' };
+  }
+
+  const skillOverrides: Record<string, number> = {};
+  for (const [skillId, rawValue] of Object.entries(input as Record<string, unknown>)) {
+    if (!validSkillIds.has(skillId)) {
+      return { error: `Unknown skill id: ${skillId}` };
+    }
+    const value = Number(rawValue);
+    if (!Number.isFinite(value) || value < 0 || !Number.isInteger(value)) {
+      return { error: `${skillId} must be a non-negative integer` };
+    }
+    skillOverrides[skillId] = value;
+  }
+
+  return { skillOverrides };
+}

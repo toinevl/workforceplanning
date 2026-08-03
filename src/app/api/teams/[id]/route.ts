@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getTeam, updateTeam } from '@/lib/api/teams';
+import { getDepartmentById } from '@/lib/api/departments';
+import { parseSkillOverridesInput } from '@/lib/skills/departmentSkills';
 
 export async function GET(
   _req: Request,
@@ -26,8 +28,13 @@ export async function PATCH(
 
   const body = await req.json();
 
-  // Build validated updates — only accept known fields
-  const updates: Partial<{ name: string; color: string; description?: string; departmentId?: string }> = {};
+  const updates: Partial<{
+    name: string;
+    color: string;
+    description?: string;
+    departmentId?: string;
+    skillOverrides: Record<string, number>;
+  }> = {};
 
   if ('name' in body) {
     if (typeof body.name !== 'string' || !body.name.trim()) {
@@ -48,8 +55,21 @@ export async function PATCH(
   }
 
   if ('departmentId' in body) {
-    // Allow null or empty string to mean "unassign"
     updates.departmentId = body.departmentId || undefined;
+  }
+
+  if ('skillOverrides' in body) {
+    const departmentId = 'departmentId' in body ? updates.departmentId : team.departmentId;
+    if (!departmentId) {
+      return NextResponse.json({ error: 'Team has no department; cannot set skill overrides' }, { status: 400 });
+    }
+    const department = await getDepartmentById(departmentId);
+    const validSkillIds = new Set((department?.skills ?? []).map((s) => s.id));
+    const parsed = parseSkillOverridesInput(body.skillOverrides, validSkillIds);
+    if ('error' in parsed) {
+      return NextResponse.json({ error: parsed.error }, { status: 400 });
+    }
+    updates.skillOverrides = parsed.skillOverrides;
   }
 
   const updated = await updateTeam(id, updates);
