@@ -44,6 +44,7 @@ export function entityToDepartment(e: DepartmentEntity): Department {
     color: e.color,
     deptHead: e.deptHead,
     sortOrder: e.sortOrder,
+    skills: e.skills ? JSON.parse(e.skills) : [],
   };
 }
 

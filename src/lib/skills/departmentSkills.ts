@@ -1,0 +1,56 @@
+import type { DepartmentSkill } from '../types/domain';
+
+export function slugifySkillName(name: string): string {
+  return (
+    name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 40) || 'skill'
+  );
+}
+
+interface RawSkillInput {
+  name?: unknown;
+  requiredHeadcount?: unknown;
+}
+
+export function parseDepartmentSkillsInput(
+  input: unknown
+): { skills: DepartmentSkill[] } | { error: string } {
+  if (input === undefined) return { skills: [] };
+  if (!Array.isArray(input)) return { error: 'skills must be an array' };
+
+  const seenNames = new Set<string>();
+  const seenIds = new Set<string>();
+  const skills: DepartmentSkill[] = [];
+
+  for (const [index, raw] of input.entries()) {
+    if (!raw || typeof raw !== 'object') {
+      return { error: `Skill ${index + 1} is invalid` };
+    }
+    const item = raw as RawSkillInput;
+    const name = String(item.name ?? '').trim();
+    if (!name) return { error: `Skill ${index + 1} needs a name` };
+
+    const lowerName = name.toLowerCase();
+    if (seenNames.has(lowerName)) return { error: `Duplicate skill name: ${name}` };
+    seenNames.add(lowerName);
+
+    const requiredHeadcount = Number(item.requiredHeadcount);
+    if (!Number.isFinite(requiredHeadcount) || requiredHeadcount < 0 || !Number.isInteger(requiredHeadcount)) {
+      return { error: `${name} requiredHeadcount must be a non-negative integer` };
+    }
+
+    let id = slugifySkillName(name);
+    let suffix = 2;
+    while (seenIds.has(id)) {
+      id = `${slugifySkillName(name)}-${suffix++}`;
+    }
+    seenIds.add(id);
+
+    skills.push({ id, name, requiredHeadcount, sortOrder: index });
+  }
+
+  return { skills };
+}

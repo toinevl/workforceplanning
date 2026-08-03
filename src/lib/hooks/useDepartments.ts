@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { Department, DepartmentWithStats } from '../types/domain';
+import type { Department, DepartmentWithStats, DepartmentSkillInput } from '../types/domain';
 import { fetchJSON } from '../utils/fetchJSON';
 
 export function useDepartmentList() {
@@ -22,7 +22,13 @@ export function useDepartment(deptId: string) {
 export function useCreateDepartment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: { name: string; color: string; description?: string; deptHead?: string }) =>
+    mutationFn: (body: {
+      name: string;
+      color: string;
+      description?: string;
+      deptHead?: string;
+      skills?: DepartmentSkillInput[];
+    }) =>
       fetchJSON<Department>('/api/departments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -35,7 +41,16 @@ export function useCreateDepartment() {
 export function useUpdateDepartment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (args: { id: string; updates: Partial<{ name: string; color: string; description?: string; deptHead?: string }> }) =>
+    mutationFn: (args: {
+      id: string;
+      updates: Partial<{
+        name: string;
+        color: string;
+        description?: string;
+        deptHead?: string;
+        skills: DepartmentSkillInput[];
+      }>;
+    }) =>
       fetchJSON<Department>(`/api/departments/${args.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },

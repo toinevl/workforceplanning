@@ -44,6 +44,7 @@ export interface DepartmentEntity extends TableEntity {
   sortOrder: number;
   createdAt: string;
   updatedAt: string;
+  skills?: string;
 }
 
 export interface ScenarioEntity extends TableEntity {

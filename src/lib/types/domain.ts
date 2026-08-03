@@ -24,12 +24,25 @@ export interface Department {
   color: string;
   deptHead?: string;
   sortOrder: number;
+  skills: DepartmentSkill[];
 }
 
 export interface DepartmentWithStats extends Department {
   headcount: number;
   totalFte: number;
   teamCount: number;
+}
+
+export interface DepartmentSkill {
+  id: string;
+  name: string;
+  requiredHeadcount: number;
+  sortOrder: number;
+}
+
+export interface DepartmentSkillInput {
+  name: string;
+  requiredHeadcount: number;
 }
 
 export interface Team {

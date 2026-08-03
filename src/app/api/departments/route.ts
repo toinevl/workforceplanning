@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getDepartmentsWithStats, createDepartment } from '@/lib/api/departments';
+import { parseDepartmentSkillsInput } from '@/lib/skills/departmentSkills';
 
 const HEX_COLOR_RE = /^#[0-9A-Fa-f]{6}$/;
 
@@ -15,7 +16,7 @@ export async function GET() {
 /**
  * POST /api/departments
  * Creates a new department
- * Body: { name: string, color: string, description?: string, deptHead?: string }
+ * Body: { name: string, color: string, description?: string, deptHead?: string, skills?: DepartmentSkillInput[] }
  */
 export async function POST(req: Request) {
   const body = await req.json();
@@ -29,11 +30,20 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Color must be a valid hex color (e.g. #a3b4c5)' }, { status: 400 });
   }
 
-  // Extract optional fields
+  const parsedSkills = parseDepartmentSkillsInput(body.skills);
+  if ('error' in parsedSkills) {
+    return NextResponse.json({ error: parsedSkills.error }, { status: 400 });
+  }
+
   const { description, deptHead } = body;
 
-  // Create department
-  const created = await createDepartment(body.name.trim(), body.color.trim(), description, deptHead);
+  const created = await createDepartment(
+    body.name.trim(),
+    body.color.trim(),
+    description,
+    deptHead,
+    parsedSkills.skills
+  );
 
   return NextResponse.json({ data: created }, { status: 201 });
 }

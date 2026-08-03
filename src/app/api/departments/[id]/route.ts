@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getDepartmentById, updateDepartment, deleteDepartment } from '@/lib/api/departments';
+import { parseDepartmentSkillsInput } from '@/lib/skills/departmentSkills';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const HEX_COLOR_RE = /^#[0-9A-Fa-f]{6}$/;
@@ -29,13 +30,17 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   }
   const body = await req.json();
 
-  // Validate that at least one updateable field is present
-  const { name, color, description, deptHead } = body;
-  if (name === undefined && color === undefined && description === undefined && deptHead === undefined) {
+  const { name, color, description, deptHead, skills } = body;
+  if (
+    name === undefined &&
+    color === undefined &&
+    description === undefined &&
+    deptHead === undefined &&
+    skills === undefined
+  ) {
     return NextResponse.json({ error: 'At least one field must be provided for update' }, { status: 400 });
   }
 
-  // Validate non-empty strings for name and color if provided
   if (name !== undefined && (typeof name !== 'string' || name.trim() === '')) {
     return NextResponse.json({ error: 'Name must be a non-empty string if provided' }, { status: 400 });
   }
@@ -44,19 +49,28 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: 'Color must be a valid hex color (e.g. #a3b4c5)' }, { status: 400 });
   }
 
-  // Build updates object with only provided fields
-  const updates: Partial<{ name: string; color: string; description?: string; deptHead?: string }> = {};
+  const parsedSkills = skills !== undefined ? parseDepartmentSkillsInput(skills) : undefined;
+  if (parsedSkills && 'error' in parsedSkills) {
+    return NextResponse.json({ error: parsedSkills.error }, { status: 400 });
+  }
+
+  const updates: Partial<{
+    name: string;
+    color: string;
+    description?: string;
+    deptHead?: string;
+    skills: import('@/lib/types/domain').DepartmentSkill[];
+  }> = {};
   if (name !== undefined) updates.name = name.trim();
   if (color !== undefined) updates.color = color.trim();
   if (description !== undefined) updates.description = description;
   if (deptHead !== undefined) updates.deptHead = deptHead;
+  if (parsedSkills) updates.skills = parsedSkills.skills;
 
-  // Update department
   try {
     const updated = await updateDepartment(id, updates);
     return NextResponse.json({ data: updated }, { status: 200 });
   } catch (error) {
-    // If error is "not found", return 404
     if ((error as Error).message.includes('not found')) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }

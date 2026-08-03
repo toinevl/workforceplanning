@@ -8,7 +8,7 @@ import {
   type TeamEntity,
   type StaffMemberEntity,
 } from '../db/tables';
-import type { Department } from '../types/domain';
+import type { Department, DepartmentSkill } from '../types/domain';
 import { entityToDepartment } from '../db/mappers';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -147,6 +147,7 @@ export async function getDepartmentsWithStats(): Promise<
       color: '#9CA3AF',
       deptHead: undefined,
       sortOrder: 999,
+      skills: [],
       headcount,
       totalFte,
       teamCount: unassignedTeams.length,
@@ -163,7 +164,8 @@ export async function createDepartment(
   name: string,
   color: string,
   description?: string,
-  deptHead?: string
+  deptHead?: string,
+  skills?: DepartmentSkill[]
 ): Promise<Department> {
   const departmentId = uuidv4();
   const timestamp = new Date().toISOString();
@@ -182,6 +184,7 @@ export async function createDepartment(
     sortOrder: nextSortOrder,
     createdAt: timestamp,
     updatedAt: timestamp,
+    skills: JSON.stringify(skills ?? []),
   };
 
   const client = getTableClient(TABLE_DEPARTMENTS);
@@ -200,6 +203,7 @@ export async function updateDepartment(
     color: string;
     description?: string;
     deptHead?: string;
+    skills: DepartmentSkill[];
   }>
 ): Promise<Department> {
   assertValidId(id);
@@ -211,11 +215,15 @@ export async function updateDepartment(
   const client = getTableClient(TABLE_DEPARTMENTS);
   const currentEntity = await client.getEntity<DepartmentEntity>('department', id);
 
+  const { skills, ...rest } = updates;
   const updated: DepartmentEntity = {
     ...currentEntity,
-    ...updates,
+    ...rest,
     updatedAt: new Date().toISOString(),
   };
+  if (skills !== undefined) {
+    updated.skills = JSON.stringify(skills);
+  }
 
   await client.upsertEntity(updated, 'Replace');
   return entityToDepartment(updated);
