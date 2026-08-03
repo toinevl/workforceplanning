@@ -9,6 +9,8 @@ import { defaultParams } from '../types/params';
 import type { ScenarioType } from '../types/domain';
 import type { SeedOptions, SeedTeamConfig } from '../types/seed';
 import { getRoleProfile } from '../skills/roles';
+import { slugifySkillName } from '../skills/departmentSkills';
+import type { DepartmentSkill } from '../types/domain';
 
 interface SeedMember {
   name: string;
@@ -233,6 +235,41 @@ function deriveSkillsForRole(role: string, isSquad: boolean): string[] {
   return isSquad ? ['SQUAD', ...skills] : skills;
 }
 
+function buildDefaultDepartmentSkills(): Record<string, DepartmentSkill[]> {
+  const teamKeyToDeptKey = new Map(TEAMS.map((t) => [t.key, t.departmentKey]));
+  const headcountByDept = new Map<string, Map<string, number>>();
+
+  for (const member of MEMBERS) {
+    const deptKey = teamKeyToDeptKey.get(member.baseTeamKey);
+    if (!deptKey) continue;
+    const memberTags = (member.tags && member.tags.length > 0)
+      ? member.tags
+      : deriveSkillsForRole(member.role, member.isSquad);
+    const skillNames = memberTags.filter((tag) => tag !== 'SQUAD');
+    let bucket = headcountByDept.get(deptKey);
+    if (!bucket) {
+      bucket = new Map();
+      headcountByDept.set(deptKey, bucket);
+    }
+    for (const skillName of skillNames) {
+      bucket.set(skillName, (bucket.get(skillName) ?? 0) + 1);
+    }
+  }
+
+  const result: Record<string, DepartmentSkill[]> = {};
+  for (const [deptKey, bucket] of headcountByDept.entries()) {
+    result[deptKey] = Array.from(bucket.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([name, requiredHeadcount], index) => ({
+        id: slugifySkillName(name),
+        name,
+        requiredHeadcount,
+        sortOrder: index,
+      }));
+  }
+  return result;
+}
+
 function buildMembers(options?: SeedOptions): SeedMember[] {
   const requested = options?.membersPerTeam;
   if (!requested) return MEMBERS;
@@ -360,6 +397,7 @@ export async function runSeed(options?: SeedOptions): Promise<{ teams: number; m
 
   // Create departments
   const now = new Date().toISOString();
+  const defaultDepartmentSkills = options?.teams ? {} : buildDefaultDepartmentSkills();
   const departmentMap: Record<string, string> = {};
   for (const dept of DEPARTMENTS) {
     const deptId = uuidv4();
@@ -373,6 +411,7 @@ export async function runSeed(options?: SeedOptions): Promise<{ teams: number; m
       sortOrder: dept.sortOrder,
       createdAt: now,
       updatedAt: now,
+      skills: JSON.stringify(defaultDepartmentSkills[dept.key] ?? []),
     }, 'Replace');
   }
 

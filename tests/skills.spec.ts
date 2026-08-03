@@ -173,3 +173,35 @@ test.describe('Coverage computation', () => {
     expect(scopedTeams.find((t: { id: string }) => t.id === team.id).skills).toEqual([]);
   });
 });
+
+test.describe('Seed script — default department skills', () => {
+  test('a full reseed gives Applied Physics & Science Education a Research skill with a gap-0 baseline', async ({ page }) => {
+    const seedRes = await page.request.post('/api/seed', { data: { resetFirst: true } });
+    expect(seedRes.ok()).toBeTruthy();
+
+    const deptsRes = await page.request.get('/api/departments');
+    const { data: departments } = await deptsRes.json();
+    const apse = departments.find((d: { name: string }) => d.name === 'Applied Physics & Science Education');
+    expect(apse).toBeDefined();
+
+    const research = apse.skills.find((s: { name: string }) => s.name === 'Research');
+    expect(research).toBeDefined();
+    expect(research.requiredHeadcount).toBeGreaterThan(0);
+
+    const teamsRes = await page.request.get(`/api/teams?departmentId=${apse.id}`);
+    const { data: teams } = await teamsRes.json();
+    const totalCurrentResearch = teams.reduce((sum: number, t: { skills: Array<{ name: string; current: number }> }) => {
+      const point = t.skills.find((s) => s.name === 'Research');
+      return sum + (point?.current ?? 0);
+    }, 0);
+    expect(totalCurrentResearch).toBe(research.requiredHeadcount);
+  });
+
+  test('Support Services has no default skills configured', async ({ page }) => {
+    const deptsRes = await page.request.get('/api/departments');
+    const { data: departments } = await deptsRes.json();
+    const svc = departments.find((d: { name: string }) => d.name === 'Support Services');
+    expect(svc).toBeDefined();
+    expect(svc.skills).toEqual([]);
+  });
+});
