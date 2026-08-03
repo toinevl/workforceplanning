@@ -297,3 +297,37 @@ tags: [wishlist]
       real team→department assignment for custom teams, which today all fall back to
       "Support Services" with no natural skill derivation), or leave the empty state as
       the intended first-run experience and consider this resolved as-is.
+
+- [ ] (B) Invert skill ambition to team-owned with department rollup +feature +ui @me #42
+      #40 shipped ambition flowing top-down: department sets a default required
+      headcount per skill, teams can override it. Headcount targets are actually a
+      team-level reality — invert it. Department keeps owning the skill SET (names
+      only); every team sets its own target headcount per skill; the department page
+      shows a rollup (sum across its teams) instead of a settable default.
+      Spec: docs/superpowers/specs/2026-08-03-team-ambition-rollup-design.md
+      (supersedes the "Admin UI" and "Team-level override UI" sections of #40's spec)
+      PARTS:
+        #42a — Data model: drop DepartmentSkill.requiredHeadcount; rename
+               Team.skillOverrides → skillTargets (domain type, entity field, JSON
+               storage) — no fallback semantics, unset key means target 0
+        #42b — Backend: simplify resolveTeamSkills (target = team.skillTargets[id] ??
+               0, no department-default fallback); rename parseSkillOverridesInput →
+               parseSkillTargetsInput; drop requiredHeadcount from
+               parseDepartmentSkillsInput
+        #42c — API: POST/PATCH /api/departments skills payload becomes {name}[] only;
+               PATCH /api/teams/[id] body field skillOverrides → skillTargets
+        #42d — Admin UI: DepartmentForm Skills section drops the required-headcount
+               number input — name + add/remove only
+        #42e — Team-level UI: remove "Reset to department default" action from
+               DepartmentTeamRow (no default left to reset to)
+        #42f — New: DepartmentSkillsRollup.tsx — department-level rollup panel above
+               the per-team list on /departments/[deptId], sums current/ambition per
+               skill from the already-fetched per-team data (no new API endpoint),
+               reuses SkillRadarChart, read-only
+        #42g — Seed script: replace department-level buildDefaultDepartmentSkills with
+               per-team derivation (each team's target = its own seeded headcount per
+               skill, gap 0 per team) — clean reseed, no migration of existing data
+        #42h — Tests: update tests/skills.spec.ts for the new shapes (no department
+               headcount, no override fallback) + new coverage for rollup arithmetic,
+               headcount-less admin form, no-reset-button team UI, per-team seed
+               baseline
