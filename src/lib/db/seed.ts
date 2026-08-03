@@ -235,16 +235,20 @@ function deriveSkillsForRole(role: string, isSquad: boolean): string[] {
   return isSquad ? ['SQUAD', ...skills] : skills;
 }
 
-function buildDefaultDepartmentSkills(): Record<string, DepartmentSkill[]> {
+function resolveMemberTags(member: SeedMember): string[] {
+  return (member.tags && member.tags.length > 0)
+    ? member.tags
+    : deriveSkillsForRole(member.role, member.isSquad);
+}
+
+function buildDefaultDepartmentSkills(members: SeedMember[]): Record<string, DepartmentSkill[]> {
   const teamKeyToDeptKey = new Map(TEAMS.map((t) => [t.key, t.departmentKey]));
   const headcountByDept = new Map<string, Map<string, number>>();
 
-  for (const member of MEMBERS) {
+  for (const member of members) {
     const deptKey = teamKeyToDeptKey.get(member.baseTeamKey);
     if (!deptKey) continue;
-    const memberTags = (member.tags && member.tags.length > 0)
-      ? member.tags
-      : deriveSkillsForRole(member.role, member.isSquad);
+    const memberTags = resolveMemberTags(member);
     const skillNames = memberTags.filter((tag) => tag !== 'SQUAD');
     let bucket = headcountByDept.get(deptKey);
     if (!bucket) {
@@ -258,14 +262,23 @@ function buildDefaultDepartmentSkills(): Record<string, DepartmentSkill[]> {
 
   const result: Record<string, DepartmentSkill[]> = {};
   for (const [deptKey, bucket] of headcountByDept.entries()) {
+    const seenIds = new Set<string>();
     result[deptKey] = Array.from(bucket.entries())
       .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([name, requiredHeadcount], index) => ({
-        id: slugifySkillName(name),
-        name,
-        requiredHeadcount,
-        sortOrder: index,
-      }));
+      .map(([name, requiredHeadcount], index) => {
+        let id = slugifySkillName(name);
+        let suffix = 2;
+        while (seenIds.has(id)) {
+          id = `${slugifySkillName(name)}-${suffix++}`;
+        }
+        seenIds.add(id);
+        return {
+          id,
+          name,
+          requiredHeadcount,
+          sortOrder: index,
+        };
+      });
   }
   return result;
 }
@@ -397,7 +410,7 @@ export async function runSeed(options?: SeedOptions): Promise<{ teams: number; m
 
   // Create departments
   const now = new Date().toISOString();
-  const defaultDepartmentSkills = options?.teams ? {} : buildDefaultDepartmentSkills();
+  const defaultDepartmentSkills = options?.teams ? {} : buildDefaultDepartmentSkills(membersToSeed);
   const departmentMap: Record<string, string> = {};
   for (const dept of DEPARTMENTS) {
     const deptId = uuidv4();
@@ -446,9 +459,7 @@ export async function runSeed(options?: SeedOptions): Promise<{ teams: number; m
   for (const member of membersToSeed) {
     const id = uuidv4();
     const retirementEligibleYear = computeRetirementEligibleYear(member);
-    const memberTags = (member.tags && member.tags.length > 0)
-      ? member.tags
-      : deriveSkillsForRole(member.role, member.isSquad);
+    const memberTags = resolveMemberTags(member);
     await staffClient.upsertEntity<StaffMemberEntity>({
       partitionKey: 'member',
       rowKey: id,

@@ -204,4 +204,25 @@ test.describe('Seed script — default department skills', () => {
     expect(svc).toBeDefined();
     expect(svc.skills).toEqual([]);
   });
+
+  test('membersPerTeam option does not break gap-0 baseline', async ({ page }) => {
+    const seedRes = await page.request.post('/api/seed', { data: { resetFirst: true, membersPerTeam: 2 } });
+    expect(seedRes.ok()).toBeTruthy();
+
+    const deptsRes = await page.request.get('/api/departments');
+    const { data: departments } = await deptsRes.json();
+    const apse = departments.find((d: { name: string }) => d.name === 'Applied Physics & Science Education');
+    expect(apse).toBeDefined();
+
+    const teamsRes = await page.request.get(`/api/teams?departmentId=${apse.id}`);
+    const { data: teams } = await teamsRes.json();
+
+    for (const skill of apse.skills) {
+      const totalCurrent = teams.reduce((sum: number, t: { skills: Array<{ name: string; current: number }> }) => {
+        const point = t.skills.find((s) => s.name === skill.name);
+        return sum + (point?.current ?? 0);
+      }, 0);
+      expect(totalCurrent).toBe(skill.requiredHeadcount);
+    }
+  });
 });
