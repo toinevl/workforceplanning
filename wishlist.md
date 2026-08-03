@@ -1,7 +1,7 @@
 ---
 project: Workforce Planning
 owner: toine
-updated: 2026-07-30
+updated: 2026-08-03
 tags: [wishlist]
 ---
 
@@ -248,3 +248,24 @@ tags: [wishlist]
         #39e — Move department CRUD from Settings to /departments — DONE
         #39f — Strip Settings to admin-only — DONE
       DONE 2026-08-02 — all 6 parts shipped in commits ac54970..05c3b65.
+
+- [ ] (B) Department-level skills — admin-owned skill sets replace role-derived ambition +feature +ui @me #40
+      Skill radar axes/ambition currently come from ROLE_PROFILES (roles.ts) —
+      implicit, unconfigurable, not tied to a department. Move to admin-managed
+      skill sets per department, with per-team required-headcount overrides.
+      Spec: docs/superpowers/specs/2026-08-03-department-skills-design.md
+      PARTS:
+        #40a — Data model: DepartmentEntity.skills + TeamEntity.skillOverrides (JSON fields)
+        #40b — Backend: resolveTeamSkills + new coverageForTeam in departmentSkills.ts;
+               remove ambitionForTeam usage from the coverage path
+        #40c — API: department skills validation (POST/PATCH /api/departments),
+               team skillOverrides validation (PATCH /api/teams/[id])
+        #40d — Admin UI: "Skills" section in department edit form (Settings → Departments) —
+               add/remove/reorder skill rows, set default required headcount
+        #40e — Team-level override UI: click-to-edit required headcount inline on
+               department detail page (DepartmentTeamRow), reset-to-default action
+        #40f — Seed script: derive per-department skills + default requiredHeadcount
+               from existing role-profile/member data (gap starts at 0)
+        #40g — Tests: unit tests for resolveTeamSkills/coverageForTeam (override
+               precedence, missing skills, empty department) + E2E flow (add skill →
+               radar axis appears → override team value → gap updates → reset)
