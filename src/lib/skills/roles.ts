@@ -22,7 +22,7 @@ export function getRoleProfile(role: string): RoleProfile['skillTargets'] {
   return found?.skillTargets ?? {};
 }
 
-export function ambitionForTeam(team: Array<{ role: string }>): Record<string, number> {
+export function roleProfileAmbitionForTeam(team: Array<{ role: string }>): Record<string, number> {
   const aggregated: Record<string, number> = {};
   for (const member of team) {
     const targets = getRoleProfile(member.role);
@@ -33,7 +33,7 @@ export function ambitionForTeam(team: Array<{ role: string }>): Record<string, n
   return aggregated;
 }
 
-export function currentForTeam(team: Array<{ skills?: string[] }>): Record<string, number> {
+export function roleProfileCurrentForTeam(team: Array<{ skills?: string[] }>): Record<string, number> {
   const aggregated: Record<string, number> = {};
   for (const member of team) {
     for (const skill of member.skills ?? []) {
@@ -43,13 +43,13 @@ export function currentForTeam(team: Array<{ skills?: string[] }>): Record<strin
   return aggregated;
 }
 
-export function coverageForTeam(
+export function roleProfileCoverageForTeam(
   team: Array<{ role: string; skills?: string[] }>,
   teamName: string,
   teamId: string,
 ) {
-  const ambition = ambitionForTeam(team);
-  const current = currentForTeam(team);
+  const ambition = roleProfileAmbitionForTeam(team);
+  const current = roleProfileCurrentForTeam(team);
   const allKeys = Array.from(new Set([...Object.keys(ambition), ...Object.keys(current)])).sort();
   const currentSkills: Record<string, number> = {};
   const ambitionSkills: Record<string, number> = {};

@@ -1,4 +1,4 @@
-import { coverageForTeam, getRoleProfile } from '@/lib/skills/roles';
+import { roleProfileCoverageForTeam, getRoleProfile } from '@/lib/skills/roles';
 import type { TeamSnapshot } from '@/lib/types/domain';
 
 export interface SkillGapSuggestion {
@@ -40,7 +40,7 @@ export interface ScenarioAnalysis {
 export function analyzeBoard(teams: TeamSnapshot[]): ScenarioAnalysis {
   const teamCoverages = teams.map((ts) => ({
     teamSnapshot: ts,
-    coverage: coverageForTeam(
+    coverage: roleProfileCoverageForTeam(
       ts.members.map((m) => ({ role: m.role, skills: m.tags })),
       ts.team.name,
       ts.team.id

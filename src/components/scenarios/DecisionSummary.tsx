@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { CloseButton } from '@/components/ui/CloseButton';
 import { InfoHint } from '@/components/ui/InfoHint';
-import { coverageForTeam } from '@/lib/skills/roles';
+import { roleProfileCoverageForTeam } from '@/lib/skills/roles';
 import { useAuditEvents } from '@/lib/hooks/useAudit';
 import type { BoardState } from '@/lib/types/domain';
 
@@ -38,7 +38,7 @@ export function DecisionSummary({ board, onClose }: DecisionSummaryProps) {
 
   const teamImpacts: TeamImpact[] = useMemo(() => {
     return board.teams.map((ts) => {
-      const coverage = coverageForTeam(
+      const coverage = roleProfileCoverageForTeam(
         ts.members.map((m) => ({ role: m.role, skills: m.tags })),
         ts.team.name,
         ts.team.id

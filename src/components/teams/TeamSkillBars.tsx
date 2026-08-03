@@ -1,6 +1,6 @@
 'use client';
 
-import { coverageForTeam } from '@/lib/skills/roles';
+import { roleProfileCoverageForTeam } from '@/lib/skills/roles';
 import type { StaffMember, ScenarioMemberState } from '@/lib/types/domain';
 
 interface TeamSkillBarsProps {
@@ -13,7 +13,7 @@ interface TeamSkillBarsProps {
  * Shows top-N skill gaps as horizontal bars (current vs ambition).
  */
 export function TeamSkillBars({ members, maxBars = 3 }: TeamSkillBarsProps) {
-  const coverage = coverageForTeam(
+  const coverage = roleProfileCoverageForTeam(
     members.map((m) => ({ role: m.role, skills: m.tags })),
     '',
     ''
