@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import type { TeamWithStats } from '@/lib/types/domain';
 import { SkillRadarChart } from '@/components/skills/SkillRadarChart';
 import { InfoHint } from '@/components/ui/InfoHint';
 import { useUpdateTeam } from '@/lib/hooks/useTeams';
+import { extractErrorMessage } from '@/lib/utils/extractErrorMessage';
 
 interface SkillCoveragePoint {
   id: string;
@@ -150,7 +152,11 @@ export function DepartmentTeamRow({ team }: DepartmentTeamRowProps) {
           </div>
         ) : skills.length === 0 ? (
           <p className="text-xs text-gray-500">
-            No skills configured for this department yet — add some in Settings → Departments.
+            No skills configured for this department yet — add some on the{' '}
+            <Link href="/departments" className="text-blue-600 hover:text-blue-800 underline">
+              Departments
+            </Link>{' '}
+            page.
           </p>
         ) : (
           <div className="grid gap-4 md:grid-cols-[1fr_auto]">
@@ -172,6 +178,11 @@ export function DepartmentTeamRow({ team }: DepartmentTeamRowProps) {
                   />
                 ))}
               </ul>
+              {updateTeam.isError && (
+                <p className="mt-2 text-xs text-red-600">
+                  {extractErrorMessage(updateTeam.error, 'Failed to save skill override')}
+                </p>
+              )}
             </div>
           </div>
         )}
