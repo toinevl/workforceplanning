@@ -37,6 +37,8 @@ export function useUpdateTeam() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(args.updates),
       }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['teams'] }),
+    onSuccess: () => {
+      return qc.invalidateQueries({ queryKey: ['teams'] });
+    },
   });
 }

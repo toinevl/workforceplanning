@@ -266,9 +266,11 @@ tags: [wishlist]
                department detail page (DepartmentTeamRow), reset-to-default action — DONE
         #40f — Seed script: derive per-department skills + default requiredHeadcount
                from existing role-profile/member data (gap starts at 0) — DONE
-        #40g — Tests: unit tests for resolveTeamSkills/coverageForTeam (override
-               precedence, missing skills, empty department) + E2E flow (add skill →
-               radar axis appears → override team value → gap updates → reset) — DONE
+        #40g — Tests: E2E/API-level coverage of resolveTeamSkills/coverageForTeam via
+               tests/skills.spec.ts (override precedence, missing skills, empty
+               department — no unit test runner exists in this repo, Playwright only)
+               + E2E flow (add skill → radar axis appears → override team value →
+               gap updates → reset) — DONE
       DONE 2026-08-03 — all 7 parts shipped across the 6-task department-skills plan
       (docs/superpowers/plans/2026-08-03-department-skills.md); final task (inline
       per-team override UI in DepartmentTeamRow, 25/25 E2E passing) committed 882408c.
