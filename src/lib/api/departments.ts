@@ -194,6 +194,41 @@ export async function createDepartment(
 }
 
 /**
+ * Strip any skillOverrides keys that no longer correspond to a skill id in
+ * `validSkillIds` from every team assigned to `departmentId`. Called whenever
+ * a department's skills array changes, since renaming/removing a skill
+ * changes its id and would otherwise leave teams with unrecoverable
+ * overrides that permanently fail validation on their next edit.
+ */
+async function pruneStaleTeamSkillOverrides(departmentId: string, validSkillIds: Set<string>): Promise<void> {
+  const client = getTableClient(TABLE_TEAMS);
+  const teams: TeamEntity[] = [];
+  for await (const entity of client.listEntities<TeamEntity>({
+    queryOptions: { filter: `PartitionKey eq 'team' and departmentId eq '${escapeSingleQuotes(departmentId)}'` },
+  })) {
+    teams.push(entity as TeamEntity);
+  }
+
+  for (const team of teams) {
+    if (!team.skillOverrides) continue;
+    let overrides: Record<string, number>;
+    try {
+      overrides = JSON.parse(team.skillOverrides);
+    } catch {
+      continue;
+    }
+    const entries = Object.entries(overrides);
+    const filtered = entries.filter(([skillId]) => validSkillIds.has(skillId));
+    if (filtered.length === entries.length) continue;
+
+    await client.upsertEntity(
+      { ...team, skillOverrides: JSON.stringify(Object.fromEntries(filtered)) },
+      'Merge'
+    );
+  }
+}
+
+/**
  * Update an existing department
  */
 export async function updateDepartment(
@@ -226,6 +261,11 @@ export async function updateDepartment(
   }
 
   await client.upsertEntity(updated, 'Replace');
+
+  if (skills !== undefined) {
+    await pruneStaleTeamSkillOverrides(id, new Set(skills.map((s) => s.id)));
+  }
+
   return entityToDepartment(updated);
 }
 

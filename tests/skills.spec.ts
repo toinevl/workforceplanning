@@ -118,6 +118,48 @@ test.describe('Team skill overrides', () => {
   });
 });
 
+test.describe('Stale skillOverrides pruning on skill rename', () => {
+  test('renaming a department skill prunes orphaned team overrides so a later inline-style PATCH succeeds', async ({ seededPage: page }) => {
+    const deptRes = await page.request.post('/api/departments', {
+      data: { name: `Rename Dept ${Date.now()}`, color: '#3b82f6', skills: [{ name: 'Foo', requiredHeadcount: 3 }] },
+    });
+    const { data: dept } = await deptRes.json();
+    const fooId = dept.skills[0].id;
+
+    const teamsRes = await page.request.get('/api/teams');
+    const { data: teams } = await teamsRes.json();
+    const team = teams[0];
+
+    const assignRes = await page.request.patch(`/api/teams/${team.id}`, {
+      data: { departmentId: dept.id, skillOverrides: { [fooId]: 5 } },
+    });
+    expect(assignRes.status()).toBe(200);
+    const { data: assigned } = await assignRes.json();
+    expect(assigned.skillOverrides).toEqual({ [fooId]: 5 });
+
+    // Rename the skill — its id changes from 'foo' to 'bar', orphaning the team's override.
+    const renameRes = await page.request.patch(`/api/departments/${dept.id}`, {
+      data: { skills: [{ name: 'Bar', requiredHeadcount: 3 }] },
+    });
+    expect(renameRes.status()).toBe(200);
+    const { data: renamedDept } = await renameRes.json();
+    const barId = renamedDept.skills[0].id;
+    expect(barId).not.toBe(fooId);
+
+    const teamAfterRes = await page.request.get(`/api/teams/${team.id}`);
+    const { data: teamAfter } = await teamAfterRes.json();
+    expect(teamAfter.skillOverrides).toEqual({});
+
+    // Inline-equivalent PATCH: spread current (already-pruned) overrides plus a new edit.
+    const inlinePatchRes = await page.request.patch(`/api/teams/${team.id}`, {
+      data: { skillOverrides: { ...teamAfter.skillOverrides, [barId]: 8 } },
+    });
+    expect(inlinePatchRes.status()).toBe(200);
+    const { data: finalTeam } = await inlinePatchRes.json();
+    expect(finalTeam.skillOverrides).toEqual({ [barId]: 8 });
+  });
+});
+
 test.describe('Coverage computation', () => {
   test('GET /api/teams?departmentId=X uses department skills as axes, with team override applied', async ({ seededPage: page }) => {
     // Skill names deliberately avoid the legacy ROLE_PROFILES vocabulary (Research, Teaching,

@@ -56,6 +56,9 @@ export async function PATCH(
 
   if ('departmentId' in body) {
     updates.departmentId = body.departmentId || undefined;
+    if (updates.departmentId !== team.departmentId && !('skillOverrides' in body)) {
+      updates.skillOverrides = {};
+    }
   }
 
   if ('skillOverrides' in body) {

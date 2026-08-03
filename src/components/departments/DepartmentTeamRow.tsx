@@ -113,13 +113,18 @@ export function DepartmentTeamRow({ team }: DepartmentTeamRowProps) {
   const sortedGaps = [...(skills ?? [])].sort((a, b) => b.gap - a.gap);
 
   function handleSaveOverride(skillId: string, value: number) {
-    const nextOverrides = { ...(team.skillOverrides ?? {}), [skillId]: value };
+    const validIds = new Set((team.skills ?? []).map((s) => s.id));
+    const nextOverrides = Object.fromEntries(
+      Object.entries({ ...(team.skillOverrides ?? {}), [skillId]: value }).filter(([id]) => validIds.has(id))
+    );
     updateTeam.mutate({ id: team.id, updates: { skillOverrides: nextOverrides } });
   }
 
   function handleResetOverride(skillId: string) {
-    const nextOverrides = { ...(team.skillOverrides ?? {}) };
-    delete nextOverrides[skillId];
+    const validIds = new Set((team.skills ?? []).map((s) => s.id));
+    const nextOverrides = Object.fromEntries(
+      Object.entries(team.skillOverrides ?? {}).filter(([id]) => id !== skillId && validIds.has(id))
+    );
     updateTeam.mutate({ id: team.id, updates: { skillOverrides: nextOverrides } });
   }
 
