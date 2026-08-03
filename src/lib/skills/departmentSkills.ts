@@ -22,7 +22,7 @@ export function parseDepartmentSkillsInput(
   if (!Array.isArray(input)) return { error: 'skills must be an array' };
 
   const seenNames = new Set<string>();
-  const seenIds = new Set<string>();
+  const idToName = new Map<string, string>();
   const skills: DepartmentSkill[] = [];
 
   for (const [index, raw] of input.entries()) {
@@ -42,12 +42,12 @@ export function parseDepartmentSkillsInput(
       return { error: `${name} requiredHeadcount must be a non-negative integer` };
     }
 
-    let id = slugifySkillName(name);
-    let suffix = 2;
-    while (seenIds.has(id)) {
-      id = `${slugifySkillName(name)}-${suffix++}`;
+    const id = slugifySkillName(name);
+    const collidingName = idToName.get(id);
+    if (collidingName !== undefined && collidingName !== name) {
+      return { error: `Skills '${collidingName}' and '${name}' both produce the id '${id}' — use more distinct names` };
     }
-    seenIds.add(id);
+    idToName.set(id, name);
 
     skills.push({ id, name, requiredHeadcount, sortOrder: index });
   }
