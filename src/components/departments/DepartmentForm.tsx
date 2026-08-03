@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { ColorPicker } from './ColorPicker';
 import { SectionLabel } from '@/components/ui/SectionLabel';
-import type { Department } from '@/lib/types/domain';
+import type { Department, DepartmentSkillInput } from '@/lib/types/domain';
 
 const HEX_COLOR_REGEX = /^#[0-9A-Fa-f]{6}$/;
 
@@ -12,11 +12,63 @@ interface DepartmentFormProps {
   initialData?: Partial<Department>;
   isLoading?: boolean;
   error?: string | null;
-  onSubmit: (data: { name: string; color: string; description?: string; deptHead?: string }) => void;
+  onSubmit: (data: {
+    name: string;
+    color: string;
+    description?: string;
+    deptHead?: string;
+    skills: DepartmentSkillInput[];
+  }) => void;
   onCancel?: () => void;
 }
 
 const DEFAULT_COLOR = '#3b82f6';
+
+function SkillRow({
+  skill,
+  onNameChange,
+  onHeadcountChange,
+  onRemove,
+  disabled,
+}: {
+  skill: DepartmentSkillInput;
+  onNameChange: (value: string) => void;
+  onHeadcountChange: (value: number) => void;
+  onRemove: () => void;
+  disabled: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <input
+        type="text"
+        value={skill.name}
+        onChange={(e) => onNameChange(e.target.value)}
+        placeholder="Skill name"
+        disabled={disabled}
+        className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-50"
+      />
+      <input
+        type="number"
+        min={0}
+        step={1}
+        value={skill.requiredHeadcount}
+        onChange={(e) => onHeadcountChange(Number(e.target.value))}
+        placeholder="Required headcount"
+        disabled={disabled}
+        className="w-36 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-50"
+      />
+      <button
+        type="button"
+        onClick={onRemove}
+        disabled={disabled}
+        aria-label={`Remove ${skill.name || 'skill'}`}
+        className="rounded-lg border border-gray-300 px-2 py-2 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        ×
+      </button>
+    </div>
+  );
+}
 
 export function DepartmentForm({
   mode,
@@ -30,22 +82,38 @@ export function DepartmentForm({
   const [color, setColor] = useState(initialData?.color ?? DEFAULT_COLOR);
   const [description, setDescription] = useState(initialData?.description ?? '');
   const [deptHead, setDeptHead] = useState(initialData?.deptHead ?? '');
+  const [skills, setSkills] = useState<DepartmentSkillInput[]>(
+    (initialData?.skills ?? []).map((s) => ({ name: s.name, requiredHeadcount: s.requiredHeadcount }))
+  );
 
   function isValidColor(value: string) {
     return HEX_COLOR_REGEX.test(value.trim());
+  }
+
+  function isValidSkills() {
+    return skills.every(
+      (s) => s.name.trim().length > 0 && Number.isFinite(s.requiredHeadcount) && s.requiredHeadcount >= 0
+    );
   }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const trimmedColor = color.trim();
 
-    if (!name.trim() || !isValidColor(trimmedColor) || isLoading) {
+    if (!name.trim() || !isValidColor(trimmedColor) || !isValidSkills() || isLoading) {
       return;
     }
 
-    const data: { name: string; color: string; description?: string; deptHead?: string } = {
+    const data: {
+      name: string;
+      color: string;
+      description?: string;
+      deptHead?: string;
+      skills: DepartmentSkillInput[];
+    } = {
       name: name.trim(),
       color: trimmedColor,
+      skills: skills.map((s) => ({ name: s.name.trim(), requiredHeadcount: Math.trunc(s.requiredHeadcount) })),
     };
     if (description.trim()) data.description = description.trim();
     if (deptHead.trim()) data.deptHead = deptHead.trim();
@@ -53,7 +121,7 @@ export function DepartmentForm({
     onSubmit(data);
   }
 
-  const isSubmitDisabled = isLoading || !name.trim() || !isValidColor(color);
+  const isSubmitDisabled = isLoading || !name.trim() || !isValidColor(color) || !isValidSkills();
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -112,6 +180,36 @@ export function DepartmentForm({
           disabled={isLoading}
           className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500"
         />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <SectionLabel>Skills</SectionLabel>
+        <p className="text-xs text-gray-500">
+          These apply to every team in this department. Teams can adjust the required headcount per skill, but
+          not the skill set itself.
+        </p>
+        {skills.map((skill, index) => (
+          <SkillRow
+            key={index}
+            skill={skill}
+            disabled={isLoading}
+            onNameChange={(value) =>
+              setSkills((prev) => prev.map((s, i) => (i === index ? { ...s, name: value } : s)))
+            }
+            onHeadcountChange={(value) =>
+              setSkills((prev) => prev.map((s, i) => (i === index ? { ...s, requiredHeadcount: value } : s)))
+            }
+            onRemove={() => setSkills((prev) => prev.filter((_, i) => i !== index))}
+          />
+        ))}
+        <button
+          type="button"
+          onClick={() => setSkills((prev) => [...prev, { name: '', requiredHeadcount: 1 }])}
+          disabled={isLoading}
+          className="self-start rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-800 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          + Add skill
+        </button>
       </div>
 
       {/* Actions */}

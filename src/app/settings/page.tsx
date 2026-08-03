@@ -5,6 +5,7 @@ import { AppShell } from '@/components/layout/AppShell';
 import { SeedSetupPanel } from '@/components/scenarios/SeedSetupPanel';
 import { useSeed } from '@/lib/hooks/useScenario';
 import { BulkMigrateButton } from '@/components/departments/BulkMigrateButton';
+import { DepartmentsSection } from '@/components/departments/DepartmentsSection';
 import { useTeamList } from '@/lib/hooks/useTeams';
 
 export default function SettingsPage() {
@@ -58,6 +59,16 @@ export default function SettingsPage() {
           </p>
           <div className="mt-4">
             <BulkMigrateButton unassignedTeamCount={unassignedTeamCount} />
+          </div>
+        </div>
+
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold text-gray-900">Departments</h2>
+          <p className="mt-1 text-sm text-gray-600">
+            Manage departments and configure their required skills.
+          </p>
+          <div className="mt-4">
+            <DepartmentsSection />
           </div>
         </div>
       </div>

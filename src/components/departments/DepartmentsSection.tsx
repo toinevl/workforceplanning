@@ -11,7 +11,7 @@ import {
 import { DepartmentForm } from './DepartmentForm';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { extractErrorMessage } from '@/lib/utils/extractErrorMessage';
-import type { Department } from '@/lib/types/domain';
+import type { Department, DepartmentSkillInput } from '@/lib/types/domain';
 
 function parseDeleteError(error: unknown): { message: string; assignedTeamCount?: number } {
   if (!(error instanceof Error)) return { message: 'Delete failed.' };
@@ -88,7 +88,13 @@ function EditFormWrapper({
   error,
 }: {
   deptId: string;
-  onSubmit: (data: { name: string; color: string; description?: string; deptHead?: string }) => void;
+  onSubmit: (data: {
+    name: string;
+    color: string;
+    description?: string;
+    deptHead?: string;
+    skills: DepartmentSkillInput[];
+  }) => void;
   onCancel: () => void;
   isLoading: boolean;
   error?: string | null;
@@ -160,6 +166,7 @@ export function DepartmentsSection() {
     color: string;
     description?: string;
     deptHead?: string;
+    skills: DepartmentSkillInput[];
   }) {
     createMutation.mutate(data, {
       onSuccess: () => {
@@ -173,6 +180,7 @@ export function DepartmentsSection() {
     color: string;
     description?: string;
     deptHead?: string;
+    skills: DepartmentSkillInput[];
   }) {
     if (!selectedDeptId) return;
     updateMutation.mutate(
