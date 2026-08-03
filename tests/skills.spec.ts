@@ -265,3 +265,60 @@ test.describe('Admin UI — department skills', () => {
     await expect(page.getByText('No skills configured for this department yet')).not.toBeVisible();
   });
 });
+
+test.describe('Team-level skill override UI', () => {
+  test('editing a skill\'s required headcount inline updates the gap and persists', async ({ seededPage: page }) => {
+    // 'Illustration' deliberately avoids the legacy ROLE_PROFILES vocabulary (Research, Teaching,
+    // Leadership, Strategy, Communication, Backend, DevOps, Fundraising) — seed.ts's
+    // deriveSkillsForRole tags every non-SQUAD member with 3 of those names by default, which
+    // would make `current` (and thus the gap assertion below) nondeterministic if we reused them.
+    const deptRes = await page.request.post('/api/departments', {
+      data: { name: `Inline Edit Dept ${Date.now()}`, color: '#3b82f6', skills: [{ name: 'Illustration', requiredHeadcount: 3 }] },
+    });
+    const { data: dept } = await deptRes.json();
+
+    const teamsRes = await page.request.get('/api/teams');
+    const { data: teams } = await teamsRes.json();
+    const team = teams[0];
+    await page.request.patch(`/api/teams/${team.id}`, { data: { departmentId: dept.id } });
+
+    await page.goto(`/departments/${dept.id}`);
+
+    const reqButton = page.getByRole('button', { name: /edit required headcount for illustration/i });
+    await expect(reqButton).toHaveText('req: 3');
+    await reqButton.click();
+
+    const input = page.getByLabel(/edit required headcount for illustration/i).or(page.locator('input[type="number"]').first());
+    await input.fill('9');
+    await input.press('Enter');
+
+    await expect(page.getByRole('button', { name: /edit required headcount for illustration/i })).toHaveText('req: 9');
+    await expect(page.getByText('+9')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'reset' })).toBeVisible();
+
+    await page.reload();
+    await expect(page.getByRole('button', { name: /edit required headcount for illustration/i })).toHaveText('req: 9');
+  });
+
+  test('resetting an overridden skill reverts it to the department default', async ({ seededPage: page }) => {
+    const deptRes = await page.request.post('/api/departments', {
+      data: { name: `Reset Dept ${Date.now()}`, color: '#3b82f6', skills: [{ name: 'Research', requiredHeadcount: 4 }] },
+    });
+    const { data: dept } = await deptRes.json();
+    const researchId = dept.skills[0].id;
+
+    const teamsRes = await page.request.get('/api/teams');
+    const { data: teams } = await teamsRes.json();
+    const team = teams[0];
+    await page.request.patch(`/api/teams/${team.id}`, {
+      data: { departmentId: dept.id, skillOverrides: { [researchId]: 10 } },
+    });
+
+    await page.goto(`/departments/${dept.id}`);
+    await expect(page.getByRole('button', { name: /edit required headcount for research/i })).toHaveText('req: 10');
+
+    await page.getByRole('button', { name: 'reset' }).click();
+    await expect(page.getByRole('button', { name: /edit required headcount for research/i })).toHaveText('req: 4');
+    await expect(page.getByRole('button', { name: 'reset' })).not.toBeVisible();
+  });
+});
