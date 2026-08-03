@@ -254,10 +254,11 @@ test.describe('Admin UI — department skills', () => {
     expect(dept.skills).toEqual([{ id: 'research', name: 'Research', requiredHeadcount: 2, sortOrder: 0 }]);
 
     // Verify the department is visible on the departments list page
+    // Note: Department appears twice on /departments (top summary + DepartmentsSection list),
+    // so we disambiguate with .first()
     await page.goto('/departments');
     await page.waitForLoadState('networkidle');
-    // Wait up to 10 seconds for the department to appear (in case of slow rendering)
-    await expect(page.getByText('UI Skills')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('UI Skills Dept').first()).toBeVisible();
 
     // Verify the department displays with skills on its detail page
     await page.goto(`/departments/${dept.id}`);
