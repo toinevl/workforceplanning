@@ -71,6 +71,15 @@ test.describe('Unauthenticated access (no session cookie)', () => {
     await expect(page.getByRole('heading', { name: /workforce planning/i })).toBeVisible();
     await expect(page.getByRole('button', { name: /sign in with microsoft/i })).toBeVisible();
   });
+
+  test('guided tour does not appear on /login before the user has signed in', async ({ page }) => {
+    await page.goto('/login');
+    // GuidedTour auto-opens 1.5s after mount when undismissed — wait past
+    // that window and confirm it never renders for a signed-out visitor.
+    await page.waitForTimeout(2000);
+    await expect(page.getByText('Welcome to Workforce Planning')).not.toBeVisible();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+  });
 });
 
 // ── Authenticated access ────────────────────────────────────────────────────

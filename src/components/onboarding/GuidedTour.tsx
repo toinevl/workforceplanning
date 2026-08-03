@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useSession } from 'next-auth/react';
 
 const TOUR_KEY = 'wfp-tour-completed';
 
@@ -44,17 +45,21 @@ const STEPS = [
 ];
 
 export function GuidedTour() {
+  const { data: session, status } = useSession();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    // Only onboard signed-in users — never show the tour over the login
+    // screen or before the session has finished resolving.
+    if (status !== 'authenticated' || !session?.user) return;
     const completed = localStorage.getItem(TOUR_KEY);
     if (!completed) {
       const timer = setTimeout(() => setOpen(true), 1500);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [status, session?.user]);
 
   function handleClose() {
     setOpen(false);
