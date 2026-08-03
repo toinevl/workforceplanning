@@ -89,9 +89,12 @@ export function DecisionSummary({ board, onClose }: DecisionSummaryProps) {
 
       <div className="flex-1 overflow-y-auto">
         <div className="px-4 py-3">
-          <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
-            Team Skill Impact
-          </h3>
+          <div className="flex items-center gap-1 mb-2">
+            <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+              Team Skill Impact
+            </h3>
+            <InfoHint text="Gaps here reflect role-profile targets, not the department's configured skill requirements — see the department page for that view." />
+          </div>
           <div className="space-y-3">
             {teamImpacts.map((team) => (
               <div key={team.teamId} className="rounded-lg border border-gray-200 bg-gray-50 p-2.5">

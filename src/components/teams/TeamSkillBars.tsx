@@ -1,6 +1,7 @@
 'use client';
 
 import { roleProfileCoverageForTeam } from '@/lib/skills/roles';
+import { InfoHint } from '@/components/ui/InfoHint';
 import type { StaffMember, ScenarioMemberState } from '@/lib/types/domain';
 
 interface TeamSkillBarsProps {
@@ -29,6 +30,10 @@ export function TeamSkillBars({ members, maxBars = 3 }: TeamSkillBarsProps) {
 
   return (
     <div className="px-2.5 py-2 border-t border-gray-100 bg-white space-y-1">
+      <div className="flex items-center gap-1">
+        <span className="text-[0.6875rem] font-medium text-gray-500">Skill gaps</span>
+        <InfoHint text="Gaps here reflect role-profile targets, not the department's configured skill requirements — see the department page for that view." />
+      </div>
       {gaps.map(([skill, gap]) => {
         const current = coverage.currentSkills[skill] ?? 0;
         const ambition = coverage.ambitionSkills[skill] ?? 0;
