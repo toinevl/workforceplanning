@@ -1,4 +1,4 @@
-import type { DepartmentSkill } from '../types/domain';
+import type { Department, DepartmentSkill, Team } from '../types/domain';
 
 export function slugifySkillName(name: string): string {
   return (
@@ -77,4 +77,48 @@ export function parseSkillOverridesInput(
   }
 
   return { skillOverrides };
+}
+
+export interface ResolvedSkill {
+  id: string;
+  name: string;
+  requiredHeadcount: number;
+}
+
+export function resolveTeamSkills(
+  department: Pick<Department, 'skills'>,
+  team: Pick<Team, 'skillOverrides'>
+): ResolvedSkill[] {
+  const overrides = team.skillOverrides ?? {};
+  return [...department.skills]
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .map((skill) => ({
+      id: skill.id,
+      name: skill.name,
+      requiredHeadcount: overrides[skill.id] ?? skill.requiredHeadcount,
+    }));
+}
+
+export interface SkillCoveragePoint {
+  id: string;
+  name: string;
+  current: number;
+  ambition: number;
+  gap: number;
+}
+
+export function coverageForTeam(
+  resolvedSkills: ResolvedSkill[],
+  members: Array<{ tags?: string[] }>
+): SkillCoveragePoint[] {
+  return resolvedSkills.map((skill) => {
+    const current = members.filter((m) => (m.tags ?? []).includes(skill.name)).length;
+    return {
+      id: skill.id,
+      name: skill.name,
+      current,
+      ambition: skill.requiredHeadcount,
+      gap: skill.requiredHeadcount - current,
+    };
+  });
 }

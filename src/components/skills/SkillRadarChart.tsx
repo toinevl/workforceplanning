@@ -88,7 +88,7 @@ export function SkillRadarChart({
       <div className="flex flex-wrap gap-3 text-xs text-gray-600">
         <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-green-600" /> Current</span>
         <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-blue-600" /> Ambition</span>
-        <InfoHint text="Current = skills present in the team today (counted from member tags). Ambition = skill targets summed from role profiles. Gap = ambition minus current." />
+        <InfoHint text="Current = skills present in the team today (counted from member tags). Ambition = required headcount set by the department (or overridden for this team). Gap = ambition minus current." />
       </div>
     </div>
   );

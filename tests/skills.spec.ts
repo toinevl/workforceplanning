@@ -117,3 +117,59 @@ test.describe('Team skill overrides', () => {
     expect(teams[0].skillOverrides).toEqual({});
   });
 });
+
+test.describe('Coverage computation', () => {
+  test('GET /api/teams?departmentId=X uses department skills as axes, with team override applied', async ({ seededPage: page }) => {
+    // Skill names deliberately avoid the legacy ROLE_PROFILES vocabulary (Research, Teaching,
+    // Leadership, Strategy, Communication, Backend, DevOps, Fundraising) — seed.ts's
+    // deriveSkillsForRole tags every non-SQUAD member with 3 of those names by default, which
+    // would make `current` nondeterministic for this test if we reused them.
+    const deptRes = await page.request.post('/api/departments', {
+      data: {
+        name: `Coverage Dept ${Date.now()}`,
+        color: '#3b82f6',
+        skills: [
+          { name: 'Woodworking', requiredHeadcount: 3 },
+          { name: 'Cartography', requiredHeadcount: 2 },
+        ],
+      },
+    });
+    const { data: dept } = await deptRes.json();
+    const woodworkingId = dept.skills[0].id;
+    const cartographyId = dept.skills[1].id;
+
+    const teamsRes = await page.request.get('/api/teams');
+    const { data: teams } = await teamsRes.json();
+    const team = teams[0];
+
+    await page.request.patch(`/api/teams/${team.id}`, {
+      data: { departmentId: dept.id, skillOverrides: { [woodworkingId]: 9 } },
+    });
+
+    const scopedRes = await page.request.get(`/api/teams?departmentId=${dept.id}`);
+    expect(scopedRes.status()).toBe(200);
+    const { data: scopedTeams } = await scopedRes.json();
+    const scopedTeam = scopedTeams.find((t: { id: string }) => t.id === team.id);
+
+    expect(scopedTeam.skills).toEqual([
+      { id: woodworkingId, name: 'Woodworking', current: 0, ambition: 9, gap: 9 },
+      { id: cartographyId, name: 'Cartography', current: 0, ambition: 2, gap: 2 },
+    ]);
+  });
+
+  test('a team in a department with no skills configured returns an empty skills array', async ({ seededPage: page }) => {
+    const deptRes = await page.request.post('/api/departments', {
+      data: { name: `Empty Skills Dept ${Date.now()}`, color: '#3b82f6' },
+    });
+    const { data: dept } = await deptRes.json();
+
+    const teamsRes = await page.request.get('/api/teams');
+    const { data: teams } = await teamsRes.json();
+    const team = teams[0];
+    await page.request.patch(`/api/teams/${team.id}`, { data: { departmentId: dept.id } });
+
+    const scopedRes = await page.request.get(`/api/teams?departmentId=${dept.id}`);
+    const { data: scopedTeams } = await scopedRes.json();
+    expect(scopedTeams.find((t: { id: string }) => t.id === team.id).skills).toEqual([]);
+  });
+});
