@@ -260,8 +260,9 @@ tags: [wishlist]
                remove ambitionForTeam usage from the coverage path — DONE
         #40c — API: department skills validation (POST/PATCH /api/departments),
                team skillOverrides validation (PATCH /api/teams/[id]) — DONE
-        #40d — Admin UI: "Skills" section in department edit form (Settings → Departments) —
-               add/remove/reorder skill rows, set default required headcount — DONE
+        #40d — Admin UI: "Skills" section in department edit form (/departments) —
+               add/remove skill rows, set default required headcount — DONE
+               (no reorder UI built; sortOrder is derived from row order on save)
         #40e — Team-level override UI: click-to-edit required headcount inline on
                department detail page (DepartmentTeamRow), reset-to-default action — DONE
         #40f — Seed script: derive per-department skills + default requiredHeadcount
@@ -274,3 +275,25 @@ tags: [wishlist]
       DONE 2026-08-03 — all 7 parts shipped across the 6-task department-skills plan
       (docs/superpowers/plans/2026-08-03-department-skills.md); final task (inline
       per-team override UI in DepartmentTeamRow, 25/25 E2E passing) committed 882408c.
+      Final whole-branch review found 1 Critical (stale skillOverrides could permanently
+      break inline editing with a silent 400 — nothing pruned overrides when a
+      department's skill set changed) + 5 Important issues (no error surfaced on failed
+      override saves, empty-state text pointed at the wrong page, colliding skill-id
+      slugs could silently rebind an override to the wrong skill, spec doc had gone
+      stale on 3 points, the two coexisting skill-gap surfaces — department page vs.
+      scenario board — were unlabeled). One fix wave (commits 2466d4f..c905e16) resolved
+      all 6; scoped re-review confirmed clean, 26/26 E2E passing. One Important finding
+      (seed-derived skills unreachable from the Admin seed panel, since it always POSTs
+      a custom teams array) was deliberately deferred as a design decision — see #41.
+
+- [ ] (D) Decide whether custom-team seeds should derive real department skills +feature +seed @me #41
+      Follow-up from #40's final review. buildDefaultDepartmentSkills() only populates
+      skills when the seed uses the full default 27-team dataset (npm run dev:seed or a
+      raw API call with no custom teams) — every seed initiated from the Admin page's
+      SeedSetupPanel sends a custom teams array, so those departments always get
+      skills: []. The empty state now correctly links to /departments so an admin can
+      configure skills by hand, but most users seeding via the UI will only ever see
+      the empty state first. Decide: derive skills for custom-team seeds too (needs a
+      real team→department assignment for custom teams, which today all fall back to
+      "Support Services" with no natural skill derivation), or leave the empty state as
+      the intended first-run experience and consider this resolved as-is.
